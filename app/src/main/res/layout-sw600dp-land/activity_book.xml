@@ -22,7 +22,7 @@
 
         <include
             android:id="@+id/player"
-            layout="@layout/player" />
+            layout="@layout/player_television" />
     </LinearLayout>
 
     <com.google.android.material.appbar.AppBarLayout
