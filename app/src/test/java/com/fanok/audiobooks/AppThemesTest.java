@@ -32,6 +32,35 @@ public class AppThemesTest {
     }
 
     @Test
+    public void hsvCalculationsAndConversion() {
+        int red = AppThemes.hsvToRgb(0f, 1f, 1f);
+        assertEquals(0xFFFF0000, red);
+
+        int green = AppThemes.hsvToRgb(120f, 1f, 1f);
+        assertEquals(0xFF00FF00, green);
+
+        int blue = AppThemes.hsvToRgb(240f, 1f, 1f);
+        assertEquals(0xFF0000FF, blue);
+
+        int white = AppThemes.hsvToRgb(0f, 0f, 1f);
+        assertEquals(0xFFFFFFFF, white);
+
+        int black = AppThemes.hsvToRgb(0f, 0f, 0f);
+        assertEquals(0xFF000000, black);
+
+        float[] hsv = new float[3];
+        AppThemes.rgbToHsv(0xFFFF0000, hsv);
+        assertEquals(0f, hsv[0], 0.01f);
+        assertEquals(1f, hsv[1], 0.01f);
+        assertEquals(1f, hsv[2], 0.01f);
+
+        AppThemes.rgbToHsv(0xFF00FF00, hsv);
+        assertEquals(120f, hsv[0], 0.01f);
+        assertEquals(1f, hsv[1], 0.01f);
+        assertEquals(1f, hsv[2], 0.01f);
+    }
+
+    @Test
     public void unknownOrNullPaletteDefaultsToSage() {
         assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette(null));
         assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette(""));

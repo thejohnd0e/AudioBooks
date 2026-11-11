@@ -48,6 +48,56 @@ public final class AppThemes {
         return String.format("#%06x", (0xFFFFFF & color));
     }
 
+    /** Converts HSV (h in 0..360, s in 0..1, v in 0..1) to a 32-bit ARGB color integer. */
+    public static int hsvToRgb(float h, float s, float v) {
+        h = ((h % 360f) + 360f) % 360f;
+        s = Math.max(0f, Math.min(1f, s));
+        v = Math.max(0f, Math.min(1f, v));
+        float c = v * s;
+        float x = c * (1f - Math.abs((h / 60f) % 2f - 1f));
+        float m = v - c;
+        float r = 0, g = 0, b = 0;
+        if (h < 60f) { r = c; g = x; b = 0; }
+        else if (h < 120f) { r = x; g = c; b = 0; }
+        else if (h < 180f) { r = 0; g = c; b = x; }
+        else if (h < 240f) { r = 0; g = x; b = c; }
+        else if (h < 300f) { r = x; g = 0; b = c; }
+        else { r = c; g = 0; b = x; }
+        int ri = Math.round((r + m) * 255f);
+        int gi = Math.round((g + m) * 255f);
+        int bi = Math.round((b + m) * 255f);
+        return 0xFF000000 | (ri << 16) | (gi << 8) | bi;
+    }
+
+    /** Converts a 32-bit ARGB color integer to HSV (hsv[0]=h:0..360, hsv[1]=s:0..1, hsv[2]=v:0..1). */
+    public static void rgbToHsv(int color, @NonNull float[] hsv) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+        float rf = r / 255f;
+        float gf = g / 255f;
+        float bf = b / 255f;
+        float max = Math.max(rf, Math.max(gf, bf));
+        float min = Math.min(rf, Math.min(gf, bf));
+        float delta = max - min;
+        float h = 0;
+        if (delta > 0.00001f) {
+            if (max == rf) {
+                h = 60f * (((gf - bf) / delta) % 6f);
+            } else if (max == gf) {
+                h = 60f * (((bf - rf) / delta) + 2f);
+            } else {
+                h = 60f * (((rf - gf) / delta) + 4f);
+            }
+            if (h < 0) h += 360f;
+        }
+        float s = max == 0 ? 0 : delta / max;
+        float v = max;
+        hsv[0] = h;
+        hsv[1] = s;
+        hsv[2] = v;
+    }
+
     /** Parses a hex color string (with or without '#') into an ARGB color int. */
     public static int parseHex(String hex, int defaultColor) {
         Integer parsed = parseHexColor(hex);
