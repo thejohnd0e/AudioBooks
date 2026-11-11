@@ -46,7 +46,7 @@ public class ProxyDialogFragment extends DialogFragment implements ProxyFinder.L
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         Context context = requireContext();
         finder = ProxyFinder.get(context);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_proxy, null, false);
         modes = view.findViewById(R.id.proxyModes);
         autoPanel = view.findViewById(R.id.proxyAutoPanel);

@@ -246,7 +246,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
         final List<DownloadItem> chosen = Collections.singletonList(item);
         String name = item.getBookName() != null ? item.getBookName() : "";
         String message = name.isEmpty() ? "Удалить эту загрузку?" : "Удалить загрузку \"" + name + "\"?";
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle("Удаление загрузки")
                 .setMessage(message)
                 .setPositiveButton("ОК", (dialog, which) -> mPresenter.remove(chosen))
@@ -306,7 +306,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
             // Resolved now into an immutable list: a refresh while the dialog is open cannot change what OK deletes.
             final List<DownloadItem> chosen = mAdapter.getSelectedItems();
             if (!chosen.isEmpty()) {
-                new AlertDialog.Builder(this)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                         .setTitle("Удаление загрузок")
                         .setMessage("Удалить выбранные загрузки (" + chosen.size() + ")?")
                         .setPositiveButton("ОК", (dialog, which) -> {
@@ -340,7 +340,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
 
     @Override
     public void showLogsDialog(String logs) {
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle("Логи удаления файлов")
                 .setMessage(logs != null ? logs : "Логи пусты")
                 .setPositiveButton("ОК", null)

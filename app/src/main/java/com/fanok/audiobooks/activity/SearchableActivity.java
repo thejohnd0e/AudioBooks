@@ -528,7 +528,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
             checked[i] = scope.contains(SCOPE_FIELDS[i]);
             names[i] = getString(SCOPE_NAMES[i]);
         }
-        new MaterialAlertDialogBuilder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.search_scope)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton(R.string.search_scope_done, (d, w) -> {
@@ -555,7 +555,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
             checked[i] = current.contains(all[i]);
             names[i] = getString(all[i].title);
         }
-        new MaterialAlertDialogBuilder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.search_genres)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton(R.string.search_scope_done, (d, w) -> {
@@ -792,7 +792,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
         }
         ScrollView scroll = new ScrollView(this);
         scroll.addView(list);
-        dialog[0] = new MaterialAlertDialogBuilder(this)
+        dialog[0] = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setCustomTitle(head)
                 .setView(scroll)
                 .setNegativeButton(R.string.close, null)

@@ -153,7 +153,7 @@ public class ParentalControlActivity extends AppCompatActivity {
         AttributeSet attr = Xml.asAttributeSet(parser);
         PinEntryEditText editText = new PinEntryEditText(this, attr);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(title)
                 .setCancelable(cancelable)
                 .setView(editText)
@@ -161,6 +161,7 @@ public class ParentalControlActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.confirm, null)
                 .create();
         dialog.setOnShowListener(dialogInterface -> {
+            com.fanok.audiobooks.PaletteBinder.applyPaletteToDialog(dialog);
             Objects.requireNonNull(editText.getText()).clear();
             editText.requestFocus();
             Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);

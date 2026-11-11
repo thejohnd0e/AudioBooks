@@ -373,7 +373,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             PinEntryEditText editText = new PinEntryEditText(context, attr);
 
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
             builder.setTitle(R.string.enter_password)
                     .setCancelable(false)
                     .setView(editText)
@@ -386,6 +386,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 dialog.setOnDismissListener(d -> ((LoadBook) context).finish());
             }
             dialog.setOnShowListener(dialogInterface -> {
+                PaletteBinder.applyPaletteToDialog(dialog);
                 Objects.requireNonNull(editText.getText()).clear();
                 editText.requestFocus();
                 Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -679,7 +680,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mDelete.setOnClickListener(view -> {
             if (mAudioAdapter != null && mAudioAdapter.getSelectedItemsSize() > 0) {
                 final java.util.HashSet<String> chosen = mAudioAdapter.getSelectedItems();
-                new AlertDialog.Builder(this)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                         .setTitle("Удаление загрузок")
                         .setMessage("Вы уверены, что хотите удалить выбранные файлы (" + chosen.size() + ")?")
                         .setPositiveButton("ОК", (dialog, which) -> {
@@ -1287,7 +1288,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             jump.run();
             return;
         }
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setMessage(next ? R.string.confirm_next_chapter : R.string.confirm_previous_chapter)
                 .setPositiveButton(R.string.go_to, (dialog, which) -> jump.run())
                 .setNegativeButton(R.string.cancel, null)
@@ -1476,7 +1477,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         body.addView(details);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(body);
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.error_report_title)
                 .setView(scroll)
                 .setPositiveButton(R.string.retry, (d, which) -> mPresenter.getAudio())
@@ -1608,7 +1609,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             return;
         }
         mSwitchHintShowing = true; // a reload of the chapters while it is open does not stack a second one
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.hint_switch_book_title)
                 .setMessage(R.string.hint_switch_book)
                 .setPositiveButton(R.string.got_it, null)
