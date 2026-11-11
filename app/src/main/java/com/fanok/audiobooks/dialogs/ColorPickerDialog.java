@@ -117,7 +117,9 @@ public final class ColorPickerDialog {
                     if (isDarkLuminanceClamped && hsv[2] > 0.38f) {
                         hsv[2] = 0.38f;
                     }
-                    currentHsv[0] = hsv[0];
+                    if (hsv[1] > 0.001f) {
+                        currentHsv[0] = hsv[0];
+                    }
                     currentHsv[1] = hsv[1];
                     currentHsv[2] = hsv[2];
 

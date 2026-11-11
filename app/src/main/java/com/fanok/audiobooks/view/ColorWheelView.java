@@ -136,6 +136,7 @@ public class ColorWheelView extends View {
     }
 
     private void updateFromTouch(float x, float y) {
+        if (mWheelRadius <= 0) return;
         float dx = x - mCenterX;
         float dy = y - mCenterY;
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
