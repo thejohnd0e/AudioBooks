@@ -3,6 +3,7 @@ package com.fanok.audiobooks.activity;
 import static com.fanok.audiobooks.Consts.handleUserInput;
 
 import com.fanok.audiobooks.FontScale;
+import com.fanok.audiobooks.PaletteBinder;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -705,6 +706,7 @@ public class MainActivity extends MvpAppCompatActivity
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        PaletteBinder.bind(this);
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

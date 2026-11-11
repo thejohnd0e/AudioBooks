@@ -9,6 +9,7 @@ import static com.fanok.audiobooks.service.MediaPlayerService.countAudioWereShow
 
 import com.fanok.audiobooks.FontScale;
 import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.UiModeManager;
@@ -468,6 +469,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     @UnstableApi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppThemes.apply(this, R.style.AppTheme_NoActionBar, R.style.LightAppTheme_NoActionBar,
+                R.style.AppThemeBlack_NoActionBar);
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: called");
 
@@ -521,12 +524,21 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mNextBottom = findViewById(R.id.nextBottom);
         mForward = findViewById(R.id.forward);
 
+        int accent = com.google.android.material.color.MaterialColors.getColor(this, R.attr.colorAccentPrimary, 0);
+        if (accent != 0) {
+            if (mPlayTop != null) {
+                androidx.core.view.ViewCompat.setBackgroundTintList(mPlayTop,
+                        android.content.res.ColorStateList.valueOf(accent));
+            }
+            if (mPlayBottom != null) {
+                androidx.core.view.ViewCompat.setBackgroundTintList(mPlayBottom,
+                        android.content.res.ColorStateList.valueOf(accent));
+            }
+        }
+
         MainActivity.setCloseApp(false);
 
         mNotificationClick = intent.getBooleanExtra("notificationClick", false);
-
-        AppThemes.apply(this, R.style.AppTheme_NoActionBar, R.style.LightAppTheme_NoActionBar,
-                R.style.AppThemeBlack_NoActionBar);
 
         if (mBookPOJO != null && mBookPOJO.getName() != null) {
             setTitle(mBookPOJO.getName().trim());
@@ -537,8 +549,12 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         viewPager.setAdapter(sectionsPagerAdapter);
 
         tabs = findViewById(R.id.tabs);
+        if (accent != 0 && tabs != null) {
+            tabs.setSelectedTabIndicatorColor(accent);
+        }
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        PaletteBinder.bind(this);
         // the ★ tab is an icon in the colours of the tabs' titles; ОБЗОР before it stays the page shown first
         tabs.setTabIconTint(tabs.getTabTextColors());
         new TabLayoutMediator(tabs, viewPager, (tab, position) -> {
