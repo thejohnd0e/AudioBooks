@@ -1,18 +1,16 @@
 package com.fanok.audiobooks.dialogs;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.GridLayout;
-import android.widget.Toast;
+import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import com.fanok.audiobooks.AppThemes;
 import com.fanok.audiobooks.R;
+import com.fanok.audiobooks.view.ColorWheelView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -21,16 +19,6 @@ public final class ColorPickerDialog {
     public interface OnColorPickedListener {
         void onColorPicked(int color);
     }
-
-    private static final int[] DARK_SWATCHES = new int[] {
-            0xFF000000, 0xFF121212, 0xFF161B18, 0xFF1A1614, 0xFF14181D, 0xFF0E141F,
-            0xFF19121A, 0xFF1F2620, 0xFF26211D, 0xFF1F242B, 0xFF1A222C, 0xFF261C14
-    };
-
-    private static final int[] ACCENT_SWATCHES = new int[] {
-            0xFF7EAC91, 0xFFD4A373, 0xFF7293A6, 0xFFE07A5F, 0xFF2EC4B6, 0xFF3A86FF,
-            0xFFF4A261, 0xFF8338EC, 0xFFE63946, 0xFFFFB703, 0xFFADB5BD, 0xFFFFFFFF
-    };
 
     private ColorPickerDialog() {
     }
@@ -41,41 +29,76 @@ public final class ColorPickerDialog {
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_color_picker, null);
         View previewCurrent = view.findViewById(R.id.colorPreviewCurrent);
         View previewNew = view.findViewById(R.id.colorPreviewNew);
-        GridLayout swatchesGrid = view.findViewById(R.id.swatchesGrid);
+        ColorWheelView colorWheel = view.findViewById(R.id.colorWheel);
+        SeekBar brightnessSlider = view.findViewById(R.id.brightnessSlider);
         TextInputEditText hexInput = view.findViewById(R.id.hexInput);
 
+        float[] initialHsv = new float[3];
+        AppThemes.rgbToHsv(initialColor, initialHsv);
+
+        final float[] currentHsv = new float[] { initialHsv[0], initialHsv[1], initialHsv[2] };
         final int[] selectedColor = new int[] { initialColor };
+        final boolean[] isInternalChange = new boolean[] { false };
 
         previewCurrent.setBackgroundColor(initialColor);
         previewNew.setBackgroundColor(initialColor);
-        hexInput.setText(AppThemes.formatHex(initialColor));
 
-        int[] swatches = isDarkLuminanceClamped ? DARK_SWATCHES : ACCENT_SWATCHES;
-        int size = (int) (36 * context.getResources().getDisplayMetrics().density);
-        int margin = (int) (4 * context.getResources().getDisplayMetrics().density);
+        // Darkness clamp max brightness to 38% for background and surface slots
+        int maxBrightness = isDarkLuminanceClamped ? 38 : 100;
+        brightnessSlider.setMax(maxBrightness);
 
-        for (int swatch : swatches) {
-            View swatchView = new View(context);
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width = size;
-            params.height = size;
-            params.setMargins(margin, margin, margin, margin);
-            swatchView.setLayoutParams(params);
-
-            GradientDrawable drawable = new GradientDrawable();
-            drawable.setShape(GradientDrawable.OVAL);
-            drawable.setColor(swatch);
-            drawable.setStroke(2, 0x44FFFFFF);
-            swatchView.setBackground(drawable);
-
-            swatchView.setOnClickListener(v -> {
-                selectedColor[0] = swatch;
-                previewNew.setBackgroundColor(swatch);
-                hexInput.setText(AppThemes.formatHex(swatch));
-            });
-            swatchesGrid.addView(swatchView);
+        int initialProgress = Math.round(currentHsv[2] * 100f);
+        if (initialProgress > maxBrightness) {
+            initialProgress = maxBrightness;
+            currentHsv[2] = initialProgress / 100f;
+            selectedColor[0] = AppThemes.hsvToRgb(currentHsv[0], currentHsv[1], currentHsv[2]);
+            previewNew.setBackgroundColor(selectedColor[0]);
         }
+        brightnessSlider.setProgress(initialProgress);
 
+        colorWheel.setHueAndSaturation(currentHsv[0], currentHsv[1]);
+        colorWheel.setValue(currentHsv[2]);
+
+        hexInput.setText(AppThemes.formatHex(selectedColor[0]));
+
+        // ColorWheel listener: updates Hue and Saturation
+        colorWheel.setOnColorChangeListener((hue, sat, rgb) -> {
+            currentHsv[0] = hue;
+            currentHsv[1] = sat;
+            int newColor = AppThemes.hsvToRgb(currentHsv[0], currentHsv[1], currentHsv[2]);
+            selectedColor[0] = newColor;
+            previewNew.setBackgroundColor(newColor);
+
+            isInternalChange[0] = true;
+            hexInput.setText(AppThemes.formatHex(newColor));
+            isInternalChange[0] = false;
+        });
+
+        // Brightness slider listener: updates Value
+        brightnessSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    currentHsv[2] = progress / 100f;
+                    colorWheel.setValue(currentHsv[2]);
+                    int newColor = AppThemes.hsvToRgb(currentHsv[0], currentHsv[1], currentHsv[2]);
+                    selectedColor[0] = newColor;
+                    previewNew.setBackgroundColor(newColor);
+
+                    isInternalChange[0] = true;
+                    hexInput.setText(AppThemes.formatHex(newColor));
+                    isInternalChange[0] = false;
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Direct HEX input listener
         hexInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -85,21 +108,26 @@ public final class ColorPickerDialog {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s == null) return;
+                if (isInternalChange[0] || s == null) return;
                 String text = s.toString().trim();
                 Integer parsed = AppThemes.parseHexColor(text);
                 if (parsed != null) {
-                    int color = parsed;
-                    if (isDarkLuminanceClamped) {
-                        float[] hsv = new float[3];
-                        Color.colorToHSV(color, hsv);
-                        if (hsv[2] > 0.38f) {
-                            hsv[2] = 0.38f;
-                            color = Color.HSVToColor(hsv);
-                        }
+                    float[] hsv = new float[3];
+                    AppThemes.rgbToHsv(parsed, hsv);
+                    if (isDarkLuminanceClamped && hsv[2] > 0.38f) {
+                        hsv[2] = 0.38f;
                     }
-                    selectedColor[0] = color;
-                    previewNew.setBackgroundColor(color);
+                    currentHsv[0] = hsv[0];
+                    currentHsv[1] = hsv[1];
+                    currentHsv[2] = hsv[2];
+
+                    int newColor = AppThemes.hsvToRgb(currentHsv[0], currentHsv[1], currentHsv[2]);
+                    selectedColor[0] = newColor;
+                    previewNew.setBackgroundColor(newColor);
+
+                    colorWheel.setHueAndSaturation(currentHsv[0], currentHsv[1]);
+                    colorWheel.setValue(currentHsv[2]);
+                    brightnessSlider.setProgress(Math.round(currentHsv[2] * 100f));
                 }
             }
         });

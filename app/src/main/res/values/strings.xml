@@ -115,6 +115,7 @@
     <string name="color_picker_hex_hint">#RRGGBB</string>
     <string name="color_picker_current">Текущий</string>
     <string name="color_picker_new">Новый</string>
+    <string name="color_picker_brightness">Яркость</string>
     <string name="custom_colors_title">Настройка 3 цветов</string>
 
     <string name="action_listen">Слушать</string>
