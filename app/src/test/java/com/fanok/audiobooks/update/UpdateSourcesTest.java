@@ -68,7 +68,7 @@ public class UpdateSourcesTest {
         String sums = "BFA478d6d9e12d776bfe4d7e5346de708fbacce2c4aa009dc3b401bbdae596c0  AudioBooks-7.9.1.apk\n"
                 + "127ce02877793fcaaef1024c2b8607d224c75d64ba6921e7a40c1f931574fed2  AudioBooks-7.9.1.aab\n";
         Release release = UpdateSources.githubRelease(tag, "7.9.1", sums);
-        assertEquals("https://github.com/korvin2000/AudioBooks/releases/download/v7.9.1/AudioBooks-7.9.1.apk",
+        assertEquals("https://github.com/thejohnd0e/AudioBooks/releases/download/v7.9.1/AudioBooks-7.9.1.apk",
                 release.apkUrl);
         assertEquals("bfa478d6d9e12d776bfe4d7e5346de708fbacce2c4aa009dc3b401bbdae596c0", release.sha256);
         assertNull(UpdateSources.githubRelease(tag, "7.9.1", "127ce0  AudioBooks-7.9.1.aab"));

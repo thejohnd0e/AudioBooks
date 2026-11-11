@@ -1,15 +1,25 @@
 apply plugin: 'com.android.application'
 
-// Release signing comes only from the git-ignored keystore.properties at the repository root
-// (format: keystore.properties.example). Without it the release build fails instead of signing with a debug key.
+// Release signing comes from ignored keystore.properties or process-local AUDIOBOOKS_SIGNING_* variables.
+// Without either the release build fails instead of signing with a debug key.
 def keystorePropertiesFile = rootProject.file('keystore.properties')
 def keystoreProperties = new Properties()
+def envStore = System.getenv('AUDIOBOOKS_SIGNING_STORE')
+def envPassword = System.getenv('AUDIOBOOKS_SIGNING_PASSWORD')
+def envAlias = System.getenv('AUDIOBOOKS_SIGNING_ALIAS')
+def signingConfigured = keystorePropertiesFile.exists() || (envStore && envPassword && envAlias)
 if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
     // Checks use assert, not throw: AGP 8.13 lint silently skips all checks of a build.gradle containing a throw.
     ['storeFile', 'storePassword', 'keyAlias', 'keyPassword'].each { key ->
         assert keystoreProperties.getProperty(key): "${keystorePropertiesFile} has no '${key}' (see keystore.properties.example)"
     }
+}
+if (!keystorePropertiesFile.exists() && signingConfigured) {
+    keystoreProperties.setProperty('storeFile', envStore)
+    keystoreProperties.setProperty('storePassword', envPassword)
+    keystoreProperties.setProperty('keyAlias', envAlias)
+    keystoreProperties.setProperty('keyPassword', envPassword)
 }
 
 android {
@@ -32,7 +42,7 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
+        if (signingConfigured) {
             release {
                 storeFile rootProject.file(keystoreProperties.getProperty('storeFile'))
                 storePassword keystoreProperties.getProperty('storePassword')
@@ -49,17 +59,13 @@ android {
             }
         }
 
-        applicationId "com.fanok.books"
+        applicationId "link.intertop.audiobooks"
         // the search suggestion authority follows the application id, so another install of the app never clashes with it
         resValue "string", "suggestion_authority", applicationId + ".MySuggestionProvider"
-        // cloud sync with Yandex Disk: the app registered at oauth.yandex.ru (gradle.properties); empty hides the option
-        def yandexClientId = (findProperty('YANDEX_CLIENT_ID') ?: '').toString().trim()
-        buildConfigField "String", "YANDEX_CLIENT_ID", "\"$yandexClientId\""
-        manifestPlaceholders += [YANDEX_CLIENT_ID: yandexClientId] // the Yandex LoginSDK's redirect back to the app
         minSdkVersion 24 // 24+: network_security_config trust anchors (ISRG Root X1) work without bundling Conscrypt
         targetSdkVersion 34
-        versionCode 112
-        versionName "8.4.1"
+        versionCode 113
+        versionName "8.4.2"
         // the app speaks Russian only: the libraries' other translations would be dead weight in every APK
         resourceConfigurations += ['ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -81,7 +87,7 @@ android {
             shrinkResources true
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : null
+            signingConfig signingConfigured ? signingConfigs.release : null
         }
     }
     compileOptions {
@@ -94,7 +100,7 @@ android {
 tasks.configureEach { task ->
     if (task.name == 'packageRelease' || task.name == 'packageReleaseBundle') {
         task.doFirst {
-            assert keystorePropertiesFile.exists(): "Release signing is not configured: create ${keystorePropertiesFile} " +
+            assert signingConfigured: "Release signing is not configured: create ${keystorePropertiesFile} " +
                     "with storeFile, storePassword, keyAlias and keyPassword (see keystore.properties.example)"
         }
     }
@@ -151,8 +157,6 @@ dependencies {
     implementation 'com.google.android.play:review:2.0.2'
     // cloud sync with Google Drive: AuthorizationClient (drive.appdata), the Drive REST calls go through OkHttp
     implementation 'com.google.android.gms:play-services-auth:22.0.0'
-    // cloud sync with Yandex Disk: Yandex's own sign-in (Yandex app, else a browser tab), back with a token
-    implementation 'com.yandex.android:authsdk:3.3.0'
 
     implementation 'com.github.lzyzsd:circleprogress:1.2.1'
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0'

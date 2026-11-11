@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 public final class UpdateSources {
 
     /** Redirects to {@code …/releases/tag/<tag>} of the newest release (drafts and pre-releases excluded). */
-    static final String GITHUB_LATEST = "https://github.com/korvin2000/AudioBooks/releases/latest";
-    static final String GITHUB_DOWNLOAD = "https://github.com/korvin2000/AudioBooks/releases/download/";
+    static final String GITHUB_LATEST = "https://github.com/thejohnd0e/AudioBooks/releases/latest";
+    static final String GITHUB_DOWNLOAD = "https://github.com/thejohnd0e/AudioBooks/releases/download/";
     static final String MIRROR = "https://www.abc-guitars.com/data/audiobook/";
     static final String MIRROR_INFO = MIRROR + "update.txt";
     /**
