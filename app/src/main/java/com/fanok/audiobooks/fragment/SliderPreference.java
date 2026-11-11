@@ -11,7 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import com.fanok.audiobooks.R;
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.slider.LabelFormatter;
 import com.google.android.material.slider.Slider;
 
@@ -79,6 +82,16 @@ public class SliderPreference extends Preference {
         slider.setEnabled(isEnabled());
         slider.setFocusable(false); // the slider makes itself focusable: the row takes the remote's keys
         slider.setContentDescription(getTitle());
+
+        Context ctx = getContext();
+        int accent;
+        if (AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(ctx))) {
+            accent = AppThemes.getCustomColor(ctx, AppThemes.SLOT_ACCENT);
+        } else {
+            accent = MaterialColors.getColor(ctx, R.attr.colorAccentPrimary, 0xFF7EAC91);
+        }
+        PaletteBinder.tintControls(slider, accent);
+
         showValue();
         slider.addOnChangeListener((view, picked, fromUser) -> {
             shown = Math.round(picked);

@@ -187,7 +187,13 @@ public final class PaletteBinder {
 
         ColorStateList accentList = ColorStateList.valueOf(accent);
 
-        if (view instanceof SeekBar) {
+        if (view instanceof com.google.android.material.slider.Slider) {
+            com.google.android.material.slider.Slider slider = (com.google.android.material.slider.Slider) view;
+            slider.setThumbTintList(accentList);
+            slider.setTrackActiveTintList(accentList);
+            slider.setHaloTintList(ColorStateList.valueOf((accent & 0x00FFFFFF) | 0x33000000));
+            slider.setTrackInactiveTintList(ColorStateList.valueOf((accent & 0x00FFFFFF) | 0x44000000));
+        } else if (view instanceof SeekBar) {
             SeekBar sb = (SeekBar) view;
             sb.setProgressTintList(accentList);
             sb.setThumbTintList(accentList);
