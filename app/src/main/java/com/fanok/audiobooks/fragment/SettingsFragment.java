@@ -1119,7 +1119,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         return hsv[2] < 0.25f;
     }
 
-    private void showCustomPaletteMenu() {        Context context = requireContext();
+    private void showCustomPaletteMenu() {
+        Context context = requireContext();
         String[] items = new String[] {
                 getString(R.string.custom_color_bg) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_BG)) + ")",
                 getString(R.string.custom_color_surface) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)) + ")",
