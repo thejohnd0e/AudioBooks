@@ -40,6 +40,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.arellomobile.mvp.MvpAppCompatFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.ProvidePresenter;
+import android.content.Context;
+import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import com.fanok.audiobooks.Consts;
 import com.fanok.audiobooks.MarginItemDecoration;
 import com.fanok.audiobooks.FontScale;
@@ -429,7 +432,11 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             @Nullable Bundle savedInstanceState) {
 
 
-        View view = inflater.inflate(R.layout.fragment_book_description, container, false);
+        Context themeContext = new androidx.appcompat.view.ContextThemeWrapper(requireContext(),
+                AppThemes.paletteStyle(requireContext()));
+        LayoutInflater localInflater = inflater.cloneInContext(themeContext);
+        View view = localInflater.inflate(R.layout.fragment_book_description, container, false);
+        PaletteBinder.bindView(view, requireContext());
 
         mTitle = view.findViewById(R.id.title);
         mImageView = view.findViewById(R.id.imageView);
