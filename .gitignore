@@ -32,6 +32,9 @@ keystore.properties
 # Google Services (e.g. APIs or Firebase)
 google-services.json
 
+# Local deployment notes (not for the upstream repository)
+/docs/our-build-google-sync.md
+
 # Android Profiling
 *.hprof
 .vercel
