@@ -106,6 +106,20 @@ tasks.configureEach { task ->
     }
 }
 
+// assembleRelease clears app/build/outputs/apk/release, so the signed APK is also saved under a
+// stable versioned name in <root>/dist: nothing else there to look for, no hunt through build/.
+tasks.matching { it.name == 'assembleRelease' }.configureEach { task ->
+    task.doLast {
+        def source = file("${buildDir}/outputs/apk/release/app-release.apk")
+        if (source.exists()) {
+            def target = file("${rootDir}/dist/AudioBooks-${android.defaultConfig.versionName}-release.apk")
+            target.parentFile.mkdirs()
+            target.bytes = source.bytes
+            println "release APK: ${target}"
+        }
+    }
+}
+
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
