@@ -49,15 +49,17 @@
 ## What you can do
 
 - **Explore 29 audiobook catalogs.** Browse by genre, author, or narrator; search across up to 13 active sources simultaneously; explore series and recommendations where available.
-- **Listen online or offline.** Stream directly or download full books and individual chapters in advance. Filter books by downloaded status and listen with zero internet connection.
-- **Modern, polished interface.** Clean Material cards with duration and source badges directly on covers, 2-column grid and list view layouts, and minimal visual noise.
+- **Cloud synchronization & backup.** Seamlessly sync your library between devices via **Google Drive** or **Yandex Disk** — syncs favorites, history, exact playback positions (chapter and second), favorite authors and narrators, and app settings. Offline local JSON backup and restore is also available.
+- **Listen online or offline.** Stream directly or download full audiobooks in one tap (or save specific chapters). Dedicated «Downloaded» section and offline filter to listen with zero internet connection.
+- **Modern, polished interface.** Clean Material cards with duration and source badges directly on covers, toggle between 2-column grid and detailed list view, and minimal visual noise.
 - **Reworked book details & player.** Large cover with soft rounded corners and shadow, one-tap direct download button, prominent listen button, collapsible synopsis, and series cards.
 - **Comfortable playback bar.** Bottom player bar with enlarged touch targets (44×44dp and 48×48dp Play/Pause button with accent circle), top chapter progress indicator, playback speed control, and skip backward (10s) / forward (30s).
 - **Custom color palettes & themes.** Light, Dark, and Black themes, three calming natural palettes (**Muted Sage**, **Muted Umber**, **Muted Steel**), plus a full color wheel picker for completely custom background, surface, and accent colors.
-- **Personal library.** Save your favorite books, authors, and narrators; pick up where you stopped with smart listening history and progress indicators.
+- **Personal library & favorites.** Save favorite books, authors, and narrators; filter favorites by downloaded books; pick up where you stopped with smart listening history and progress indicators.
 - **Sleep timer & equalizer.** Wind down comfortably with a sleep timer that smoothly pauses playback, and fine-tune sound with the built-in equalizer.
-- **Reach blocked catalogs.** Built-in proxy for catalog pages, audio streaming, downloads, and book covers when sources are restricted in your country, complete with live latency and reachability status.
-- **Big screens supported.** Fully adapted for Android smartphones, tablets, and Android TV.
+- **Reach blocked catalogs.** Built-in proxy for catalog pages, audio streaming, downloads, and book covers when sources are restricted in your country, complete with live latency and reachability status per source.
+- **Parental controls.** Protect settings and restrict 18+ or adult-themed books behind a secure PIN code.
+- **Big screens & Android TV.** Fully adapted for Android smartphones, tablets (portrait and landscape layouts), and Android TV.
 
 ## Book sources
 
