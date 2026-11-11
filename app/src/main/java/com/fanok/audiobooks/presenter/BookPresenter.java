@@ -603,6 +603,23 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
         if (!canSwitchToThisBook()) {
             return;
         }
+        startThisBookFromCheckpoint();
+    }
+
+    /** The description's listen action: controls this book, switching the player to it when another book is loaded. */
+    @Override
+    public void playThisBook() {
+        if (playsThisBook()) {
+            getViewState().broadcastSend(new Intent(Broadcast_PLAY));
+        } else {
+            startThisBookFromCheckpoint();
+        }
+    }
+
+    private void startThisBookFromCheckpoint() {
+        if (mAudioPOJO == null || mAudioPOJO.isEmpty()) {
+            return;
+        }
         Checkpoint checkpoint = resumePoint();
         AudioPOJO pojo = mAudioPOJO.get(checkpoint.chapterIndex);
         getViewState().showTitle(pojo.getName());

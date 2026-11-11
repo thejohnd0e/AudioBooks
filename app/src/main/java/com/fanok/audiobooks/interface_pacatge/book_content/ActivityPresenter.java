@@ -27,6 +27,8 @@ public interface ActivityPresenter {
 
     void switchToThisBook();
 
+    void playThisBook();
+
     void buttomPreviousClick(View view);
 
     void buttomNextClick(View view);
