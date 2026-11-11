@@ -8,7 +8,7 @@
 
 **Make room for books in your everyday life.** AudioBooks is a free Android app for discovering and listening to audiobooks from 29 online catalogs. Enjoy a story on your commute, download a book before a trip, or fall asleep listening with a sleep timer.
 
-[Download](#install) · [Report an issue](https://github.com/thejohnd0e/AudioBooks/issues)
+[Download](https://github.com/thejohnd0e/AudioBooks/releases/latest) · [Report an issue](https://github.com/thejohnd0e/AudioBooks/issues)
 
 ## Screenshots
 
@@ -42,9 +42,6 @@
 - [What you can do](#what-you-can-do)
 - [Book sources](#book-sources)
 - [Requirements](#requirements)
-- [Install](#install)
-- [Start listening](#start-listening)
-- [Building from source](#building-from-source)
 - [Credits](#credits)
 
 </details>
@@ -81,37 +78,6 @@ The app connects to **29 audiobook catalogs**:
 | **Storage** | Sufficient free storage for offline audiobooks |
 | **App language** | Russian |
 | **Package name** | `link.intertop.audiobooks` (debug: `link.intertop.audiobooks.debug`) |
-
-## Install
-
-1. Download `AudioBooks-<version>-release.apk` from the [latest GitHub release](https://github.com/thejohnd0e/AudioBooks/releases/latest).
-2. Open the APK on your Android device and confirm installation.
-3. Launch **AudioBooks** and choose your preferred catalog from **Drawer → Sources** (`Источники`) or **Settings → Sources & network** (`Настройки → Источники и сеть`).
-
-Each release lists SHA-256 checksums in `SHA256SUMS.txt`. If you are switching from an older release signed with a different key, make a backup in **Settings → Backup** (`Настройки → Резервное копирование`), uninstall the older build, install the new APK, and restore your backup.
-
-## Start listening
-
-1. Browse **Audiobooks** (`Аудиокниги`) or **Genres** (`Жанры`), or search for a title, author, or narrator across multiple sources.
-2. Open a book to view its synopsis, series, and recommendations. Tap the **Play** button to start listening or tap the star icon to add it to **Favorites** (`Избранное`).
-3. For offline listening, tap **Download** (`Скачать`) on the book screen to download the audiobook. Switch to **Downloaded** (`Загруженные`) to view and play your offline collection without network access.
-4. Continue listening anytime through **History** (`История`) — your exact chapter and second position are automatically remembered.
-
-## Building from source
-
-**Requirements:** JDK 17 and Android SDK Platform 36 (Android Studio provides both). The Gradle wrapper downloads Gradle 8.13 automatically.
-
-```bash
-git clone https://github.com/thejohnd0e/AudioBooks.git
-cd AudioBooks
-./gradlew :app:testDebugUnitTest :app:assembleDebug
-```
-
-On Windows, use `gradlew.bat`. The debug APK is built to `app/build/outputs/apk/debug/app-debug.apk` and copied to `dist/`.
-
-- **Release builds** are signed using credentials configured in `keystore.properties` (see [`keystore.properties.example`](keystore.properties.example)).
-- **Release workflow:** Pushing a version tag `v<versionName>` (e.g., `v8.5.0`) triggers the automated [Release workflow](.github/workflows/release.yml) to compile, sign, and publish the release APKs and App Bundle.
-- **Developer documentation:** See [`docs/howto.md`](docs/howto.md) for toolchain details, test commands, source adapter guide, and release steps.
 
 ## Credits
 
