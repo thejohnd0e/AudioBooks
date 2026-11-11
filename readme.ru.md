@@ -6,20 +6,41 @@
 [![Latest release](https://img.shields.io/github/v/release/thejohnd0e/AudioBooks?sort=semver&label=release)](https://github.com/thejohnd0e/AudioBooks/releases/latest)
 [![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](#требования)
 
-![AudioBooks — лучшие аудиокниги всегда под рукой](docs/assets/wide_logo.webp)
-
 **Больше книг в вашей повседневной жизни.** AudioBooks — бесплатное приложение для Android, которое помогает находить и слушать аудиокниги из 29 онлайн-каталогов. Включайте истории по дороге на работу, скачивайте книги перед поездкой или засыпайте под любимую озвучку с таймером сна.
 
-Идея проста: объединить поиск книг, личную библиотеку и комфортное прослушивание в одном приложении. Выбирайте классику, фантастику, детективы, мемуары, книги по бизнесу и саморазвитию, произведения школьной программы, сказки и стихи для детей, а затем продолжайте слушать с того места, где остановились.
-
 [Скачать](#установка) · [Сообщить об ошибке](https://github.com/thejohnd0e/AudioBooks/issues)
+
+## Скриншоты
+
+<table>
+  <tr>
+    <th>Каталог книг</th>
+    <th>Карточка книги и плеер</th>
+    <th>Жанры</th>
+  </tr>
+  <tr>
+    <td><a href="docs/assets/screenshots/books_list.png"><img src="docs/assets/screenshots/books_list.png" width="220" alt="Каталог аудиокниг с обложками, названиями, авторами, исполнителями и длительностью"></a></td>
+    <td><a href="docs/assets/screenshots/player.png"><img src="docs/assets/screenshots/player.png" width="220" alt="Описание книги, прямая кнопка скачивания и увеличенная нижняя панель плеера"></a></td>
+    <td><a href="docs/assets/screenshots/categories.png"><img src="docs/assets/screenshots/categories.png" width="220" alt="Список жанров с количеством книг и отметками избранного"></a></td>
+  </tr>
+  <tr>
+    <th>Главное меню</th>
+    <th>Управление источниками</th>
+    <th>Настройки</th>
+  </tr>
+  <tr>
+    <td valign="top"><a href="docs/assets/screenshots/main_menu.png"><img src="docs/assets/screenshots/main_menu.png" width="220" alt="Боковое меню: книги, жанры, авторы, исполнители, источники, избранное, история и загрузки"></a></td>
+    <td valign="top"><a href="docs/assets/screenshots/available_sources.png"><img src="docs/assets/screenshots/available_sources.png" width="220" alt="Список источников со временем отклика, статусом и переключателем прокси"></a></td>
+    <td valign="top"><a href="docs/assets/screenshots/settings.png"><img src="docs/assets/screenshots/settings.png" width="220" alt="Настройки: оформление, воспроизведение, источники, загрузки, избранное, резервные копии и общие"></a></td>
+  </tr>
+</table>
 
 <details>
 <summary>Содержание</summary>
 
+- [Скриншоты](#скриншоты)
 - [Возможности](#возможности)
 - [Источники книг](#источники-книг)
-- [Скриншоты](#скриншоты)
 - [Требования](#требования)
 - [Установка](#установка)
 - [Первое прослушивание](#первое-прослушивание)
@@ -50,41 +71,6 @@
 - Каталог для просмотра переключается в боковом меню в разделе **Источники** либо в **Настройки → Источники и сеть**.
 - До 13 источников можно одновременно включить для мульти-поиска в разделе **Источники поиска**.
 - В окне «Источники» отображается время отклика каждого сайта и статус доступности.
-
-## Скриншоты
-
-Нажмите на изображение, чтобы открыть его в полном размере.
-
-<table>
-  <tr>
-    <th>Каталог книг</th>
-    <th>Карточка книги и плеер</th>
-    <th>Жанры</th>
-  </tr>
-  <tr>
-    <td><a href="docs/assets/screenshots/books_list.png"><img src="docs/assets/screenshots/books_list.png" width="220" alt="Каталог аудиокниг с обложками, названиями, авторами, исполнителями и длительностью"></a></td>
-    <td><a href="docs/assets/screenshots/player.png"><img src="docs/assets/screenshots/player.png" width="220" alt="Описание книги, прямая кнопка скачивания и увеличенная нижняя панель плеера"></a></td>
-    <td><a href="docs/assets/screenshots/categories.png"><img src="docs/assets/screenshots/categories.png" width="220" alt="Список жанров с количеством книг и отметками избранного"></a></td>
-  </tr>
-</table>
-
-<details>
-<summary>Ещё скриншоты: меню, источники и настройки</summary>
-
-<table>
-  <tr>
-    <th>Главное меню</th>
-    <th>Управление источниками</th>
-    <th>Настройки</th>
-  </tr>
-  <tr>
-    <td valign="top"><a href="docs/assets/screenshots/main_menu.png"><img src="docs/assets/screenshots/main_menu.png" width="220" alt="Боковое меню: книги, жанры, авторы, исполнители, источники, избранное, история и загрузки"></a></td>
-    <td valign="top"><a href="docs/assets/screenshots/available_sources.png"><img src="docs/assets/screenshots/available_sources.png" width="220" alt="Список источников со временем отклика, статусом и переключателем прокси"></a></td>
-    <td valign="top"><a href="docs/assets/screenshots/settings.png"><img src="docs/assets/screenshots/settings.png" width="220" alt="Настройки: оформление, воспроизведение, источники, загрузки, избранное, резервные копии и общие"></a></td>
-  </tr>
-</table>
-
-</details>
 
 ## Требования
 
