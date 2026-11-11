@@ -23,8 +23,6 @@ The idea is simple: bring book discovery, a personal library, and comfortable li
 - [Requirements](#requirements)
 - [Install](#install)
 - [Start listening](#start-listening)
-- [Help & feedback](#help--feedback)
-- [Contributing](#contributing)
 - [Building from source](#building-from-source)
 - [Credits](#credits)
 
@@ -112,21 +110,6 @@ Each release lists SHA-256 checksums in `SHA256SUMS.txt`. If you are switching f
 2. Open a book to view its synopsis, series, and recommendations. Tap the **Play** button to start listening or tap the star icon to add it to **Favorites** (`Избранное`).
 3. For offline listening, tap **Download** (`Скачать`) on the book screen to download the audiobook. Switch to **Downloaded** (`Загруженные`) to view and play your offline collection without network access.
 4. Continue listening anytime through **History** (`История`) — your exact chapter and second position are automatically remembered.
-
-## Help & feedback
-
-- **Bugs and feature requests:** [GitHub Issues](https://github.com/thejohnd0e/AudioBooks/issues). When reporting playback or download issues, please include your app version, Android version, selected source, book link, and reproduction steps.
-- **Contact:** android-dev@intertop.link.
-
-**Troubleshooting**
-
-- **A catalog will not load:** check your network connection and try another source. If the website is blocked in your country, toggle **Proxy** in **Settings → Sources & network → Proxy** (`Настройки → Источники и сеть → Прокси`).
-- **Playback stops when screen turns off:** disable battery optimization for AudioBooks in Android system settings.
-- **Transferring to a new device:** export your data via **Settings → Backup** (`Настройки → Резервное копирование`); downloaded audio files should be copied separately.
-
-## Contributing
-
-Bug reports, translation improvements, documentation fixes, and focused pull requests are welcome. For major changes, please open an issue first to discuss your proposal. Every pull request is checked by CI (unit tests, Android lint, debug APK). Please keep the English and Russian READMEs in sync.
 
 ## Building from source
 
