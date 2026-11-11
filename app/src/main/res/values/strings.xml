@@ -109,6 +109,13 @@
     <string name="custom_color_bg">Цвет фона</string>
     <string name="custom_color_surface">Цвет карточек и окон</string>
     <string name="custom_color_accent">Акцентный цвет</string>
+    <string name="palette_custom_edit">Настроить палитру</string>
+    <string name="palette_custom_edit_summary">Выбор 3 цветов: фон, карточки, акцент</string>
+    <string name="color_picker_title">Выбор цвета</string>
+    <string name="color_picker_hex_hint">#RRGGBB</string>
+    <string name="color_picker_current">Текущий</string>
+    <string name="color_picker_new">Новый</string>
+    <string name="custom_colors_title">Настройка 3 цветов</string>
 
     <string name="action_listen">Слушать</string>
     <string name="action_to_favorites">В избранное</string>
