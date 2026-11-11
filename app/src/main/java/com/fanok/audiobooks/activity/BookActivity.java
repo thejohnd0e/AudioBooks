@@ -524,18 +524,6 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mNextBottom = findViewById(R.id.nextBottom);
         mForward = findViewById(R.id.forward);
 
-        int accent = com.google.android.material.color.MaterialColors.getColor(this, R.attr.colorAccentPrimary, 0);
-        if (accent != 0) {
-            if (mPlayTop != null) {
-                androidx.core.view.ViewCompat.setBackgroundTintList(mPlayTop,
-                        android.content.res.ColorStateList.valueOf(accent));
-            }
-            if (mPlayBottom != null) {
-                androidx.core.view.ViewCompat.setBackgroundTintList(mPlayBottom,
-                        android.content.res.ColorStateList.valueOf(accent));
-            }
-        }
-
         MainActivity.setCloseApp(false);
 
         mNotificationClick = intent.getBooleanExtra("notificationClick", false);
@@ -549,12 +537,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         viewPager.setAdapter(sectionsPagerAdapter);
 
         tabs = findViewById(R.id.tabs);
-        if (accent != 0 && tabs != null) {
-            tabs.setSelectedTabIndicatorColor(accent);
-        }
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        PaletteBinder.bind(this);
         // the ★ tab is an icon in the colours of the tabs' titles; ОБЗОР before it stays the page shown first
         tabs.setTabIconTint(tabs.getTabTextColors());
         new TabLayoutMediator(tabs, viewPager, (tab, position) -> {
@@ -565,6 +549,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 tab.setText(sectionsPagerAdapter.getPageTitle(position));
             }
         }).attach();
+        PaletteBinder.bind(this);
         // the comments tab shows only when there are comments; its list reuses this fetch
         comentsCount = com.fanok.audiobooks.model.ComentsModel.shared(mBookPOJO.getUrl(), savedInstanceState == null)
                 .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())

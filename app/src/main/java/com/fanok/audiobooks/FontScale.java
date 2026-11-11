@@ -37,17 +37,18 @@ public final class FontScale {
         }
     }
 
-    /** {@code base} for an activity's {@code attachBaseContext}: the same resources at the chosen font scale. */
+    /** {@code base} for an activity's {@code attachBaseContext}: the same resources at the chosen font scale and palette. */
     @NonNull
     public static Context wrap(@NonNull Context base) {
         int percent = percent(base);
-        if (percent == DEFAULT) {
-            return base;
+        Context ctx = base;
+        if (percent != DEFAULT) {
+            // only the font scale: a full copy would pin the night mode, the locale and the screen size of now
+            Configuration delta = new Configuration();
+            delta.fontScale = effective(base.getResources().getConfiguration().fontScale, percent);
+            ctx = base.createConfigurationContext(delta);
         }
-        // only the font scale: a full copy would pin the night mode, the locale and the screen size of now
-        Configuration delta = new Configuration();
-        delta.fontScale = effective(base.getResources().getConfiguration().fontScale, percent);
-        return base.createConfigurationContext(delta);
+        return new androidx.appcompat.view.ContextThemeWrapper(ctx, AppThemes.paletteStyle(ctx));
     }
 
     /** Pure: the font scale of {@code percent} of the {@code system} one, kept within the bounds. */
