@@ -3,13 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
     <!-- Preview comparison: Old vs New -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -29,9 +32,9 @@
             <View
                 android:id="@+id/colorPreviewCurrent"
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="6dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="4dp"
                 android:background="#141816" />
         </LinearLayout>
 
@@ -52,30 +55,40 @@
             <View
                 android:id="@+id/colorPreviewNew"
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_marginStart="6dp"
-                android:layout_marginTop="4dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="2dp"
                 android:background="#141816" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Quick Presets Swatches Container -->
+    <!-- Color Wheel -->
+    <com.fanok.audiobooks.view.ColorWheelView
+        android:id="@+id/colorWheel"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Brightness Slider -->
     <TextView
+        android:id="@+id/brightnessLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Быстрый выбор"
+        android:layout_marginTop="4dp"
+        android:text="@string/color_picker_brightness"
         android:textColor="?attr/colorTextMuted"
-        android:textSize="12sp" />
+        android:textSize="11sp" />
 
-    <GridLayout
-        android:id="@+id/swatchesGrid"
+    <SeekBar
+        android:id="@+id/brightnessSlider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:alignmentMode="alignMargins"
-        android:columnCount="6"
-        android:useDefaultMargins="true" />
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="12dp"
+        android:max="100"
+        android:progress="100" />
 
     <!-- HEX input -->
     <com.google.android.material.textfield.TextInputLayout
@@ -93,7 +106,7 @@
             android:maxLength="7"
             android:maxLines="1"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>
