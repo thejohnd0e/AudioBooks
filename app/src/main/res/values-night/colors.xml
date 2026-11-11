@@ -32,4 +32,14 @@
     <color name="palette_onyx_surface">#121212</color>
     <color name="palette_onyx_accent">#7EAC91</color>
     <color name="palette_onyx_text_muted">#8E9290</color>
+
+    <!-- Custom palette: placeholders only, replaced at runtime by PaletteBinder -->
+    <color name="palette_custom_toolbar">#141816</color>
+    <color name="palette_custom_toolbar_dark">#0E120F</color>
+    <color name="palette_custom_background">#141816</color>
+    <color name="palette_custom_surface">#1F2622</color>
+    <color name="palette_custom_accent">#C4C4C4</color>
+    <color name="palette_custom_text_muted">#A3B0A9</color>
 </resources>
+
+

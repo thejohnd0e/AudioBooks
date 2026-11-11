@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.view.View;
@@ -18,19 +19,49 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.shape.MaterialShapeDrawable;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 
 /**
- * Binds active palette colors (Background, Surface, Accent) directly to window, toolbar,
- * and key controls to eliminate all background seams and support dynamic custom colors.
+ * Paints the app with the active palette: window, system bars, toolbar, cards, dialogs and every
+ * control or label the theme colours by attribute.
+ *
+ * <p>The three colours of a custom palette live in the preferences. An XML theme is a compiled
+ * resource and cannot hold them, so the theme overlay keeps placeholder colours of its own and this
+ * class replaces them at runtime, everywhere and every time a screen or a list row is drawn. That is
+ * why a custom palette wins over any preset: the preset's colours never reach the screen.
  */
 public final class PaletteBinder {
 
     private PaletteBinder() {
+    }
+
+    /** The palette's background colour; a custom palette always wins over the theme's. */
+    public static int background(@NonNull Context context) {
+        return AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
+                ? AppThemes.getCustomColor(context, AppThemes.SLOT_BG)
+                : MaterialColors.getColor(context, R.attr.colorBackgroundMain, 0xFF101412);
+    }
+
+    /** The palette's surface colour: cards, list rows, dialogs. */
+    public static int surface(@NonNull Context context) {
+        return AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
+                ? AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)
+                : MaterialColors.getColor(context, R.attr.colorSurfaceCard, 0xFF18201B);
+    }
+
+    /** The palette's accent colour. */
+    public static int accent(@NonNull Context context) {
+        return AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
+                ? AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)
+                : MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
     }
 
     private static final RecyclerView.OnChildAttachStateChangeListener PREF_ATTACH_LISTENER =
@@ -38,41 +69,19 @@ public final class PaletteBinder {
                 @Override
                 public void onChildViewAttachedToWindow(@NonNull View view) {
                     Context context = view.getContext();
-                    String palette = AppThemes.currentPalette(context);
-                    int accent;
-                    if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
-                        accent = AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT);
-                    } else {
-                        accent = MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
-                    }
-                    tintControls(view, accent);
+                    recolorSurfaces(view, background(context), surface(context));
+                    tintControls(view, accent(context));
                 }
 
                 @Override
                 public void onChildViewDetachedFromWindow(@NonNull View view) {}
             };
 
-    /**
-     * Applies the current palette to the activity window, toolbar, and interactive elements.
-     */
+    /** Applies the current palette to the activity window, toolbar, cards and controls. */
     public static void bind(@NonNull Activity activity) {
-        String palette = AppThemes.currentPalette(activity);
-        int bg;
-        int surface;
-        int accent;
-
-        if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
-            bg = AppThemes.getCustomColor(activity, AppThemes.SLOT_BG);
-            surface = AppThemes.getCustomColor(activity, AppThemes.SLOT_SURFACE);
-            accent = AppThemes.getCustomColor(activity, AppThemes.SLOT_ACCENT);
-        } else {
-            bg = MaterialColors.getColor(activity, R.attr.colorBackgroundMain, 0xFF141816);
-            surface = MaterialColors.getColor(activity, R.attr.colorSurfaceCard, 0xFF1F2622);
-            accent = MaterialColors.getColor(activity, R.attr.colorAccentPrimary, 0xFF7EAC91);
-        }
-
-        android.util.Log.i("PaletteBinder", "bind: palette=" + palette + ", bg=" + AppThemes.formatHex(bg)
-                + ", surface=" + AppThemes.formatHex(surface) + ", accent=" + AppThemes.formatHex(accent));
+        int bg = background(activity);
+        int surface = surface(activity);
+        int accent = accent(activity);
 
         // Seamless window and system bars
         activity.getWindow().setBackgroundDrawable(new ColorDrawable(bg));
@@ -81,13 +90,11 @@ public final class PaletteBinder {
             activity.getWindow().setNavigationBarColor(bg);
         }
 
-        // Seamless toolbar matching window canvas
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setBackgroundColor(bg);
         }
 
-        // TabLayout indicator
         TabLayout tabs = activity.findViewById(R.id.tabs);
         if (tabs != null) {
             tabs.setBackgroundColor(bg);
@@ -95,7 +102,6 @@ public final class PaletteBinder {
             tabs.setTabTextColors(0x99FFFFFF, accent);
         }
 
-        // Main play buttons
         ImageButton playTop = activity.findViewById(R.id.playTop);
         if (playTop != null) {
             ViewCompat.setBackgroundTintList(playTop, ColorStateList.valueOf(accent));
@@ -106,72 +112,49 @@ public final class PaletteBinder {
             ViewCompat.setBackgroundTintList(playBottom, ColorStateList.valueOf(accent));
         }
 
-        // Player top progress indicator
         ProgressBar playerProgress = activity.findViewById(R.id.progressBar);
         if (playerProgress != null) {
             playerProgress.setProgressTintList(ColorStateList.valueOf(accent));
         }
 
-        // Dynamic controls across the activity
-        tintControls(activity.getWindow().getDecorView(), accent);
+        final View decor = activity.getWindow().getDecorView();
+        paint(decor, bg, surface, accent);
+        // list rows and fragment layouts appear after this call: repaint them on every layout
+        decor.getViewTreeObserver().addOnGlobalLayoutListener(
+                () -> paint(decor, background(activity), surface(activity), accent(activity)));
     }
 
-    /**
-     * Binds custom colors to dynamic views within a fragment or view hierarchy.
-     */
+    /** Applies the current palette to a fragment's view hierarchy. */
     public static void bindView(@NonNull View view, @NonNull Context context) {
-        String palette = AppThemes.currentPalette(context);
-        int bg;
-        int surface;
-        int accent;
-
-        if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
-            bg = AppThemes.getCustomColor(context, AppThemes.SLOT_BG);
-            surface = AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE);
-            accent = AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT);
-        } else {
-            bg = MaterialColors.getColor(context, R.attr.colorBackgroundMain, 0xFF141816);
-            surface = MaterialColors.getColor(context, R.attr.colorSurfaceCard, 0xFF1F2622);
-            accent = MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
-        }
+        int accent = accent(context);
 
         View btnListen = view.findViewById(R.id.btnListenBook);
-        if (btnListen instanceof com.google.android.material.button.MaterialButton) {
-            ((com.google.android.material.button.MaterialButton) btnListen)
-                    .setBackgroundTintList(ColorStateList.valueOf(accent));
+        if (btnListen instanceof MaterialButton) {
+            ((MaterialButton) btnListen).setBackgroundTintList(ColorStateList.valueOf(accent));
         }
 
         View genre = view.findViewById(R.id.genre);
-        if (genre != null && AppThemes.PALETTE_CUSTOM.equals(palette)) {
+        if (genre != null && AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))) {
             GradientDrawable chip = new GradientDrawable();
             chip.setShape(GradientDrawable.RECTANGLE);
             chip.setCornerRadius(14 * context.getResources().getDisplayMetrics().density);
-            chip.setColor(surface);
+            chip.setColor(surface(context));
             chip.setStroke((int) (1.5f * context.getResources().getDisplayMetrics().density), accent);
             genre.setBackground(chip);
         }
 
-        tintControls(view, accent);
+        paint(view, background(context), surface(context), accent);
     }
 
-    /**
-     * Binds and tints PreferenceFragmentCompat RecyclerView items as they attach.
-     */
+    /** Binds and paints PreferenceFragmentCompat RecyclerView items as they attach. */
     public static void bindPreferences(@NonNull PreferenceFragmentCompat fragment) {
         Context context = fragment.getContext();
         if (context == null) return;
-        String palette = AppThemes.currentPalette(context);
-        int accent;
-        if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
-            accent = AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT);
-        } else {
-            accent = MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
-        }
 
         try {
             RecyclerView list = fragment.getListView();
             if (list != null) {
-                tintControls(list, accent);
+                paint(list, background(context), surface(context), accent(context));
                 list.removeOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
                 list.addOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
             }
@@ -180,17 +163,95 @@ public final class PaletteBinder {
         }
     }
 
+    private static void paint(@Nullable View view, int background, int surface, int accent) {
+        recolorSurfaces(view, background, surface);
+        tintControls(view, accent);
+    }
+
     /**
-     * Recursively traverses a view hierarchy and applies accent color to SeekBars,
-     * CompoundButtons (CheckBox/Switch/RadioButton), and ProgressBars.
+     * Repaints backgrounds painted with the theme's background or surface colour.
+     *
+     * <p>Cards, rows and dialog surfaces take their colour from theme attributes, which a palette
+     * chosen at runtime cannot change; this pass brings them the palette's own colours, so a black
+     * custom palette turns every surface black instead of leaving the theme's grey.
+     */
+    public static void recolorSurfaces(@Nullable View view, int background, int surface) {
+        if (view == null) return;
+        Context context = view.getContext();
+        int themeBackground = MaterialColors.getColor(context, R.attr.colorBackgroundMain, 0);
+        int themeSurface = MaterialColors.getColor(context, R.attr.colorSurfaceCard, 0);
+        int materialSurface = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorSurface, 0);
+        // the placeholders the custom palette's theme overlay carries: nothing may keep them
+        int placeholderBackground = ContextCompat.getColor(context, R.color.palette_custom_background);
+        int placeholderSurface = ContextCompat.getColor(context, R.color.palette_custom_surface);
+        if (background == themeBackground && surface == themeSurface) {
+            return; // a built-in palette: the theme already paints it
+        }
+
+        Drawable drawable = view.getBackground();
+        int fill = fillOf(drawable);
+
+        if ((fill == themeBackground || fill == placeholderBackground) && background != fill) {
+            paintColor(view, drawable, background);
+        } else if ((fill == themeSurface || fill == placeholderSurface
+                || (materialSurface != 0 && fill == materialSurface)) && surface != fill) {
+            paintColor(view, drawable, surface);
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                recolorSurfaces(group.getChildAt(i), background, surface);
+            }
+        }
+    }
+
+    /** The solid colour of a drawable, or -1 when it fills with something else. */
+    private static int fillOf(@Nullable Drawable drawable) {
+        if (drawable instanceof GradientDrawable) {
+            ColorStateList colors = ((GradientDrawable) drawable).getColor();
+            return colors == null ? -1 : colors.getDefaultColor();
+        }
+        if (drawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        }
+        if (drawable instanceof MaterialShapeDrawable) {
+            ColorStateList colors = ((MaterialShapeDrawable) drawable).getFillColor();
+            return colors == null ? -1 : colors.getDefaultColor();
+        }
+        return -1;
+    }
+
+    /** Paints {@code color} on a copy of {@code drawable}, keeping its shape, corners and stroke. */
+    private static void paintColor(@NonNull View view, @Nullable Drawable drawable, int color) {
+        if (drawable instanceof GradientDrawable || drawable instanceof MaterialShapeDrawable) {
+            Drawable copy = drawable.getConstantState() != null
+                    ? drawable.getConstantState().newDrawable().mutate()
+                    : drawable.mutate();
+            if (copy instanceof GradientDrawable) {
+                ((GradientDrawable) copy).setColor(color);
+            } else if (copy instanceof MaterialShapeDrawable) {
+                ((MaterialShapeDrawable) copy).setFillColor(ColorStateList.valueOf(color));
+            }
+            view.setBackground(copy);
+            return;
+        }
+        // a flat colour: corners and strokes are not part of it
+        view.setBackgroundColor(color);
+    }
+
+    /**
+     * Tints every control and label the theme colours by an accent attribute: sliders, checkboxes,
+     * switches, progress bars, buttons with icons, and text or icon tints resolved from the theme.
      */
     public static void tintControls(@Nullable View view, int accent) {
         if (view == null) return;
 
         ColorStateList accentList = ColorStateList.valueOf(accent);
 
-        if (view instanceof com.google.android.material.slider.Slider) {
-            com.google.android.material.slider.Slider slider = (com.google.android.material.slider.Slider) view;
+        if (view instanceof Slider) {
+            Slider slider = (Slider) view;
             slider.setThumbTintList(accentList);
             slider.setTrackActiveTintList(accentList);
             slider.setHaloTintList(ColorStateList.valueOf((accent & 0x00FFFFFF) | 0x33000000));
@@ -213,17 +274,15 @@ public final class PaletteBinder {
             pb.setIndeterminateTintList(accentList);
         } else if (view instanceof ImageView) {
             ImageView iv = (ImageView) view;
-            ColorStateList tint = iv.getImageTintList();
-            if (matchesThemeAccent(view.getContext(), tint)) {
+            if (matchesThemeAccent(iv.getContext(), iv.getImageTintList())) {
                 iv.setImageTintList(accentList);
             }
         }
 
         // anything coloured by a theme accent attribute keeps the palette's built-in colour,
         // because theme attributes cannot hold a colour chosen at runtime; replace it here
-        if (view instanceof com.google.android.material.button.MaterialButton) {
-            com.google.android.material.button.MaterialButton mb =
-                    (com.google.android.material.button.MaterialButton) view;
+        if (view instanceof MaterialButton) {
+            MaterialButton mb = (MaterialButton) view;
             if (mb.getIcon() != null && matchesThemeAccent(mb.getContext(), mb.getIconTint())) {
                 mb.setIconTint(accentList);
             }
@@ -266,8 +325,8 @@ public final class PaletteBinder {
                 MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0),
                 MaterialColors.getColor(context, R.attr.hrefColor, 0)
         };
-        for (int accent : accents) {
-            if (accent != 0 && accent == color) {
+        for (int value : accents) {
+            if (value != 0 && value == color) {
                 return true;
             }
         }
@@ -275,27 +334,39 @@ public final class PaletteBinder {
     }
 
     /**
-     * Paints a dialog with the active palette: its surface (Material would lighten it by the
-     * dialog's elevation) and its accent-coloured buttons and labels.
+     * Paints a dialog with the palette: its surface (Material would lighten it by the dialog's
+     * elevation) and its accent-coloured buttons and labels.
      */
     public static void applyPaletteToDialog(@NonNull android.app.Dialog dialog) {
         android.view.Window window = dialog.getWindow();
         if (window == null) return;
 
         Context context = dialog.getContext();
-        int surface = AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
-                ? AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)
-                : MaterialColors.getColor(context, R.attr.colorSurfaceCard, 0xFF1F2622);
-        int accent = AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
-                ? AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)
-                : MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
+        int surface = surface(context);
 
-        GradientDrawable background = new GradientDrawable();
-        background.setShape(GradientDrawable.RECTANGLE);
-        background.setCornerRadius(16f * context.getResources().getDisplayMetrics().density);
-        background.setColor(surface);
+        GradientDrawable card = new GradientDrawable();
+        card.setShape(GradientDrawable.RECTANGLE);
+        card.setCornerRadius(16f * context.getResources().getDisplayMetrics().density);
+        card.setColor(surface);
 
-        window.setBackgroundDrawable(background);
-        tintControls(window.getDecorView(), accent);
+        window.setBackgroundDrawable(card.getConstantState().newDrawable());
+
+        View decor = window.getDecorView();
+        // the dialog's own content view carries a Material shape of the theme's surface colour
+        View content = window.findViewById(android.R.id.content);
+        if (content != null && content != decor) {
+            content.setBackground(card.getConstantState().newDrawable());
+        }
+        paint(decor, background(context), surface, accent(context));
+
+        // Material applies its own card while the dialog starts, so paint once more afterwards
+        decor.post(() -> {
+            window.setBackgroundDrawable(card.getConstantState().newDrawable());
+            decor.setBackground(card.getConstantState().newDrawable());
+            if (content != null && content != decor) {
+                content.setBackground(card.getConstantState().newDrawable());
+            }
+            paint(decor, background(context), surface, accent(context));
+        });
     }
 }
