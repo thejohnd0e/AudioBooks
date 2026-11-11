@@ -199,24 +199,4 @@ public class LoadBook extends AppCompatActivity {
                 });
     }
 
-    @Override
-    public Resources.Theme getTheme() {
-        Resources.Theme theme = super.getTheme();
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            theme.applyStyle(R.style.AppTheme_NoAnimTheme, true);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            theme.applyStyle(R.style.LightAppTheme_NoAnimTheme, true);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            theme.applyStyle(R.style.AppThemeBlack_NoAnimTheme, true);
-        }
-
-
-        return theme;
-    }
-
 }
