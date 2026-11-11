@@ -50,10 +50,16 @@ public final class AppThemes {
 
     /** Parses a hex color string (with or without '#') into an ARGB color int. */
     public static int parseHex(String hex, int defaultColor) {
-        if (hex == null) return defaultColor;
+        Integer parsed = parseHexColor(hex);
+        return parsed != null ? parsed : defaultColor;
+    }
+
+    /** Parses a hex color string (with or without '#') into an ARGB color Integer, or null if invalid. */
+    public static Integer parseHexColor(String hex) {
+        if (hex == null) return null;
         String clean = hex.trim();
         if (clean.startsWith("#")) clean = clean.substring(1);
-        if (clean.length() != 6 && clean.length() != 8) return defaultColor;
+        if (clean.length() != 6 && clean.length() != 8) return null;
         try {
             if (clean.length() == 6) {
                 return (int) (0xFF000000L | Long.parseLong(clean, 16));
@@ -61,7 +67,7 @@ public final class AppThemes {
                 return (int) Long.parseLong(clean, 16);
             }
         } catch (NumberFormatException e) {
-            return defaultColor;
+            return null;
         }
     }
 
@@ -173,15 +179,12 @@ public final class AppThemes {
 
     /** Applies the night mode the preference implies; called at startup and when the preference changes. */
     public static void applyNightMode(@NonNull Context context) {
-        String theme = current(context);
-        boolean night = !theme.equals(context.getString(R.string.theme_light_value));
-        AppCompatDelegate.setDefaultNightMode(night ? AppCompatDelegate.MODE_NIGHT_YES
-                : AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         // Android 12+ draws the starting window before the app runs: told the app's mode, it takes the matching color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             UiModeManager uiMode = context.getApplicationContext().getSystemService(UiModeManager.class);
             if (uiMode != null) {
-                uiMode.setApplicationNightMode(night ? UiModeManager.MODE_NIGHT_YES : UiModeManager.MODE_NIGHT_NO);
+                uiMode.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES);
             }
         }
     }
@@ -189,13 +192,6 @@ public final class AppThemes {
     /** The one of the three styles that matches the preference. */
     @StyleRes
     public static int style(@NonNull Context context, @StyleRes int dark, @StyleRes int light, @StyleRes int black) {
-        String theme = current(context);
-        if (theme.equals(context.getString(R.string.theme_light_value))) {
-            return light;
-        }
-        if (theme.equals(context.getString(R.string.theme_black_value))) {
-            return black;
-        }
         return dark;
     }
 

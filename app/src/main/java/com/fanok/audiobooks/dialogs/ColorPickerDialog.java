@@ -87,18 +87,19 @@ public final class ColorPickerDialog {
             public void afterTextChanged(Editable s) {
                 if (s == null) return;
                 String text = s.toString().trim();
-                int parsed = AppThemes.parseHex(text, -1);
-                if (parsed != -1) {
+                Integer parsed = AppThemes.parseHexColor(text);
+                if (parsed != null) {
+                    int color = parsed;
                     if (isDarkLuminanceClamped) {
                         float[] hsv = new float[3];
-                        Color.colorToHSV(parsed, hsv);
+                        Color.colorToHSV(color, hsv);
                         if (hsv[2] > 0.38f) {
                             hsv[2] = 0.38f;
-                            parsed = Color.HSVToColor(hsv);
+                            color = Color.HSVToColor(hsv);
                         }
                     }
-                    selectedColor[0] = parsed;
-                    previewNew.setBackgroundColor(parsed);
+                    selectedColor[0] = color;
+                    previewNew.setBackgroundColor(color);
                 }
             }
         });

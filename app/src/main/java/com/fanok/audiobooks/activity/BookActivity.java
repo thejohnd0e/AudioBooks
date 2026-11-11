@@ -1695,26 +1695,6 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     }
 
     @Override
-    public Resources.Theme getTheme() {
-        Resources.Theme theme = super.getTheme();
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            theme.applyStyle(R.style.AppTheme_NoActionBar, true);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            theme.applyStyle(R.style.LightAppTheme_NoActionBar, true);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            theme.applyStyle(R.style.AppThemeBlack_NoActionBar, true);
-        }
-
-
-        return theme;
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         View currentFocus = getCurrentFocus();
         if (currentFocus!=null){

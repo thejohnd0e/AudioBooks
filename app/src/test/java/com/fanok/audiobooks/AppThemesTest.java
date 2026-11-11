@@ -23,6 +23,12 @@ public class AppThemesTest {
         assertEquals(0xFF161B18, AppThemes.parseHex("161B18", 0));
         assertEquals(0xFFFFFFFF, AppThemes.parseHex("invalid", 0xFFFFFFFF));
         assertEquals(0xFFFFFFFF, AppThemes.parseHex(null, 0xFFFFFFFF));
+
+        assertEquals(Integer.valueOf(0xFFFFFFFF), AppThemes.parseHexColor("#FFFFFF"));
+        assertEquals(Integer.valueOf(0xFFFFFFFF), AppThemes.parseHexColor("ffffff"));
+        assertEquals(Integer.valueOf(0xFF000000), AppThemes.parseHexColor("#000000"));
+        org.junit.Assert.assertNull(AppThemes.parseHexColor("invalid"));
+        org.junit.Assert.assertNull(AppThemes.parseHexColor(null));
     }
 
     @Test
