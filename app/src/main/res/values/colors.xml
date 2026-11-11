@@ -45,4 +45,48 @@
     <color name="primaryDarkColorBlack">#1A1A1B</color>
     <color name="backgroundSelectedBlack">#5C5C60</color>
     <color name="backgraundColorBlack">#0B0B0B</color>
+
+    <!-- Muted Nature Palettes (Light Mode / Default) -->
+    <!-- Sage (Шалфей) -->
+    <color name="palette_sage_toolbar">#4E7A5E</color>
+    <color name="palette_sage_toolbar_dark">#3A5E47</color>
+    <color name="palette_sage_background">#F4F6F4</color>
+    <color name="palette_sage_surface">#FFFFFF</color>
+    <color name="palette_sage_accent">#4E7A5E</color>
+    <color name="palette_sage_text_muted">#6E7A73</color>
+
+    <!-- Umbra (Умбра) -->
+    <color name="palette_umbra_toolbar">#8F643B</color>
+    <color name="palette_umbra_toolbar_dark">#6E4D2B</color>
+    <color name="palette_umbra_background">#F7F5F2</color>
+    <color name="palette_umbra_surface">#FFFFFF</color>
+    <color name="palette_umbra_accent">#8F643B</color>
+    <color name="palette_umbra_text_muted">#7D736C</color>
+
+    <!-- Steel (Сталь) -->
+    <color name="palette_steel_toolbar">#4D6980</color>
+    <color name="palette_steel_toolbar_dark">#384E60</color>
+    <color name="palette_steel_background">#F3F5F7</color>
+    <color name="palette_steel_surface">#FFFFFF</color>
+    <color name="palette_steel_accent">#4D6980</color>
+    <color name="palette_steel_text_muted">#6B7480</color>
+
+    <!-- Onyx (Оникс / AMOLED) -->
+    <color name="palette_onyx_toolbar">#000000</color>
+    <color name="palette_onyx_toolbar_dark">#000000</color>
+    <color name="palette_onyx_background">#000000</color>
+    <color name="palette_onyx_surface">#121212</color>
+    <color name="palette_onyx_accent">#7EAC91</color>
+    <color name="palette_onyx_text_muted">#8E9290</color>
+
+    <!-- Своя палитра: only placeholders — PaletteBinder replaces them with the user's three
+         colours on every screen, so no preset's colour ever shows in this palette -->
+    <color name="palette_custom_toolbar">#141816</color>
+    <color name="palette_custom_toolbar_dark">#0E120F</color>
+    <color name="palette_custom_background">#141816</color>
+    <color name="palette_custom_surface">#1F2622</color>
+    <color name="palette_custom_accent">#C4C4C4</color>
+    <color name="palette_custom_text_muted">#A3B0A9</color>
 </resources>
+
+

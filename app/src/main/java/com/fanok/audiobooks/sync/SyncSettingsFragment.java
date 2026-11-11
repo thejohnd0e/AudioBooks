@@ -136,7 +136,7 @@ public class SyncSettingsFragment extends PreferenceFragmentCompat
         CloudSync.choose(context, chosen); // a sign-in to another cloud still under way ends unheeded
         if (chosen == null) {
             if (connected != null) {
-                new AlertDialog.Builder(context)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                         .setTitle(R.string.app_name)
                         .setMessage(R.string.sync_off_confirm)
                         .setPositiveButton(R.string.yes, (dialog, which) -> CloudSync.disconnect(context))

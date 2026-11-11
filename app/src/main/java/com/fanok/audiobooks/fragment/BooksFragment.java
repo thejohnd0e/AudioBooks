@@ -897,7 +897,7 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
      */
     @Override
     public void showDurationPicker(@NonNull Duration current) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(requireContext());
         final Context context = builder.getContext();
         final DialogDurationFilterBinding dialog = DialogDurationFilterBinding.inflate(LayoutInflater.from(context));
         final List<Duration> presets = Duration.PRESETS;

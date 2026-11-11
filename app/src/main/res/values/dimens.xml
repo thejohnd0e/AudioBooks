@@ -18,7 +18,10 @@
     <dimen name="scale_drawable">18dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="item_genre_title_top_margin">4dp</dimen>
-    <dimen name="player_row_height">75dp</dimen>
+    <dimen name="player_row_height_redesign">68dp</dimen>
+    <dimen name="player_row_height">@dimen/player_row_height_redesign</dimen>
+    <dimen name="player_btn_size">44dp</dimen>
+    <dimen name="player_play_btn_size">48dp</dimen>
     <dimen name="textSizeBookDescription">16sp</dimen>
     <dimen name="book_cover_weight">125dp</dimen>
     <dimen name="titleSizeBookDescription">20sp</dimen>

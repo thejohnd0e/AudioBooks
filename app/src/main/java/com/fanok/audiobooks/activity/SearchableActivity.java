@@ -528,7 +528,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
             checked[i] = scope.contains(SCOPE_FIELDS[i]);
             names[i] = getString(SCOPE_NAMES[i]);
         }
-        new MaterialAlertDialogBuilder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.search_scope)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton(R.string.search_scope_done, (d, w) -> {
@@ -555,7 +555,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
             checked[i] = current.contains(all[i]);
             names[i] = getString(all[i].title);
         }
-        new MaterialAlertDialogBuilder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.search_genres)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton(R.string.search_scope_done, (d, w) -> {
@@ -623,25 +623,6 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
                 mPresenter.loadBoks();
             }
         }
-    }
-
-    @Override
-    public Resources.Theme getTheme() {
-        Resources.Theme theme = super.getTheme();
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            theme.applyStyle(R.style.AppTheme_SwipeOnClose, true);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            theme.applyStyle(R.style.LightAppTheme_SwipeOnClose, true);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            theme.applyStyle(R.style.AppThemeBlack_SwipeOnClose, true);
-        }
-
-        return theme;
     }
 
     @Override
@@ -811,7 +792,7 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
         }
         ScrollView scroll = new ScrollView(this);
         scroll.addView(list);
-        dialog[0] = new MaterialAlertDialogBuilder(this)
+        dialog[0] = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setCustomTitle(head)
                 .setView(scroll)
                 .setNegativeButton(R.string.close, null)

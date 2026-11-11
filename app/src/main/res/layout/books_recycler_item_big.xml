@@ -3,8 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/recycler_item_height_big"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
-    android:background="?attr/backgroundItem"
+    android:background="@drawable/bg_book_card"
     android:orientation="horizontal"
     tools:viewBindingIgnore="true">
 
@@ -16,8 +20,8 @@
         android:orientation="horizontal">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="@dimen/recycler_item_image_width_big"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/imageView"
@@ -72,8 +76,9 @@
         </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:layout_marginStart="@dimen/recycler_item_textmargin"
             android:orientation="horizontal">
 
@@ -171,7 +176,6 @@
                     android:id="@+id/series"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_book"
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:singleLine="true"
@@ -183,7 +187,6 @@
                     android:id="@+id/autor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_autor"
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:singleLine="true"
@@ -195,12 +198,11 @@
                     android:id="@+id/artist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/ic_artist"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:textColor="?attr/hrefColor"
+                    android:textColor="?attr/subTextColor"
                     android:textSize="@dimen/titleSize"
                     tools:text="Кинг Стивен" />
 
@@ -215,7 +217,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/recycler_item_textmargin"
                         android:layout_weight="1"
-                        android:drawableStart="@drawable/ic_clock"
                         android:gravity="center_vertical"
                         android:maxLines="1"
                         android:singleLine="true"

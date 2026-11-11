@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Muted Nature Palettes (Night / Dark Mode) -->
+    <!-- Sage (Шалфей) -->
+    <color name="palette_sage_toolbar">#242E29</color>
+    <color name="palette_sage_toolbar_dark">#171F1B</color>
+    <color name="palette_sage_background">#1C2220</color>
+    <color name="palette_sage_surface">#252D2A</color>
+    <color name="palette_sage_accent">#7EAC91</color>
+    <color name="palette_sage_text_muted">#A3B0A9</color>
+
+    <!-- Umbra (Умбра) -->
+    <color name="palette_umbra_toolbar">#2D2521</color>
+    <color name="palette_umbra_toolbar_dark">#1D1714</color>
+    <color name="palette_umbra_background">#221E1C</color>
+    <color name="palette_umbra_surface">#2D2825</color>
+    <color name="palette_umbra_accent">#D4A373</color>
+    <color name="palette_umbra_text_muted">#B5AAA3</color>
+
+    <!-- Steel (Сталь) -->
+    <color name="palette_steel_toolbar">#222830</color>
+    <color name="palette_steel_toolbar_dark">#15191F</color>
+    <color name="palette_steel_background">#1A1D22</color>
+    <color name="palette_steel_surface">#242830</color>
+    <color name="palette_steel_accent">#88A4BC</color>
+    <color name="palette_steel_text_muted">#A2AAB5</color>
+
+    <!-- Onyx (Оникс / AMOLED) -->
+    <color name="palette_onyx_toolbar">#000000</color>
+    <color name="palette_onyx_toolbar_dark">#000000</color>
+    <color name="palette_onyx_background">#000000</color>
+    <color name="palette_onyx_surface">#121212</color>
+    <color name="palette_onyx_accent">#7EAC91</color>
+    <color name="palette_onyx_text_muted">#8E9290</color>
+
+    <!-- Custom palette: placeholders only, replaced at runtime by PaletteBinder -->
+    <color name="palette_custom_toolbar">#141816</color>
+    <color name="palette_custom_toolbar_dark">#0E120F</color>
+    <color name="palette_custom_background">#141816</color>
+    <color name="palette_custom_surface">#1F2622</color>
+    <color name="palette_custom_accent">#C4C4C4</color>
+    <color name="palette_custom_text_muted">#A3B0A9</color>
+</resources>
+
+

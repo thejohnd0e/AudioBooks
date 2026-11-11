@@ -565,7 +565,7 @@ public class FavoriteFragment extends MvpAppCompatFragment implements FavoriteVi
      */
     static void confirmClear(@NonNull Context context, int title, int message, @NonNull Runnable clear) {
         final String yes = context.getString(R.string.yes);
-        final AlertDialog dialog = new AlertDialog.Builder(context)
+        final AlertDialog dialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(yes, (d, which) -> clear.run())

@@ -65,7 +65,7 @@ public class SourceCountDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         shown = savedInstanceState != null ? savedInstanceState.getInt(STATE_SHOWN) : Sources.activeCount();
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(requireContext());
         View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_source_count, null, false);
         value = view.findViewById(R.id.sourceCountValue);
         status = view.findViewById(R.id.sourceCountStatus);
