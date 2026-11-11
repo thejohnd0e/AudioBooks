@@ -7,11 +7,18 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.ViewCompat;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.tabs.TabLayout;
 
@@ -23,6 +30,25 @@ public final class PaletteBinder {
 
     private PaletteBinder() {
     }
+
+    private static final RecyclerView.OnChildAttachStateChangeListener PREF_ATTACH_LISTENER =
+            new RecyclerView.OnChildAttachStateChangeListener() {
+                @Override
+                public void onChildViewAttachedToWindow(@NonNull View view) {
+                    Context context = view.getContext();
+                    String palette = AppThemes.currentPalette(context);
+                    int accent;
+                    if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
+                        accent = AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT);
+                    } else {
+                        accent = MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
+                    }
+                    tintControls(view, accent);
+                }
+
+                @Override
+                public void onChildViewDetachedFromWindow(@NonNull View view) {}
+            };
 
     /**
      * Applies the current palette to the activity window, toolbar, and interactive elements.
@@ -83,6 +109,9 @@ public final class PaletteBinder {
         if (playerProgress != null) {
             playerProgress.setProgressTintList(ColorStateList.valueOf(accent));
         }
+
+        // Dynamic controls across the activity
+        tintControls(activity.getWindow().getDecorView(), accent);
     }
 
     /**
@@ -118,6 +147,69 @@ public final class PaletteBinder {
             chip.setColor(surface);
             chip.setStroke((int) (1.5f * context.getResources().getDisplayMetrics().density), accent);
             genre.setBackground(chip);
+        }
+
+        tintControls(view, accent);
+    }
+
+    /**
+     * Binds and tints PreferenceFragmentCompat RecyclerView items as they attach.
+     */
+    public static void bindPreferences(@NonNull PreferenceFragmentCompat fragment) {
+        Context context = fragment.getContext();
+        if (context == null) return;
+        String palette = AppThemes.currentPalette(context);
+        int accent;
+        if (AppThemes.PALETTE_CUSTOM.equals(palette)) {
+            accent = AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT);
+        } else {
+            accent = MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
+        }
+
+        try {
+            RecyclerView list = fragment.getListView();
+            if (list != null) {
+                tintControls(list, accent);
+                list.removeOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
+                list.addOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
+            }
+        } catch (IllegalStateException ignored) {
+            // list view not yet created
+        }
+    }
+
+    /**
+     * Recursively traverses a view hierarchy and applies accent color to SeekBars,
+     * CompoundButtons (CheckBox/Switch/RadioButton), and ProgressBars.
+     */
+    public static void tintControls(@Nullable View view, int accent) {
+        if (view == null) return;
+
+        ColorStateList accentList = ColorStateList.valueOf(accent);
+
+        if (view instanceof SeekBar) {
+            SeekBar sb = (SeekBar) view;
+            sb.setProgressTintList(accentList);
+            sb.setThumbTintList(accentList);
+        } else if (view instanceof CompoundButton) {
+            CompoundButton cb = (CompoundButton) view;
+            cb.setButtonTintList(accentList);
+            if (cb instanceof SwitchCompat) {
+                SwitchCompat sc = (SwitchCompat) cb;
+                sc.setThumbTintList(accentList);
+                sc.setTrackTintList(accentList);
+            }
+        } else if (view instanceof ProgressBar) {
+            ProgressBar pb = (ProgressBar) view;
+            pb.setProgressTintList(accentList);
+            pb.setIndeterminateTintList(accentList);
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup vg = (ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                tintControls(vg.getChildAt(i), accent);
+            }
         }
     }
 }

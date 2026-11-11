@@ -477,19 +477,19 @@
     </style>
 
     <style name="ThemeOverlay.AudioBooks.Palette.Custom" parent="">
-        <item name="colorPrimary">@color/palette_sage_toolbar</item>
-        <item name="colorPrimaryDark">@color/palette_sage_toolbar_dark</item>
-        <item name="backgraundColor">@color/palette_sage_background</item>
-        <item name="backgroundItem">@color/palette_sage_surface</item>
-        <item name="hrefColor">@color/palette_sage_accent</item>
-        <item name="colorAccent">@color/palette_sage_accent</item>
-        <item name="colorBackgroundMain">@color/palette_sage_background</item>
-        <item name="colorSurfaceCard">@color/palette_sage_surface</item>
-        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
-        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
-        <item name="android:windowBackground">@color/palette_sage_background</item>
-        <item name="android:colorBackground">@color/palette_sage_background</item>
-        <item name="colorSurface">@color/palette_sage_surface</item>
-        <item name="colorBackgroundFloating">@color/palette_sage_surface</item>
+        <item name="colorPrimary">@color/palette_onyx_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_onyx_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_onyx_background</item>
+        <item name="backgroundItem">@color/palette_onyx_surface</item>
+        <item name="hrefColor">@color/palette_onyx_accent</item>
+        <item name="colorAccent">@color/palette_onyx_accent</item>
+        <item name="colorBackgroundMain">@color/palette_onyx_background</item>
+        <item name="colorSurfaceCard">@color/palette_onyx_surface</item>
+        <item name="colorAccentPrimary">@color/palette_onyx_accent</item>
+        <item name="colorTextMuted">@color/palette_onyx_text_muted</item>
+        <item name="android:windowBackground">@color/palette_onyx_background</item>
+        <item name="android:colorBackground">@color/palette_onyx_background</item>
+        <item name="colorSurface">@color/palette_onyx_surface</item>
+        <item name="colorBackgroundFloating">@color/palette_onyx_surface</item>
     </style>
 </resources>

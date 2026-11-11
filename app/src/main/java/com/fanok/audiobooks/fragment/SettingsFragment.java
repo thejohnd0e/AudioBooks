@@ -28,6 +28,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import com.fanok.audiobooks.PaletteBinder;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -351,6 +352,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mListFocus.restore(this, savedInstanceState);
+        PaletteBinder.bindPreferences(this);
     }
 
     @Override
@@ -1130,6 +1132,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
                     com.fanok.audiobooks.dialogs.ColorPickerDialog.show(context, title, initial, isDarkClamped, newColor -> {
                         AppThemes.setCustomColor(context, slot, newColor);
+                        PaletteBinder.bindPreferences(SettingsFragment.this);
+                        if (getListView() != null && getListView().getAdapter() != null) {
+                            getListView().getAdapter().notifyDataSetChanged();
+                        }
                         if (getActivity() != null) {
                             requireActivity().getWindow().getDecorView().post(App::recreateActivities);
                         }
