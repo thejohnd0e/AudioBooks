@@ -9,6 +9,7 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import com.fanok.audiobooks.R;
 import com.fanok.audiobooks.view.ColorWheelView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -134,7 +135,7 @@ public final class ColorPickerDialog {
             }
         });
 
-        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+        AlertDialog dialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle(title)
                 .setView(view)
                 .setPositiveButton(android.R.string.ok, (d, which) -> {

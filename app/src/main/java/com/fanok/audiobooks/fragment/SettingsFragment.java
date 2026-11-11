@@ -689,7 +689,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 checked = i;
             }
         }
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle(R.string.store_dir_dialog)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -715,12 +715,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 String message = size > 0
                         ? getString(R.string.store_move_confirm, Formatter.formatShortFileSize(context, size), where)
                         : getString(R.string.store_switch_confirm, where);
-                new AlertDialog.Builder(context)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                         .setTitle(R.string.store_dir_dialog)
                         .setMessage(message)
                         .setNegativeButton(R.string.cancel, null)
                         .setPositiveButton(R.string.ok, (d, w) -> {
-                            AlertDialog progress = new AlertDialog.Builder(context)
+                            AlertDialog progress = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                                     .setMessage(R.string.store_moving)
                                     .setCancelable(false)
                                     .show();
@@ -752,7 +752,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
 
         CharSequence[] options = new CharSequence[]{"Выбрать папку (Проводник)", "Сбросить на стандартную"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         builder.setTitle("Папка для скачивания");
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
@@ -780,7 +780,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
         titles.add("✏️ Указать свой путь вручную");
 
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle("Выберите место для скачивания книг")
                 .setItems(titles.toArray(new CharSequence[0]), (dialog, which) -> {
                     if (which < options.size()) {
@@ -807,7 +807,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         android.widget.EditText input = new android.widget.EditText(context);
         input.setHint("/storage/emulated/0/Download/AudioBooks");
         input.setText(DownloadStorageHelper.getDownloadPath(context));
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle("Укажите путь к папке")
                 .setView(input)
                 .setPositiveButton("ОК", (dialog, which) -> {
@@ -1103,7 +1103,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     private void showAllert(@NotNull Context context, int message,
             DialogInterface.OnClickListener onClickListener) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(context);
+        AlertDialog.Builder alert = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         alert.setTitle(R.string.app_name);
         alert.setMessage(message);
         alert.setPositiveButton(R.string.yes, onClickListener);
@@ -1120,7 +1120,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 getString(R.string.custom_color_accent) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)) + ")"
         };
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(context)
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle(R.string.custom_colors_title)
                 .setItems(items, (dialog, which) -> {
                     int slot = which;
@@ -1141,8 +1142,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                         }
                     });
                 })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void updatePrefSummary(Preference p) {

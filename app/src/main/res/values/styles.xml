@@ -37,6 +37,9 @@
         <item name="colorSurface">?attr/colorSurfaceCard</item>
         <item name="android:colorBackground">?attr/colorSurfaceCard</item>
         <item name="colorBackgroundFloating">?attr/colorSurfaceCard</item>
+        <!-- the surface colour must show as chosen: Material would lighten it by the dialog's elevation -->
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:background">?attr/colorSurfaceCard</item>
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.AudioBooks.Dialog</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.AudioBooks.DialogButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.AudioBooks.DialogButton</item>

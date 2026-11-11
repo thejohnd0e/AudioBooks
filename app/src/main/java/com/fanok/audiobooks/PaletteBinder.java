@@ -10,8 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
@@ -209,6 +211,40 @@ public final class PaletteBinder {
             ProgressBar pb = (ProgressBar) view;
             pb.setProgressTintList(accentList);
             pb.setIndeterminateTintList(accentList);
+        } else if (view instanceof ImageView) {
+            ImageView iv = (ImageView) view;
+            ColorStateList tint = iv.getImageTintList();
+            if (matchesThemeAccent(view.getContext(), tint)) {
+                iv.setImageTintList(accentList);
+            }
+        }
+
+        // anything coloured by a theme accent attribute keeps the palette's built-in colour,
+        // because theme attributes cannot hold a colour chosen at runtime; replace it here
+        if (view instanceof com.google.android.material.button.MaterialButton) {
+            com.google.android.material.button.MaterialButton mb =
+                    (com.google.android.material.button.MaterialButton) view;
+            if (mb.getIcon() != null && matchesThemeAccent(mb.getContext(), mb.getIconTint())) {
+                mb.setIconTint(accentList);
+            }
+            if (matchesThemeAccent(mb.getContext(), mb.getStrokeColor())) {
+                mb.setStrokeColor(accentList);
+            }
+        }
+
+        if (view instanceof TextView) {
+            TextView tv = (TextView) view;
+            ColorStateList colors = tv.getTextColors();
+            if (colors != null && colors.isStateful() && isPaletteAccent(tv.getContext(), colors.getDefaultColor())) {
+                tv.setTextColor(accent);
+            } else if (tv.getCurrentTextColor() != accent && isPaletteAccent(tv.getContext(), tv.getCurrentTextColor())) {
+                tv.setTextColor(accent);
+            }
+        }
+
+        if (view.getBackground() != null && view.getBackgroundTintList() != null
+                && isPaletteAccent(view.getContext(), view.getBackgroundTintList().getDefaultColor())) {
+            view.setBackgroundTintList(accentList);
         }
 
         if (view instanceof ViewGroup) {
@@ -217,5 +253,49 @@ public final class PaletteBinder {
                 tintControls(vg.getChildAt(i), accent);
             }
         }
+    }
+
+    private static boolean matchesThemeAccent(@NonNull Context context, @Nullable ColorStateList tint) {
+        return tint != null && isPaletteAccent(context, tint.getDefaultColor());
+    }
+
+    /** Whether {@code color} is one of the theme's accent attributes (i.e. the palette's built-in accent). */
+    private static boolean isPaletteAccent(@NonNull Context context, int color) {
+        int[] accents = new int[] {
+                MaterialColors.getColor(context, android.R.attr.colorAccent, 0),
+                MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0),
+                MaterialColors.getColor(context, R.attr.hrefColor, 0)
+        };
+        for (int accent : accents) {
+            if (accent != 0 && accent == color) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Paints a dialog with the active palette: its surface (Material would lighten it by the
+     * dialog's elevation) and its accent-coloured buttons and labels.
+     */
+    public static void applyPaletteToDialog(@NonNull android.app.Dialog dialog) {
+        android.view.Window window = dialog.getWindow();
+        if (window == null) return;
+
+        Context context = dialog.getContext();
+        int surface = AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
+                ? AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)
+                : MaterialColors.getColor(context, R.attr.colorSurfaceCard, 0xFF1F2622);
+        int accent = AppThemes.PALETTE_CUSTOM.equals(AppThemes.currentPalette(context))
+                ? AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)
+                : MaterialColors.getColor(context, R.attr.colorAccentPrimary, 0xFF7EAC91);
+
+        GradientDrawable background = new GradientDrawable();
+        background.setShape(GradientDrawable.RECTANGLE);
+        background.setCornerRadius(16f * context.getResources().getDisplayMetrics().density);
+        background.setColor(surface);
+
+        window.setBackgroundDrawable(background);
+        tintControls(window.getDecorView(), accent);
     }
 }
