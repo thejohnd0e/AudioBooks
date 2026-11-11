@@ -120,11 +120,6 @@
     </PreferenceScreen>
 
     <Preference
-        android:icon="@drawable/ic_write"
-        android:key="write_autor"
-        android:title="@string/write_autor" />
-
-    <Preference
         android:icon="@drawable/ic_battery"
         android:key="disable_battary_optimize"
         android:summary="@string/battary_optimize_desc"
@@ -138,19 +133,9 @@
         app:isPreferenceVisible="false" />
 
     <Preference
-        android:icon="@drawable/ic_web"
-        android:key="open_4pda"
-        android:title="@string/open_4pda" />
-
-    <Preference
         android:icon="@drawable/ic_github"
         android:key="open_github"
         android:title="@string/open_github" />
-
-    <Preference
-        android:icon="@drawable/ic_telegram"
-        android:key="open_telegram"
-        android:title="@string/open_telegram" />
 
     <!-- the region of the connection (AppRegion; not the key "region", that is AppRegion.PREF_REGION); a click opens
          db-ip.com, the source of the IP-to-region table (assets/region, tools/region/build_ip_regions.py) -->

@@ -96,10 +96,10 @@ jobs:
           "$apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
           mkdir -p dist
           base="AudioBooks-$VERSION_NAME"
-          cp app/build/outputs/apk/release/app-release.apk "dist/$base.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/$base-release.apk"
           cp app/build/outputs/bundle/release/app-release.aab "dist/$base.aab"
           cp app/build/outputs/mapping/release/mapping.txt "dist/$base-mapping.txt"
-          (cd dist && sha256sum "$base.apk" "$base.aab" > SHA256SUMS.txt && cat SHA256SUMS.txt)
+          (cd dist && sha256sum "$base-release.apk" "$base.aab" > SHA256SUMS.txt && cat SHA256SUMS.txt)
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7

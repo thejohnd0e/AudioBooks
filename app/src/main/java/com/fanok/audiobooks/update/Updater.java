@@ -241,16 +241,10 @@ public final class Updater {
             cleanUp(new File(app.getCacheDir(), DIR));
             List<Site> sites = new ArrayList<>();
             List<OkHttpClient> clients = new ArrayList<>();
-            RegionCheck.Result region = AppRegion.last(app);
-            boolean russia = region != null && region.region == Region.RUSSIA;
             for (OkHttpClient route : AppProxy.updateRoutes(base)) {
-                for (Site place : UpdateSources.routeOrder(russia, Site.GITHUB, Site.MIRROR, Site.DISK)) {
-                    sites.add(place);
-                    clients.add(route);
-                }
+                sites.add(Site.GITHUB);
+                clients.add(route);
             }
-            sites.add(Site.FORUM);
-            clients.add(forumClient(app, base));
 
             boolean newer = false;
             Release github = null; // its hash also checks the same version from another place

@@ -30,7 +30,6 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import com.fanok.audiobooks.BuildConfig;
 import com.fanok.audiobooks.R;
-import com.fanok.audiobooks.activity.ActivitySendEmail;
 import com.fanok.audiobooks.activity.MainActivity;
 import com.fanok.audiobooks.adapter.ListFocus;
 import com.fanok.audiobooks.region.AppRegion;
@@ -152,35 +151,14 @@ public class AboutFragment extends PreferenceFragmentCompat {
             return true;
         };
 
-        preferenceClickListner("write_autor", preference -> {
-            Intent intent = new Intent(getContext(), ActivitySendEmail.class);
-            startActivity(intent);
-            return true;
-        });
-
-        preferenceClickListner("open_4pda", preference -> {
-            openInBrowser("https://4pda.to/forum/index.php?showtopic=1128418");
-            return true;
-        });
-
         preferenceClickListner("open_github", preference -> {
-            openInBrowser("https://github.com/korvin2000/AudioBooks");
+            openInBrowser("https://github.com/thejohnd0e/AudioBooks");
             return true;
         });
 
         // the credit of the IP table (CC BY 4.0) asks for a link
         preferenceClickListner("about_region", preference -> {
             openInBrowser("https://db-ip.com");
-            return true;
-        });
-
-        preferenceClickListner("open_telegram", preference -> {
-            // the Telegram app when one is installed (tg: is its own scheme), otherwise the group's page in a browser
-            try {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=AudioKnijki")));
-            } catch (ActivityNotFoundException e) {
-                openInBrowser("https://t.me/AudioKnijki");
-            }
             return true;
         });
 
@@ -215,7 +193,7 @@ public class AboutFragment extends PreferenceFragmentCompat {
             hint.setSpan(new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.sources_link)), 0,
                     hint.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             version.setSummary(TextUtils.concat(
-                    getString(R.string.version) + " " + BuildConfig.VERSION_NAME + "\n", hint));
+                    getString(R.string.version) + " " + BuildConfig.VERSION_NAME + " [by thejohnd0e]\n", hint));
             version.setTitle(getString(R.string.app_name));
         }
 

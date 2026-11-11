@@ -52,7 +52,7 @@ public final class CloudSync {
 
     /** The clouds this build can sync with, in the order offered. */
     static final List<CloudService> SERVICES = Collections.unmodifiableList(Arrays.<CloudService>asList(
-            new GoogleDrive.Service(), new YandexDisk.Service()));
+            new GoogleDrive.Service()));
 
     private static final String TAG = "CloudSync";
 

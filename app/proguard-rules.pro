@@ -15,8 +15,6 @@
 -keep class com.fanok.audiobooks.sync.Snapshot { *; }
 -keep class com.fanok.audiobooks.sync.Snapshot$* { *; }
 -keep class com.fanok.audiobooks.sync.SyncSettingsFragment { public <init>(); }
-# the Yandex LoginSDK ships no rules; minified 3.1 lost its options on Android 13 (its issue #17)
--keep class com.yandex.authsdk.** { *; }
 
 # Media3 & ExoPlayer
 -keep class androidx.media3.** { *; }
