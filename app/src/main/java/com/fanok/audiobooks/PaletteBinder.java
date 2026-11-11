@@ -147,7 +147,11 @@ public final class PaletteBinder {
 
         View btnListen = view.findViewById(R.id.btnListenBook);
         if (btnListen instanceof MaterialButton) {
-            ((MaterialButton) btnListen).setBackgroundTintList(ColorStateList.valueOf(accent));
+            MaterialButton button = (MaterialButton) btnListen;
+            int bg = background(context);
+            button.setBackgroundTintList(ColorStateList.valueOf(accent));
+            button.setTextColor(bg);
+            button.setIconTint(ColorStateList.valueOf(bg));
         }
 
         View genre = view.findViewById(R.id.genre);
