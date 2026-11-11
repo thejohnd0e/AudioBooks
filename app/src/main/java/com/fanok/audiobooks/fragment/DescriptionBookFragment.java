@@ -56,6 +56,11 @@ import com.fanok.audiobooks.adapter.BooksOtherAdapter;
 import com.fanok.audiobooks.adapter.ExpandableText;
 import com.fanok.audiobooks.interface_pacatge.book_content.Description;
 import com.fanok.audiobooks.model.FavoritePeople;
+import com.fanok.audiobooks.activity.ClearSavedActivity;
+import com.fanok.audiobooks.download.BookDownloader;
+import com.fanok.audiobooks.download.DownloadIds;
+import com.fanok.audiobooks.download.DownloadMonitor;
+import com.fanok.audiobooks.download.DownloadStatus;
 import com.fanok.audiobooks.pojo.BookPOJO;
 import com.fanok.audiobooks.pojo.DescriptionPOJO;
 import com.fanok.audiobooks.pojo.OtherArtistPOJO;
@@ -488,11 +493,12 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
 
         View btnDownload = view.findViewById(R.id.btnDownloadBook);
         if (btnDownload != null) {
-            btnDownload.setOnClickListener(v -> {
-                if (getActivity() instanceof BookActivity) {
-                    ((BookActivity) getActivity()).openDownloadSelection();
-                }
-            });
+            BookPOJO book = book();
+            if (!BookDownloader.canDownload(requireContext(), book)) {
+                btnDownload.setVisibility(View.GONE); // a site's collection or an imported book: nothing to download
+            } else {
+                btnDownload.setOnClickListener(v -> downloadBook(book));
+            }
         }
 
         mAdapterBooksRecomended = new BooksOtherAdapter();
@@ -949,6 +955,47 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         if (!b) {
             expandDescription(); // the recommendations came empty or failed
         }
+    }
+
+    /**
+     * The description's СКАЧАТЬ button downloads the book — every chapter that is not on the device
+     * yet — instead of only opening the player's chapter selection. While a download of this book
+     * runs, it leads to «Загрузки», where the progress and the controls are.
+     */
+    private void downloadBook(@NonNull BookPOJO book) {
+        Context context = requireContext();
+        DownloadStatus status = DownloadMonitor.get()
+                .statusOfBook(DownloadIds.bookKey(book.getUrl()));
+        if (isRunning(status)) {
+            ClearSavedActivity.startActivity(requireActivity());
+            return;
+        }
+        BookDownloader.downloadAll(context, book);
+    }
+
+    /** Downloads under way, paused or waiting: a new tap would only queue them again. */
+    private static boolean isRunning(@NonNull DownloadStatus status) {
+        switch (status.state) {
+            case DownloadStatus.DOWNLOADING:
+            case DownloadStatus.STALLED:
+            case DownloadStatus.QUEUED:
+            case DownloadStatus.WAITING_NETWORK:
+            case DownloadStatus.PAUSED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /** The book this page describes, as the pager passed it in. */
+    @NonNull
+    private BookPOJO book() {
+        BookPOJO pojo = new Gson().fromJson(
+                requireArguments().getString(ARG_BOOK_POJO), BookPOJO.class);
+        if (pojo == null) {
+            throw new NullPointerException();
+        }
+        return pojo;
     }
 
     @ProvidePresenter
