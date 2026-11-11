@@ -1112,8 +1112,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         alert.show();
     }
 
-    private void showCustomPaletteMenu() {
-        Context context = requireContext();
+    /** An accent this dark makes the labels and icons it colours unreadable on a dark surface. */
+    private boolean isTooDarkForText(int color) {
+        float[] hsv = new float[3];
+        android.graphics.Color.colorToHSV(color, hsv);
+        return hsv[2] < 0.25f;
+    }
+
+    private void showCustomPaletteMenu() {        Context context = requireContext();
         String[] items = new String[] {
                 getString(R.string.custom_color_bg) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_BG)) + ")",
                 getString(R.string.custom_color_surface) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)) + ")",
@@ -1133,6 +1139,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
                     com.fanok.audiobooks.dialogs.ColorPickerDialog.show(context, title, initial, isDarkClamped, newColor -> {
                         AppThemes.setCustomColor(context, slot, newColor);
+                        if (slot == AppThemes.SLOT_ACCENT && isTooDarkForText(newColor)) {
+                            Toast.makeText(context, R.string.custom_accent_too_dark, Toast.LENGTH_LONG).show();
+                        }
                         PaletteBinder.bindPreferences(SettingsFragment.this);
                         if (getListView() != null && getListView().getAdapter() != null) {
                             getListView().getAdapter().notifyDataSetChanged();

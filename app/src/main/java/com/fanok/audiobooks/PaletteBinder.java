@@ -119,9 +119,26 @@ public final class PaletteBinder {
 
         final View decor = activity.getWindow().getDecorView();
         paint(decor, bg, surface, accent);
-        // list rows and fragment layouts appear after this call: repaint them on every layout
-        decor.getViewTreeObserver().addOnGlobalLayoutListener(
-                () -> paint(decor, background(activity), surface(activity), accent(activity)));
+        // fragments and list rows appear right after this call: one pass once they are laid out
+        decor.post(() -> {
+            paint(decor, background(activity), surface(activity), accent(activity));
+            watchLists(decor);
+        });
+    }
+
+    /** Repaints a list row as it comes into view; a list has no rows when its screen is built. */
+    private static void watchLists(@NonNull View view) {
+        if (view instanceof RecyclerView) {
+            RecyclerView list = (RecyclerView) view;
+            list.removeOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
+            list.addOnChildAttachStateChangeListener(PREF_ATTACH_LISTENER);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                watchLists(group.getChildAt(i));
+            }
+        }
     }
 
     /** Applies the current palette to a fragment's view hierarchy. */

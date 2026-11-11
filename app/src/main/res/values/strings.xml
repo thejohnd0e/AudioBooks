@@ -117,6 +117,7 @@
     <string name="color_picker_new">Новый</string>
     <string name="color_picker_brightness">Яркость</string>
     <string name="custom_colors_title">Настройка 3 цветов</string>
+    <string name="custom_accent_too_dark">Такой акцент почти не виден: подписи и значки станут неразличимы на тёмном фоне. Выберите цвет светлее.</string>
 
     <string name="action_listen">Слушать</string>
     <string name="action_to_favorites">В избранное</string>
