@@ -60,3 +60,6 @@ tools/region/*.csv.gz
 tools/people/raw/
 tools/people/lists/
 example/src/names/IndexBuilder.java
+# Release APKs copied here by :app:assembleRelease (see app/build.gradle)
+/dist/
+
