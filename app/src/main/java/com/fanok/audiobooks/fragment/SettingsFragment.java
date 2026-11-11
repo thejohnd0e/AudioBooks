@@ -437,6 +437,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             return true;
         });
 
+        preferenceChangeListner(AppThemes.PREF_PALETTE, (preference, newValue) -> {
+            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
+            return true;
+        });
+
         SliderPreference fontScale = findPreference(FontScale.PREF);
         if (fontScale != null) {
             fontScale.setFormatter(value -> getString(R.string.font_scale_value, Math.round(value)));
@@ -855,6 +860,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             String key) {
         if (AppProxy.PREF_MODE.equals(key)) {
             updateProxySummary();
+        }
+        if (AppThemes.PREF_PALETTE.equals(key) && getActivity() != null) {
+            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
         }
         if (Updater.PREF.equals(key) && sharedPreferences.getBoolean(key, true) && getContext() != null) {
             Updater.check(getContext(), null); // switched on: the first check now, not at the next period

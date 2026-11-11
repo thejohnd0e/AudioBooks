@@ -21,6 +21,10 @@
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="toolbarNavigationButtonStyle">@style/Widget.App.Toolbar.Button.Navigation</item>
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
+        <item name="colorBackgroundMain">@color/palette_sage_background</item>
+        <item name="colorSurfaceCard">@color/palette_sage_surface</item>
+        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
+        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -104,6 +108,10 @@
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="toolbarNavigationButtonStyle">@style/Widget.App.Toolbar.Button.Navigation</item>
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
+        <item name="colorBackgroundMain">@color/backgraundColorBlack</item>
+        <item name="colorSurfaceCard">@color/primaryDarkColorBlack</item>
+        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
+        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
     </style>
 
     <style name="AppThemeBlack.NoActionBar">
@@ -177,7 +185,10 @@
         <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
         <item name="toolbarNavigationButtonStyle">@style/Widget.App.Toolbar.Button.Navigation</item>
         <item name="actionButtonStyle">@style/Widget.App.ActionButton</item>
-
+        <item name="colorBackgroundMain">@color/palette_sage_background</item>
+        <item name="colorSurfaceCard">@color/palette_sage_surface</item>
+        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
+        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
     </style>
 
     <style name="myCustomMenuTextAppearanceLight" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
@@ -373,4 +384,69 @@
 
 
 
+    <!-- Muted Nature Palettes Theme Overlays -->
+    <style name="ThemeOverlay.AudioBooks.Palette.Sage" parent="">
+        <item name="colorPrimary">@color/palette_sage_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_sage_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_sage_background</item>
+        <item name="backgroundItem">@color/palette_sage_surface</item>
+        <item name="hrefColor">@color/palette_sage_accent</item>
+        <item name="colorAccent">@color/palette_sage_accent</item>
+        <item name="colorBackgroundMain">@color/palette_sage_background</item>
+        <item name="colorSurfaceCard">@color/palette_sage_surface</item>
+        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
+        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
+    </style>
+
+    <style name="ThemeOverlay.AudioBooks.Palette.Umbra" parent="">
+        <item name="colorPrimary">@color/palette_umbra_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_umbra_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_umbra_background</item>
+        <item name="backgroundItem">@color/palette_umbra_surface</item>
+        <item name="hrefColor">@color/palette_umbra_accent</item>
+        <item name="colorAccent">@color/palette_umbra_accent</item>
+        <item name="colorBackgroundMain">@color/palette_umbra_background</item>
+        <item name="colorSurfaceCard">@color/palette_umbra_surface</item>
+        <item name="colorAccentPrimary">@color/palette_umbra_accent</item>
+        <item name="colorTextMuted">@color/palette_umbra_text_muted</item>
+    </style>
+
+    <style name="ThemeOverlay.AudioBooks.Palette.Steel" parent="">
+        <item name="colorPrimary">@color/palette_steel_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_steel_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_steel_background</item>
+        <item name="backgroundItem">@color/palette_steel_surface</item>
+        <item name="hrefColor">@color/palette_steel_accent</item>
+        <item name="colorAccent">@color/palette_steel_accent</item>
+        <item name="colorBackgroundMain">@color/palette_steel_background</item>
+        <item name="colorSurfaceCard">@color/palette_steel_surface</item>
+        <item name="colorAccentPrimary">@color/palette_steel_accent</item>
+        <item name="colorTextMuted">@color/palette_steel_text_muted</item>
+    </style>
+
+    <style name="ThemeOverlay.AudioBooks.Palette.Onyx" parent="">
+        <item name="colorPrimary">@color/palette_onyx_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_onyx_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_onyx_background</item>
+        <item name="backgroundItem">@color/palette_onyx_surface</item>
+        <item name="hrefColor">@color/palette_onyx_accent</item>
+        <item name="colorAccent">@color/palette_onyx_accent</item>
+        <item name="colorBackgroundMain">@color/palette_onyx_background</item>
+        <item name="colorSurfaceCard">@color/palette_onyx_surface</item>
+        <item name="colorAccentPrimary">@color/palette_onyx_accent</item>
+        <item name="colorTextMuted">@color/palette_onyx_text_muted</item>
+    </style>
+
+    <style name="ThemeOverlay.AudioBooks.Palette.Custom" parent="">
+        <item name="colorPrimary">@color/palette_sage_toolbar</item>
+        <item name="colorPrimaryDark">@color/palette_sage_toolbar_dark</item>
+        <item name="backgraundColor">@color/palette_sage_background</item>
+        <item name="backgroundItem">@color/palette_sage_surface</item>
+        <item name="hrefColor">@color/palette_sage_accent</item>
+        <item name="colorAccent">@color/palette_sage_accent</item>
+        <item name="colorBackgroundMain">@color/palette_sage_background</item>
+        <item name="colorSurfaceCard">@color/palette_sage_surface</item>
+        <item name="colorAccentPrimary">@color/palette_sage_accent</item>
+        <item name="colorTextMuted">@color/palette_sage_text_muted</item>
+    </style>
 </resources>

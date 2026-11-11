@@ -19,6 +19,15 @@
             android:title="@string/setting_theme" />
 
         <ListPreference
+            android:defaultValue="@string/palette_sage_value"
+            android:dialogTitle="@string/setting_palette"
+            android:entries="@array/settings_palette_titles"
+            android:entryValues="@array/settings_palette_values"
+            android:icon="@drawable/ic_theme"
+            android:key="pref_palette"
+            android:title="@string/setting_palette" />
+
+        <ListPreference
             android:defaultValue="@string/books_adapter_layout_list_value"
             android:dialogTitle="@string/books_adapter_layout"
             android:entries="@array/books_adapter_layout_titles"

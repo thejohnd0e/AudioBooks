@@ -8,6 +8,7 @@ import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_SHOW_TITLE;
 import static com.fanok.audiobooks.service.MediaPlayerService.countAudioWereShowingRatingPopUp;
 
 import com.fanok.audiobooks.FontScale;
+import com.fanok.audiobooks.AppThemes;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.UiModeManager;
@@ -524,14 +525,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
         mNotificationClick = intent.getBooleanExtra("notificationClick", false);
 
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            setTheme(R.style.AppTheme_NoActionBar);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            setTheme(R.style.LightAppTheme_NoActionBar);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            setTheme(R.style.AppThemeBlack_NoActionBar);
-        }
+        AppThemes.apply(this, R.style.AppTheme_NoActionBar, R.style.LightAppTheme_NoActionBar,
+                R.style.AppThemeBlack_NoActionBar);
 
         if (mBookPOJO != null && mBookPOJO.getName() != null) {
             setTitle(mBookPOJO.getName().trim());
@@ -1077,15 +1072,22 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 finish();
             }
         } else if (menuItem.getItemId() == R.id.download_delete) {
-            if (bottomSheetBehavior != null &&
-                    bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
-            mAudioAdapter.startSelection();
+            openDownloadSelection();
         }
 
         mPresenter.onOptionsMenuItemSelected(menuItem);
         return (super.onOptionsItemSelected(menuItem));
+    }
+
+    /** Opens the bottom player sheet and begins chapter selection for download or deletion. */
+    public void openDownloadSelection() {
+        if (bottomSheetBehavior != null &&
+                bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+        if (mAudioAdapter != null) {
+            mAudioAdapter.startSelection();
+        }
     }
 
     /** The player UI listens only while visible; on the way back the service resends chapter, icon and progress. */

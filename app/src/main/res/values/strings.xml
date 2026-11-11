@@ -95,6 +95,25 @@
     <string name="theme_light_value" translatable="false">light</string>
     <string name="theme_black_value" translatable="false">black</string>
 
+    <string name="setting_palette">Цветовая палитра</string>
+    <string name="palette_sage">Шалфей</string>
+    <string name="palette_umbra">Умбра</string>
+    <string name="palette_steel">Сталь</string>
+    <string name="palette_onyx">Оникс (AMOLED)</string>
+    <string name="palette_custom">Своя палитра</string>
+    <string name="palette_sage_value" translatable="false">sage</string>
+    <string name="palette_umbra_value" translatable="false">umbra</string>
+    <string name="palette_steel_value" translatable="false">steel</string>
+    <string name="palette_onyx_value" translatable="false">onyx</string>
+    <string name="palette_custom_value" translatable="false">custom</string>
+    <string name="custom_color_bg">Цвет фона</string>
+    <string name="custom_color_surface">Цвет карточек и окон</string>
+    <string name="custom_color_accent">Акцентный цвет</string>
+
+    <string name="action_listen">Слушать</string>
+    <string name="action_to_favorites">В избранное</string>
+    <string name="action_download">Скачать</string>
+
 
 
 
