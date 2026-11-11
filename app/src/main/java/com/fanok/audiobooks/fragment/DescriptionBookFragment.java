@@ -462,6 +462,32 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mDescLine = view.findViewById(R.id.descLine);
         mOtherBookLine = view.findViewById(R.id.otherBookLine);
 
+        View btnListen = view.findViewById(R.id.btnListenBook);
+        if (btnListen != null) {
+            btnListen.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    View playTop = getActivity().findViewById(R.id.playTop);
+                    if (playTop != null) {
+                        playTop.performClick();
+                    }
+                }
+            });
+        }
+
+        View btnFavorite = view.findViewById(R.id.btnFavoriteBook);
+        if (btnFavorite != null) {
+            btnFavorite.setOnClickListener(v -> toggleBook());
+        }
+
+        View btnDownload = view.findViewById(R.id.btnDownloadBook);
+        if (btnDownload != null) {
+            btnDownload.setOnClickListener(v -> {
+                if (getActivity() instanceof BookActivity) {
+                    ((BookActivity) getActivity()).openDownloadSelection();
+                }
+            });
+        }
+
         mAdapterBooksRecomended = new BooksOtherAdapter();
         mRecommendedBooks.setAdapter(mAdapterBooksRecomended);
         // On a touch screen the list never takes the focus: shown after the description, it was handed the focus and

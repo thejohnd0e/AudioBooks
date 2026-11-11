@@ -7,7 +7,6 @@
     tools:context=".activity.BookActivity"
     tools:viewBindingIgnore="true">
 
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
@@ -26,54 +25,71 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="@dimen/text_margin_book_description">
+            android:padding="@dimen/activity_horizontal_margin">
 
-            <!-- "Автор — Название": the author toggles the author, the title the book; a long press copies it -->
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorPrimaryText"
-                android:textSize="@dimen/titleSizeBookDescription"
-                tools:text="Роулинг Джоан — Гарри Поттер и Орден Феникса" />
-
+            <!-- Top Header Block: Card Cover + Main Metadata -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/text_margin_book_description"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/imageView"
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="@dimen/book_cover_weight"
                     android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/book_cover"
-                    tools:srcCompat="@tools:sample/avatars[2]" />
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceCard">
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/book_cover"
+                        android:scaleType="fitCenter"
+                        tools:srcCompat="@tools:sample/avatars[2]" />
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/text_margin_book_description"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
                     android:orientation="vertical">
-
 
                     <TextView
                         android:id="@+id/genre"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_genre_chip"
+                        android:paddingStart="8dp"
+                        android:paddingTop="3dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="3dp"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:textColor="?attr/hrefColor"
-                        android:textSize="@dimen/textSizeBookDescription"
+                        android:textColor="?attr/colorAccentPrimary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
                         tools:text="Фантастика" />
 
+                    <!-- "Автор — Название": the author toggles the author, the title the book; a long press copies it -->
+                    <TextView
+                        android:id="@+id/title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="?attr/colorPrimaryText"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="Роулинг Джоан — Гарри Поттер и Орден Феникса" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/text_margin_book_description"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal">
 
                         <TextView
@@ -84,7 +100,7 @@
                             android:maxLines="1"
                             android:singleLine="true"
                             android:textColor="?attr/subTextColor"
-                            android:textSize="@dimen/textSizeBookDescription"
+                            android:textSize="12sp"
                             app:drawableStartCompat="@drawable/ic_like"
                             tools:text="10" />
 
@@ -92,13 +108,38 @@
                             android:id="@+id/disLike"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/text_margin_book_description"
                             android:maxLines="1"
                             android:singleLine="true"
                             android:textColor="?attr/subTextColor"
-                            android:textSize="@dimen/textSizeBookDescription"
+                            android:textSize="12sp"
                             app:drawableStartCompat="@drawable/ic_dislike"
                             tools:text="10" />
 
+                        <TextView
+                            android:id="@+id/favorite"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/text_margin_book_description"
+                            android:drawablePadding="3dp"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:textColor="?attr/subTextColor"
+                            android:textSize="12sp"
+                            app:drawableStartCompat="@drawable/ic_site_favorites"
+                            tools:text="213" />
+
+                        <TextView
+                            android:id="@+id/reting"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="3dp"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:textColor="?attr/subTextColor"
+                            android:textSize="12sp"
+                            app:drawableStartCompat="@drawable/ic_reting"
+                            tools:text="4 972" />
                     </LinearLayout>
 
                     <!-- the book's length; once started, what is left at the current speed -->
@@ -106,12 +147,12 @@
                         android:id="@+id/time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/text_margin_book_description"
+                        android:layout_marginTop="6dp"
                         android:drawablePadding="4dp"
                         android:maxLines="1"
                         android:singleLine="true"
                         android:textColor="?attr/subTextColor"
-                        android:textSize="@dimen/textSizeBookDescription"
+                        android:textSize="13sp"
                         app:drawableStartCompat="@drawable/ic_clock"
                         tools:text="осталось 5 ч. 12 мин." />
 
@@ -134,7 +175,7 @@
                             android:layout_weight="1"
                             android:importantForAccessibility="no"
                             android:max="1000"
-                            app:indicatorColor="?attr/subTextColor"
+                            app:indicatorColor="?attr/colorAccentPrimary"
                             app:trackCornerRadius="2dp"
                             app:trackThickness="@dimen/book_time_bar_height"
                             tools:progress="430" />
@@ -153,52 +194,18 @@
                             tools:visibility="visible" />
                     </LinearLayout>
 
-                    <!-- the site's favourites counter (a heart: a star is MY favourite) and the rating, on one row -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/favorite"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/text_margin_book_description"
-                            android:layout_marginEnd="@dimen/book_meta_gap"
-                            android:drawablePadding="4dp"
-                            android:maxLines="1"
-                            android:singleLine="true"
-                            android:textColor="?attr/subTextColor"
-                            android:textSize="@dimen/textSizeBookDescription"
-                            app:drawableStartCompat="@drawable/ic_site_favorites"
-                            tools:text="213" />
-
-                        <TextView
-                            android:id="@+id/reting"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/text_margin_book_description"
-                            android:drawablePadding="4dp"
-                            android:maxLines="1"
-                            android:singleLine="true"
-                            android:textColor="?attr/subTextColor"
-                            android:textSize="@dimen/textSizeBookDescription"
-                            app:drawableStartCompat="@drawable/ic_reting"
-                            tools:text="4 972" />
-                    </LinearLayout>
-
                     <!-- the site of the book, opening its card (SourceActivity); hidden for an unknown host -->
                     <TextView
                         android:id="@+id/bookSource"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/text_margin_book_description"
+                        android:layout_marginTop="6dp"
                         android:background="?attr/selectableItemBackground"
                         android:drawablePadding="4dp"
                         android:maxLines="1"
                         android:singleLine="true"
                         android:textColor="?attr/hrefColor"
-                        android:textSize="@dimen/textSizeBookDescription"
+                        android:textSize="13sp"
                         android:visibility="gone"
                         app:drawableStartCompat="@drawable/ic_source_layers"
                         tools:text="Книга в ухе" />
@@ -207,193 +214,296 @@
 
             </LinearLayout>
 
-            <!-- Автор / Чтец / Серия: compact rows, their 7dp gap is the views' top padding (so still clickable).
-                 The Автор and Чтец labels toggle that person as a favourite (amber, with a star, while one); the
-                 names open the site's listing; the series name opens СЕРИЯ and, when cut, scrolls once now and then
-                 (SeriesPeek) -->
-            <LinearLayout
-                android:id="@+id/autorConteiner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/authorLabel"
-                    android:layout_width="@dimen/text_width"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:drawablePadding="4dp"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:text="@string/autor"
-                    android:textColor="?attr/subTextColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    app:drawableStartCompat="@drawable/ic_autor" />
-
-                <TextView
-                    android:id="@+id/author"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/recycler_item_textmargin"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:textColor="?attr/hrefColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    tools:text="Роулинг Джоан" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/artistConteiner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/artistLabel"
-                    android:layout_width="@dimen/text_width"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:drawablePadding="4dp"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:text="@string/artist"
-                    android:textColor="?attr/subTextColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    app:drawableStartCompat="@drawable/ic_artist" />
-
-                <TextView
-                    android:id="@+id/artist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/recycler_item_textmargin"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:textColor="?attr/hrefColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    tools:text="Клюквин Александр" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/seriesConteiner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/seriesLabel"
-                    android:layout_width="@dimen/text_width"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:drawablePadding="4dp"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:text="@string/series"
-                    android:textColor="?attr/subTextColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    app:drawableStartCompat="@drawable/ic_book" />
-
-                <TextView
-                    android:id="@+id/series"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/recycler_item_textmargin"
-                    android:ellipsize="end"
-                    android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingTop="@dimen/text_margin_book_description"
-                    android:singleLine="true"
-                    android:textColor="?attr/hrefColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    tools:text="Гарри Поттер" />
-            </LinearLayout>
-
-            <View
-                android:id="@+id/descLine"
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginTop="@dimen/text_margin_book_description"
-                android:background="?attr/subTextColor" />
-
-            <TextView
-                android:id="@+id/desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/text_margin_book_description"
-                android:ellipsize="end"
-                android:textColor="?attr/subTextColor"
-                android:textSize="@dimen/textSizeBookDescription"
-                tools:text="Гарри Поттер с нетерпением ждет окончания каникул и начала пятого учебного года в Хогвартсе. Юный волшебник как никогда страдает от одиночества, а насмешки и придирки Дурслей стали совсем невыносимы. К тому же он уверен, что Волан-де-Морт возродился и скоро начнет действовать. Вас снова ждут опасные и захватывающие приключения, жестокая борьба, верные друзья и волшебный мир Гарри Поттера." />
-
+            <!-- Metadata Rows: Author, Reader, Series -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
 
-                <!-- beside "show less" only: copies the description -->
-                <TextView
-                    android:id="@+id/copyDesc"
+                <LinearLayout
+                    android:id="@+id/autorConteiner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/copy"
-                    android:textColor="?attr/hrefColor"
-                    android:textSize="@dimen/textSizeBookDescription"
-                    android:visibility="gone" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/showMore"
+                    <TextView
+                        android:id="@+id/authorLabel"
+                        android:layout_width="@dimen/text_width"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:text="@string/autor"
+                        android:textColor="?attr/subTextColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        app:drawableStartCompat="@drawable/ic_autor" />
+
+                    <TextView
+                        android:id="@+id/author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/recycler_item_textmargin"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:textColor="?attr/hrefColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        tools:text="Роулинг Джоан" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/artistConteiner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/artistLabel"
+                        android:layout_width="@dimen/text_width"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:text="@string/artist"
+                        android:textColor="?attr/subTextColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        app:drawableStartCompat="@drawable/ic_artist" />
+
+                    <TextView
+                        android:id="@+id/artist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/recycler_item_textmargin"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:textColor="?attr/hrefColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        tools:text="Клюквин Александр" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/seriesConteiner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/seriesLabel"
+                        android:layout_width="@dimen/text_width"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:text="@string/series"
+                        android:textColor="?attr/subTextColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        app:drawableStartCompat="@drawable/ic_book" />
+
+                    <TextView
+                        android:id="@+id/series"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/recycler_item_textmargin"
+                        android:ellipsize="end"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:singleLine="true"
+                        android:textColor="?attr/hrefColor"
+                        android:textSize="@dimen/textSizeBookDescription"
+                        tools:text="Гарри Поттер" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Action Buttons: Primary Listen Button + Secondary Favorites/Download -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnListenBook"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_listen"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorBackgroundMain"
+                app:backgroundTint="?attr/colorAccentPrimary"
+                app:cornerRadius="26dp"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorBackgroundMain" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFavoriteBook"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="44dp"
                     android:layout_weight="1"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:text="@string/show_more"
-                    android:textAlignment="center"
-                    android:textColor="?attr/hrefColor"
-                    android:textSize="@dimen/textSizeBookDescription" />
+                    android:text="@string/action_to_favorites"
+                    android:textColor="?attr/colorPrimaryText"
+                    android:textSize="13sp"
+                    app:cornerRadius="22dp"
+                    app:icon="@drawable/ic_favorite_add"
+                    app:iconGravity="textStart"
+                    app:iconTint="?attr/colorAccentPrimary"
+                    app:strokeColor="?attr/colorTextMuted" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDownloadBook"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="@string/action_download"
+                    android:textColor="?attr/colorPrimaryText"
+                    android:textSize="13sp"
+                    app:cornerRadius="22dp"
+                    app:icon="@drawable/ic_download"
+                    app:iconGravity="textStart"
+                    app:iconTint="?attr/colorAccentPrimary"
+                    app:strokeColor="?attr/colorTextMuted" />
             </LinearLayout>
 
-            <View
-                android:id="@+id/otherBookLine"
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginTop="@dimen/text_margin_book_description"
-                android:background="?attr/subTextColor" />
-
-            <TextView
-                android:id="@+id/recommendedBooksTitle"
+            <!-- Description Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/text_margin_book_description"
-                android:text="@string/other_recomended_books"
-                android:textColor="?attr/colorPrimaryText"
-                android:textSize="@dimen/textSizeBookDescription"
-                android:visibility="gone" />
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceCard"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:contentPadding="14dp"
+                app:strokeWidth="0dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recommendedBooks"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:id="@+id/descLine"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="?attr/colorTextMuted"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:lineSpacingExtra="3dp"
+                        android:textColor="?attr/colorPrimaryText"
+                        android:textSize="14sp"
+                        tools:text="Гарри Поттер с нетерпением ждет окончания каникул и начала пятого учебного года в Хогвартсе." />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/copyDesc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:text="@string/copy"
+                            android:textColor="?attr/hrefColor"
+                            android:textSize="@dimen/textSizeBookDescription"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/showMore"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:text="@string/show_more"
+                            android:textAlignment="center"
+                            android:textColor="?attr/colorAccentPrimary"
+                            android:textSize="@dimen/textSizeBookDescription"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Recommendations / Other Books Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone" />
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="?attr/colorSurfaceCard"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:contentPadding="14dp"
+                app:strokeWidth="0dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <View
+                        android:id="@+id/otherBookLine"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="?attr/colorTextMuted"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/recommendedBooksTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/other_recomended_books"
+                        android:textColor="?attr/colorPrimaryText"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recommendedBooks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

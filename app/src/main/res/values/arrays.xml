@@ -12,6 +12,22 @@
         <item>@string/theme_black_value</item>
     </string-array>
 
+    <string-array name="settings_palette_titles">
+        <item>@string/palette_sage</item>
+        <item>@string/palette_umbra</item>
+        <item>@string/palette_steel</item>
+        <item>@string/palette_onyx</item>
+        <item>@string/palette_custom</item>
+    </string-array>
+
+    <string-array name="settings_palette_values">
+        <item>@string/palette_sage_value</item>
+        <item>@string/palette_umbra_value</item>
+        <item>@string/palette_steel_value</item>
+        <item>@string/palette_onyx_value</item>
+        <item>@string/palette_custom_value</item>
+    </string-array>
+
 
     <string-array name="settings_start_screen_titles">
         <item>@string/menu_audiobooks</item>
