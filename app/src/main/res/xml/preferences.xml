@@ -10,15 +10,6 @@
         android:title="@string/settings_appearance">
 
         <ListPreference
-            android:defaultValue="@string/theme_dark_value"
-            android:dialogTitle="@string/setting_theme"
-            android:entries="@array/settings_them_titles"
-            android:entryValues="@array/settings_them_values"
-            android:icon="@drawable/ic_theme"
-            android:key="pref_theme"
-            android:title="@string/setting_theme" />
-
-        <ListPreference
             android:defaultValue="@string/palette_sage_value"
             android:dialogTitle="@string/setting_palette"
             android:entries="@array/settings_palette_titles"
@@ -26,6 +17,12 @@
             android:icon="@drawable/ic_theme"
             android:key="pref_palette"
             android:title="@string/setting_palette" />
+
+        <Preference
+            android:icon="@drawable/ic_theme"
+            android:key="pref_custom_palette_edit"
+            android:summary="@string/palette_custom_edit_summary"
+            android:title="@string/palette_custom_edit" />
 
         <ListPreference
             android:defaultValue="@string/books_adapter_layout_list_value"

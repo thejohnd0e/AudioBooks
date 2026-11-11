@@ -424,20 +424,20 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     initSourcesEntry();
                 });
 
-        preferenceChangeListner("pref_theme", (preference, newValue) -> {
-            // the value is stored after this returns; apply night mode and restart once it is
-            Context context = requireContext().getApplicationContext();
-            requireActivity().getWindow().getDecorView().post(() -> {
-                AppThemes.applyNightMode(context);
-                if (getActivity() != null) {
-                    // dark and black share a night mode, so the restart is not implied
-                    getActivity().recreate();
-                }
+        Preference customEditPref = findPreference("pref_custom_palette_edit");
+        if (customEditPref != null) {
+            String current = AppThemes.currentPalette(requireContext());
+            customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(current));
+            customEditPref.setOnPreferenceClickListener(p -> {
+                showCustomPaletteMenu();
+                return true;
             });
-            return true;
-        });
+        }
 
         preferenceChangeListner(AppThemes.PREF_PALETTE, (preference, newValue) -> {
+            if (customEditPref != null) {
+                customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(newValue));
+            }
             requireActivity().getWindow().getDecorView().post(App::recreateActivities);
             return true;
         });
@@ -1108,6 +1108,35 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         alert.setCancelable(true);
         alert.setNegativeButton(R.string.cancel, null);
         alert.show();
+    }
+
+    private void showCustomPaletteMenu() {
+        Context context = requireContext();
+        String[] items = new String[] {
+                getString(R.string.custom_color_bg) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_BG)) + ")",
+                getString(R.string.custom_color_surface) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)) + ")",
+                getString(R.string.custom_color_accent) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)) + ")"
+        };
+
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.custom_colors_title)
+                .setItems(items, (dialog, which) -> {
+                    int slot = which;
+                    int initial = AppThemes.getCustomColor(context, slot);
+                    String title = (slot == AppThemes.SLOT_BG) ? getString(R.string.custom_color_bg)
+                            : (slot == AppThemes.SLOT_SURFACE) ? getString(R.string.custom_color_surface)
+                            : getString(R.string.custom_color_accent);
+                    boolean isDarkClamped = (slot != AppThemes.SLOT_ACCENT);
+
+                    com.fanok.audiobooks.dialogs.ColorPickerDialog.show(context, title, initial, isDarkClamped, newColor -> {
+                        AppThemes.setCustomColor(context, slot, newColor);
+                        if (getActivity() != null) {
+                            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
+                        }
+                    });
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void updatePrefSummary(Preference p) {
