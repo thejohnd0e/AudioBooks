@@ -6,20 +6,41 @@
 [![Latest release](https://img.shields.io/github/v/release/thejohnd0e/AudioBooks?sort=semver&label=release)](https://github.com/thejohnd0e/AudioBooks/releases/latest)
 [![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](#requirements)
 
-![AudioBooks — your favorite audiobooks, always within reach](docs/assets/wide_logo.webp)
-
 **Make room for books in your everyday life.** AudioBooks is a free Android app for discovering and listening to audiobooks from 29 online catalogs. Enjoy a story on your commute, download a book before a trip, or fall asleep listening with a sleep timer.
 
-The idea is simple: bring book discovery, a personal library, and comfortable listening together in one place. Browse classics, science fiction, mysteries, memoirs, business and self-education titles, school curriculum books, and fairy tales and poems for children, then pick up where you left off.
-
 [Download](#install) · [Report an issue](https://github.com/thejohnd0e/AudioBooks/issues)
+
+## Screenshots
+
+<table>
+  <tr>
+    <th>Book catalog</th>
+    <th>Book details & player</th>
+    <th>Genres</th>
+  </tr>
+  <tr>
+    <td><a href="docs/assets/screenshots/books_list.png"><img src="docs/assets/screenshots/books_list.png" width="220" alt="Audiobook catalog with covers, titles, authors, narrators, and durations"></a></td>
+    <td><a href="docs/assets/screenshots/player.png"><img src="docs/assets/screenshots/player.png" width="220" alt="Book description, direct download button, and enlarged playback bar"></a></td>
+    <td><a href="docs/assets/screenshots/categories.png"><img src="docs/assets/screenshots/categories.png" width="220" alt="Genre list with book counts and favorite stars"></a></td>
+  </tr>
+  <tr>
+    <th>Main menu</th>
+    <th>Source management</th>
+    <th>Settings</th>
+  </tr>
+  <tr>
+    <td valign="top"><a href="docs/assets/screenshots/main_menu.png"><img src="docs/assets/screenshots/main_menu.png" width="220" alt="Navigation drawer to books, genres, authors, narrators, sources, favorites, history, and downloads"></a></td>
+    <td valign="top"><a href="docs/assets/screenshots/available_sources.png"><img src="docs/assets/screenshots/available_sources.png" width="220" alt="Source list with response times, health status, and proxy toggle"></a></td>
+    <td valign="top"><a href="docs/assets/screenshots/settings.png"><img src="docs/assets/screenshots/settings.png" width="220" alt="Settings grouped into appearance, playback, sources, downloads, favorites, backup, and general"></a></td>
+  </tr>
+</table>
 
 <details>
 <summary>Contents</summary>
 
+- [Screenshots](#screenshots)
 - [What you can do](#what-you-can-do)
 - [Book sources](#book-sources)
-- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Start listening](#start-listening)
@@ -50,41 +71,6 @@ The app connects to **29 audiobook catalogs**:
 - Switch the browsing catalog in **Drawer → Sources** (`Источники`) or **Settings → Sources & network** (`Настройки → Источники и сеть`).
 - Enable up to 13 sources for simultaneous search in **Search sources** (`Источники поиска`).
 - Check catalog response times and server health in the **Sources** screen.
-
-## Screenshots
-
-The app interface shown below is in Russian. Select an image to view it at full size.
-
-<table>
-  <tr>
-    <th>Book catalog</th>
-    <th>Book details & player</th>
-    <th>Genres</th>
-  </tr>
-  <tr>
-    <td><a href="docs/assets/screenshots/books_list.png"><img src="docs/assets/screenshots/books_list.png" width="220" alt="Audiobook catalog with covers, titles, authors, narrators, and durations"></a></td>
-    <td><a href="docs/assets/screenshots/player.png"><img src="docs/assets/screenshots/player.png" width="220" alt="Book description, direct download button, and enlarged playback bar"></a></td>
-    <td><a href="docs/assets/screenshots/categories.png"><img src="docs/assets/screenshots/categories.png" width="220" alt="Genre list with book counts and favorite stars"></a></td>
-  </tr>
-</table>
-
-<details>
-<summary>More screenshots: navigation, sources, and settings</summary>
-
-<table>
-  <tr>
-    <th>Main menu</th>
-    <th>Source management</th>
-    <th>Settings</th>
-  </tr>
-  <tr>
-    <td valign="top"><a href="docs/assets/screenshots/main_menu.png"><img src="docs/assets/screenshots/main_menu.png" width="220" alt="Navigation drawer to books, genres, authors, narrators, sources, favorites, history, and downloads"></a></td>
-    <td valign="top"><a href="docs/assets/screenshots/available_sources.png"><img src="docs/assets/screenshots/available_sources.png" width="220" alt="Source list with response times, health status, and proxy toggle"></a></td>
-    <td valign="top"><a href="docs/assets/screenshots/settings.png"><img src="docs/assets/screenshots/settings.png" width="220" alt="Settings grouped into appearance, playback, sources, downloads, favorites, backup, and general"></a></td>
-  </tr>
-</table>
-
-</details>
 
 ## Requirements
 
