@@ -276,7 +276,7 @@ public class FavoriteGenresFragment extends Fragment {
             names[i] = getString(all[i].title);
         }
         final boolean[] initial = checked.clone();
-        new MaterialAlertDialogBuilder(requireContext())
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(requireContext())
                 .setTitle(R.string.favorite_genres_pick)
                 .setMultiChoiceItems(names, checked, (d, which, isChecked) -> checked[which] = isChecked)
                 .setPositiveButton(R.string.search_scope_done, (d, w) -> {

@@ -22,21 +22,26 @@
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="3dp"
+            android:progressTint="?attr/colorAccentPrimary"
+            android:progressBackgroundTint="?attr/colorTextMuted"
+            android:indeterminate="false" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/text_margin">
+            android:paddingStart="@dimen/text_margin"
+            android:paddingEnd="@dimen/text_margin">
 
             <ImageButton
                 android:id="@+id/buttonCollapse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/player_btn_size"
+                android:layout_height="@dimen/player_btn_size"
                 android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/collapse"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_arrow_down_drop_circle_outline" />
 
 
@@ -102,36 +107,38 @@
                 android:id="@+id/topButtonsControls"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageButton
                     android:id="@+id/previousTop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/player_btn_size"
+                    android:layout_height="@dimen/player_btn_size"
                     android:background="?selectableItemBackgroundBorderless"
                     android:contentDescription="@string/previous"
-                    android:paddingStart="@dimen/text_margin"
-                    android:paddingEnd="@dimen/text_margin"
+                    android:scaleType="centerInside"
                     android:src="@drawable/ic_skip_previous" />
 
                 <ImageButton
                     android:id="@+id/playTop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackgroundBorderless"
+                    android:layout_width="@dimen/player_play_btn_size"
+                    android:layout_height="@dimen/player_play_btn_size"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_player_play_circle"
+                    android:backgroundTint="?attr/colorAccentPrimary"
                     android:contentDescription="@string/play"
-                    android:paddingStart="@dimen/text_margin"
-                    android:paddingEnd="@dimen/text_margin"
+                    android:scaleType="centerInside"
+                    app:tint="?attr/colorBackgroundMain"
                     android:src="@drawable/ic_play" />
 
                 <ImageButton
                     android:id="@+id/nextTop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/player_btn_size"
+                    android:layout_height="@dimen/player_btn_size"
                     android:background="?selectableItemBackgroundBorderless"
                     android:contentDescription="@string/next"
-                    android:paddingStart="@dimen/text_margin"
-                    android:paddingEnd="@dimen/text_margin"
+                    android:scaleType="centerInside"
                     android:src="@drawable/ic_skip_next" />
             </LinearLayout>
         </LinearLayout>
@@ -279,66 +286,61 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/player_row_height"
-        android:gravity="center_vertical|center_horizontal"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:padding="@dimen/text_margin">
+        android:paddingStart="@dimen/text_margin"
+        android:paddingEnd="@dimen/text_margin">
 
         <ImageButton
             android:id="@+id/rewind"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="@dimen/player_btn_size"
+            android:layout_height="@dimen/player_btn_size"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/rewind_10"
-            android:paddingStart="@dimen/text_margin"
-            android:paddingEnd="@dimen/text_margin"
             android:scaleType="centerInside"
             android:src="@drawable/ic_rewind_30" />
 
-
         <ImageButton
             android:id="@+id/previousBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="@dimen/player_btn_size"
+            android:layout_height="@dimen/player_btn_size"
+            android:layout_marginStart="8dp"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/previous"
-            android:paddingStart="@dimen/text_margin"
-            android:paddingEnd="@dimen/text_margin"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
             android:src="@drawable/ic_skip_previous" />
 
         <ImageButton
             android:id="@+id/playBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="?selectableItemBackgroundBorderless"
+            android:layout_width="@dimen/player_play_btn_size"
+            android:layout_height="@dimen/player_play_btn_size"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_player_play_circle"
+            android:backgroundTint="?attr/colorAccentPrimary"
             android:contentDescription="@string/play"
-            android:paddingStart="@dimen/text_margin"
-            android:paddingEnd="@dimen/text_margin"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
+            app:tint="?attr/colorBackgroundMain"
             android:src="@drawable/ic_play" />
 
         <ImageButton
             android:id="@+id/nextBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="@dimen/player_btn_size"
+            android:layout_height="@dimen/player_btn_size"
+            android:layout_marginEnd="8dp"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/next"
-            android:paddingStart="@dimen/text_margin"
-            android:paddingEnd="@dimen/text_margin"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
             android:src="@drawable/ic_skip_next" />
 
         <ImageButton
             android:id="@+id/forward"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="@dimen/player_btn_size"
+            android:layout_height="@dimen/player_btn_size"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/forward_30"
-            android:paddingStart="@dimen/text_margin"
-            android:paddingEnd="@dimen/text_margin"
             android:scaleType="centerInside"
             android:src="@drawable/ic_fast_forward_30" />
-
 
     </LinearLayout>
 

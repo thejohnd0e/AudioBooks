@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.preference.PreferenceManager;
+import com.fanok.audiobooks.App;
 import com.fanok.audiobooks.AppThemes;
 import com.fanok.audiobooks.Consts;
 import com.fanok.audiobooks.R;
@@ -34,7 +35,7 @@ import java.util.TreeMap;
 final class SyncedSettings {
 
     /** Default preferences holding text. */
-    private static final List<String> TEXTS = Arrays.asList("pref_theme", "books_adapter_layout_pref", "seek_step",
+    private static final List<String> TEXTS = Arrays.asList(AppThemes.PREF_PALETTE, "pref_theme", "books_adapter_layout_pref", "seek_step",
             "pref_sort_favorite", "pref_start_screen", Sources.PREF, Sources.SELECTED,
             GenrePicks.PREF_FAVORITES);
     /** The list settings among them, with the array of their values. */
@@ -53,6 +54,7 @@ final class SyncedSettings {
         for (Provider provider : Provider.values()) {
             FLAGS.add(provider.prefKey);
         }
+        LISTS.put(AppThemes.PREF_PALETTE, R.array.settings_palette_values);
         LISTS.put("pref_theme", R.array.settings_them_values);
         LISTS.put("books_adapter_layout_pref", R.array.books_adapter_layout_values);
         LISTS.put("seek_step", R.array.seek_step_values);
@@ -138,8 +140,9 @@ final class SyncedSettings {
                     Consts.setSOURCE(selected);
                 }
             }
-            if (written.contains("pref_theme")) {
+            if (written.contains(AppThemes.PREF_PALETTE) || written.contains("pref_theme")) {
                 AppThemes.applyNightMode(app);
+                App.recreateActivities();
             }
             if (written.contains(SPEED)) { // as stored now: the user may have changed it again meanwhile
                 BookPresenter.setSpeedWithoutBroadcast(storage.getFloat(SPEED, 1));

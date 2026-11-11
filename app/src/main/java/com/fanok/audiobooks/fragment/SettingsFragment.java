@@ -28,6 +28,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import com.fanok.audiobooks.PaletteBinder;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -351,6 +352,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mListFocus.restore(this, savedInstanceState);
+        PaletteBinder.bindPreferences(this);
     }
 
     @Override
@@ -424,16 +426,21 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     initSourcesEntry();
                 });
 
-        preferenceChangeListner("pref_theme", (preference, newValue) -> {
-            // the value is stored after this returns; apply night mode and restart once it is
-            Context context = requireContext().getApplicationContext();
-            requireActivity().getWindow().getDecorView().post(() -> {
-                AppThemes.applyNightMode(context);
-                if (getActivity() != null) {
-                    // dark and black share a night mode, so the restart is not implied
-                    getActivity().recreate();
-                }
+        Preference customEditPref = findPreference("pref_custom_palette_edit");
+        if (customEditPref != null) {
+            String current = AppThemes.currentPalette(requireContext());
+            customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(current));
+            customEditPref.setOnPreferenceClickListener(p -> {
+                showCustomPaletteMenu();
+                return true;
             });
+        }
+
+        preferenceChangeListner(AppThemes.PREF_PALETTE, (preference, newValue) -> {
+            if (customEditPref != null) {
+                customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(newValue));
+            }
+            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
             return true;
         });
 
@@ -682,7 +689,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 checked = i;
             }
         }
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle(R.string.store_dir_dialog)
                 .setSingleChoiceItems(items, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -708,12 +715,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 String message = size > 0
                         ? getString(R.string.store_move_confirm, Formatter.formatShortFileSize(context, size), where)
                         : getString(R.string.store_switch_confirm, where);
-                new AlertDialog.Builder(context)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                         .setTitle(R.string.store_dir_dialog)
                         .setMessage(message)
                         .setNegativeButton(R.string.cancel, null)
                         .setPositiveButton(R.string.ok, (d, w) -> {
-                            AlertDialog progress = new AlertDialog.Builder(context)
+                            AlertDialog progress = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                                     .setMessage(R.string.store_moving)
                                     .setCancelable(false)
                                     .show();
@@ -745,7 +752,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
 
         CharSequence[] options = new CharSequence[]{"Выбрать папку (Проводник)", "Сбросить на стандартную"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         builder.setTitle("Папка для скачивания");
         builder.setItems(options, (dialog, which) -> {
             if (which == 0) {
@@ -773,7 +780,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
         titles.add("✏️ Указать свой путь вручную");
 
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle("Выберите место для скачивания книг")
                 .setItems(titles.toArray(new CharSequence[0]), (dialog, which) -> {
                     if (which < options.size()) {
@@ -800,7 +807,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         android.widget.EditText input = new android.widget.EditText(context);
         input.setHint("/storage/emulated/0/Download/AudioBooks");
         input.setText(DownloadStorageHelper.getDownloadPath(context));
-        new AlertDialog.Builder(context)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
                 .setTitle("Укажите путь к папке")
                 .setView(input)
                 .setPositiveButton("ОК", (dialog, which) -> {
@@ -855,6 +862,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             String key) {
         if (AppProxy.PREF_MODE.equals(key)) {
             updateProxySummary();
+        }
+        if (AppThemes.PREF_PALETTE.equals(key) && getActivity() != null) {
+            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
         }
         if (Updater.PREF.equals(key) && sharedPreferences.getBoolean(key, true) && getContext() != null) {
             Updater.check(getContext(), null); // switched on: the first check now, not at the next period
@@ -1093,13 +1103,59 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     private void showAllert(@NotNull Context context, int message,
             DialogInterface.OnClickListener onClickListener) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(context);
+        AlertDialog.Builder alert = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         alert.setTitle(R.string.app_name);
         alert.setMessage(message);
         alert.setPositiveButton(R.string.yes, onClickListener);
         alert.setCancelable(true);
         alert.setNegativeButton(R.string.cancel, null);
         alert.show();
+    }
+
+    /** An accent this dark makes the labels and icons it colours unreadable on a dark surface. */
+    private boolean isTooDarkForText(int color) {
+        float[] hsv = new float[3];
+        android.graphics.Color.colorToHSV(color, hsv);
+        return hsv[2] < 0.25f;
+    }
+
+    private void showCustomPaletteMenu() {
+        Context context = requireContext();
+        String[] items = new String[] {
+                getString(R.string.custom_color_bg) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_BG)) + ")",
+                getString(R.string.custom_color_surface) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_SURFACE)) + ")",
+                getString(R.string.custom_color_accent) + " (" + AppThemes.formatHex(AppThemes.getCustomColor(context, AppThemes.SLOT_ACCENT)) + ")"
+        };
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context)
+                .setTitle(R.string.custom_colors_title)
+                .setItems(items, (dialog, which) -> {
+                    int slot = which;
+                    int initial = AppThemes.getCustomColor(context, slot);
+                    String title = (slot == AppThemes.SLOT_BG) ? getString(R.string.custom_color_bg)
+                            : (slot == AppThemes.SLOT_SURFACE) ? getString(R.string.custom_color_surface)
+                            : getString(R.string.custom_color_accent);
+                    boolean isDarkClamped = (slot != AppThemes.SLOT_ACCENT);
+
+                    com.fanok.audiobooks.dialogs.ColorPickerDialog.show(context, title, initial, isDarkClamped, newColor -> {
+                        AppThemes.setCustomColor(context, slot, newColor);
+                        if (slot == AppThemes.SLOT_ACCENT && isTooDarkForText(newColor)) {
+                            Toast.makeText(context, R.string.custom_accent_too_dark, Toast.LENGTH_LONG).show();
+                        }
+                        PaletteBinder.bindPreferences(SettingsFragment.this);
+                        if (getListView() != null && getListView().getAdapter() != null) {
+                            getListView().getAdapter().notifyDataSetChanged();
+                        }
+                        if (getActivity() != null) {
+                            requireActivity().getWindow().getDecorView().post(App::recreateActivities);
+                        }
+                    });
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void updatePrefSummary(Preference p) {

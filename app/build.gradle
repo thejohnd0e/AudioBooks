@@ -64,8 +64,8 @@ android {
         resValue "string", "suggestion_authority", applicationId + ".MySuggestionProvider"
         minSdkVersion 24 // 24+: network_security_config trust anchors (ISRG Root X1) work without bundling Conscrypt
         targetSdkVersion 34
-        versionCode 113
-        versionName "8.4.2"
+        versionCode 114
+        versionName "8.5.0"
         // the app speaks Russian only: the libraries' other translations would be dead weight in every APK
         resourceConfigurations += ['ru']
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -102,6 +102,20 @@ tasks.configureEach { task ->
         task.doFirst {
             assert signingConfigured: "Release signing is not configured: create ${keystorePropertiesFile} " +
                     "with storeFile, storePassword, keyAlias and keyPassword (see keystore.properties.example)"
+        }
+    }
+}
+
+// assembleRelease clears app/build/outputs/apk/release, so the signed APK is also saved under a
+// stable versioned name in <root>/dist: nothing else there to look for, no hunt through build/.
+tasks.matching { it.name == 'assembleRelease' }.configureEach { task ->
+    task.doLast {
+        def source = file("${buildDir}/outputs/apk/release/app-release.apk")
+        if (source.exists()) {
+            def target = file("${rootDir}/dist/AudioBooks-${android.defaultConfig.versionName}-release.apk")
+            target.parentFile.mkdirs()
+            target.bytes = source.bytes
+            println "release APK: ${target}"
         }
     }
 }

@@ -90,7 +90,7 @@ public class AboutFragment extends PreferenceFragmentCompat {
         });
 
         preferenceClickListner("privacy", preference -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(
+            AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(
                     requireContext());
             builder.setTitle(getString(R.string.privacy))
                     .setMessage(getString(R.string.privacy_message))

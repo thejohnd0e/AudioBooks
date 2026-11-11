@@ -40,6 +40,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.arellomobile.mvp.MvpAppCompatFragment;
 import com.arellomobile.mvp.presenter.InjectPresenter;
 import com.arellomobile.mvp.presenter.ProvidePresenter;
+import android.content.Context;
+import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import com.fanok.audiobooks.Consts;
 import com.fanok.audiobooks.MarginItemDecoration;
 import com.fanok.audiobooks.FontScale;
@@ -53,6 +56,11 @@ import com.fanok.audiobooks.adapter.BooksOtherAdapter;
 import com.fanok.audiobooks.adapter.ExpandableText;
 import com.fanok.audiobooks.interface_pacatge.book_content.Description;
 import com.fanok.audiobooks.model.FavoritePeople;
+import com.fanok.audiobooks.activity.ClearSavedActivity;
+import com.fanok.audiobooks.download.BookDownloader;
+import com.fanok.audiobooks.download.DownloadIds;
+import com.fanok.audiobooks.download.DownloadMonitor;
+import com.fanok.audiobooks.download.DownloadStatus;
 import com.fanok.audiobooks.pojo.BookPOJO;
 import com.fanok.audiobooks.pojo.DescriptionPOJO;
 import com.fanok.audiobooks.pojo.OtherArtistPOJO;
@@ -429,7 +437,11 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             @Nullable Bundle savedInstanceState) {
 
 
-        View view = inflater.inflate(R.layout.fragment_book_description, container, false);
+        Context themeContext = new androidx.appcompat.view.ContextThemeWrapper(requireContext(),
+                AppThemes.paletteStyle(requireContext()));
+        LayoutInflater localInflater = inflater.cloneInContext(themeContext);
+        View view = localInflater.inflate(R.layout.fragment_book_description, container, false);
+        PaletteBinder.bindView(view, requireContext());
 
         mTitle = view.findViewById(R.id.title);
         mImageView = view.findViewById(R.id.imageView);
@@ -461,6 +473,33 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mDisLike = view.findViewById(R.id.disLike);
         mDescLine = view.findViewById(R.id.descLine);
         mOtherBookLine = view.findViewById(R.id.otherBookLine);
+
+        View btnListen = view.findViewById(R.id.btnListenBook);
+        if (btnListen != null) {
+            btnListen.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    View playTop = getActivity().findViewById(R.id.playTop);
+                    if (playTop != null) {
+                        playTop.performClick();
+                    }
+                }
+            });
+        }
+
+        View btnFavorite = view.findViewById(R.id.btnFavoriteBook);
+        if (btnFavorite != null) {
+            btnFavorite.setOnClickListener(v -> toggleBook());
+        }
+
+        View btnDownload = view.findViewById(R.id.btnDownloadBook);
+        if (btnDownload != null) {
+            BookPOJO book = book();
+            if (!BookDownloader.canDownload(requireContext(), book)) {
+                btnDownload.setVisibility(View.GONE); // a site's collection or an imported book: nothing to download
+            } else {
+                btnDownload.setOnClickListener(v -> downloadBook(book));
+            }
+        }
 
         mAdapterBooksRecomended = new BooksOtherAdapter();
         mRecommendedBooks.setAdapter(mAdapterBooksRecomended);
@@ -916,6 +955,47 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         if (!b) {
             expandDescription(); // the recommendations came empty or failed
         }
+    }
+
+    /**
+     * The description's СКАЧАТЬ button downloads the book — every chapter that is not on the device
+     * yet — instead of only opening the player's chapter selection. While a download of this book
+     * runs, it leads to «Загрузки», where the progress and the controls are.
+     */
+    private void downloadBook(@NonNull BookPOJO book) {
+        Context context = requireContext();
+        DownloadStatus status = DownloadMonitor.get()
+                .statusOfBook(DownloadIds.bookKey(book.getUrl()));
+        if (isRunning(status)) {
+            ClearSavedActivity.startActivity(requireActivity());
+            return;
+        }
+        BookDownloader.downloadAll(context, book);
+    }
+
+    /** Downloads under way, paused or waiting: a new tap would only queue them again. */
+    private static boolean isRunning(@NonNull DownloadStatus status) {
+        switch (status.state) {
+            case DownloadStatus.DOWNLOADING:
+            case DownloadStatus.STALLED:
+            case DownloadStatus.QUEUED:
+            case DownloadStatus.WAITING_NETWORK:
+            case DownloadStatus.PAUSED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /** The book this page describes, as the pager passed it in. */
+    @NonNull
+    private BookPOJO book() {
+        BookPOJO pojo = new Gson().fromJson(
+                requireArguments().getString(ARG_BOOK_POJO), BookPOJO.class);
+        if (pojo == null) {
+            throw new NullPointerException();
+        }
+        return pojo;
     }
 
     @ProvidePresenter

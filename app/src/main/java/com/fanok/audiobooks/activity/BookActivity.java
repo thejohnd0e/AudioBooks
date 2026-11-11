@@ -8,6 +8,8 @@ import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_SHOW_TITLE;
 import static com.fanok.audiobooks.service.MediaPlayerService.countAudioWereShowingRatingPopUp;
 
 import com.fanok.audiobooks.FontScale;
+import com.fanok.audiobooks.AppThemes;
+import com.fanok.audiobooks.PaletteBinder;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.UiModeManager;
@@ -371,7 +373,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             PinEntryEditText editText = new PinEntryEditText(context, attr);
 
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
             builder.setTitle(R.string.enter_password)
                     .setCancelable(false)
                     .setView(editText)
@@ -384,6 +386,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 dialog.setOnDismissListener(d -> ((LoadBook) context).finish());
             }
             dialog.setOnShowListener(dialogInterface -> {
+                PaletteBinder.applyPaletteToDialog(dialog);
                 Objects.requireNonNull(editText.getText()).clear();
                 editText.requestFocus();
                 Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
@@ -467,6 +470,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     @UnstableApi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppThemes.apply(this, R.style.AppTheme_NoActionBar, R.style.LightAppTheme_NoActionBar,
+                R.style.AppThemeBlack_NoActionBar);
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate: called");
 
@@ -524,15 +529,6 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
         mNotificationClick = intent.getBooleanExtra("notificationClick", false);
 
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            setTheme(R.style.AppTheme_NoActionBar);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            setTheme(R.style.LightAppTheme_NoActionBar);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            setTheme(R.style.AppThemeBlack_NoActionBar);
-        }
-
         if (mBookPOJO != null && mBookPOJO.getName() != null) {
             setTitle(mBookPOJO.getName().trim());
         }
@@ -554,6 +550,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 tab.setText(sectionsPagerAdapter.getPageTitle(position));
             }
         }).attach();
+        PaletteBinder.bind(this);
         // the comments tab shows only when there are comments; its list reuses this fetch
         comentsCount = com.fanok.audiobooks.model.ComentsModel.shared(mBookPOJO.getUrl(), savedInstanceState == null)
                 .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
@@ -683,7 +680,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mDelete.setOnClickListener(view -> {
             if (mAudioAdapter != null && mAudioAdapter.getSelectedItemsSize() > 0) {
                 final java.util.HashSet<String> chosen = mAudioAdapter.getSelectedItems();
-                new AlertDialog.Builder(this)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                         .setTitle("Удаление загрузок")
                         .setMessage("Вы уверены, что хотите удалить выбранные файлы (" + chosen.size() + ")?")
                         .setPositiveButton("ОК", (dialog, which) -> {
@@ -1077,15 +1074,22 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                 finish();
             }
         } else if (menuItem.getItemId() == R.id.download_delete) {
-            if (bottomSheetBehavior != null &&
-                    bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
-            mAudioAdapter.startSelection();
+            openDownloadSelection();
         }
 
         mPresenter.onOptionsMenuItemSelected(menuItem);
         return (super.onOptionsItemSelected(menuItem));
+    }
+
+    /** Opens the bottom player sheet and begins chapter selection for download or deletion. */
+    public void openDownloadSelection() {
+        if (bottomSheetBehavior != null &&
+                bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+        if (mAudioAdapter != null) {
+            mAudioAdapter.startSelection();
+        }
     }
 
     /** The player UI listens only while visible; on the way back the service resends chapter, icon and progress. */
@@ -1284,7 +1288,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             jump.run();
             return;
         }
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setMessage(next ? R.string.confirm_next_chapter : R.string.confirm_previous_chapter)
                 .setPositiveButton(R.string.go_to, (dialog, which) -> jump.run())
                 .setNegativeButton(R.string.cancel, null)
@@ -1473,7 +1477,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         body.addView(details);
         ScrollView scroll = new ScrollView(this);
         scroll.addView(body);
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.error_report_title)
                 .setView(scroll)
                 .setPositiveButton(R.string.retry, (d, which) -> mPresenter.getAudio())
@@ -1605,7 +1609,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             return;
         }
         mSwitchHintShowing = true; // a reload of the chapters while it is open does not stack a second one
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.hint_switch_book_title)
                 .setMessage(R.string.hint_switch_book)
                 .setPositiveButton(R.string.got_it, null)
@@ -1689,26 +1693,6 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     @Override
     public void activityStart(@NotNull Intent intent) {
         startActivity(intent);
-    }
-
-    @Override
-    public Resources.Theme getTheme() {
-        Resources.Theme theme = super.getTheme();
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            theme.applyStyle(R.style.AppTheme_NoActionBar, true);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            theme.applyStyle(R.style.LightAppTheme_NoActionBar, true);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            theme.applyStyle(R.style.AppThemeBlack_NoActionBar, true);
-        }
-
-
-        return theme;
     }
 
     @Override

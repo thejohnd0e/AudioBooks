@@ -471,7 +471,7 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
         final boolean[] confirmed = {tv}; // a TV kept every press already: closing has nothing to undo
         dismissSpeedDialog();
 
-        final AlertDialog.Builder popDialog = new AlertDialog.Builder(view.getContext());
+        final AlertDialog.Builder popDialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(view.getContext());
         popDialog.setIcon(R.drawable.ic_speedometer);
         popDialog.setTitle(view.getContext().getString(R.string.title_set_speed_popup));
         popDialog.setView(tv ? speedButtons(view.getContext()) : speedSlider(view.getContext(), chosen));

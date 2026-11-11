@@ -163,7 +163,7 @@ public class SourcesDialogFragment extends DialogFragment {
             rankPending = true;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_sources, null, false);
         checkedAt = view.findViewById(R.id.sourcesCheckedAt);
         hint = view.findViewById(R.id.sourcesProxyHint);

@@ -85,7 +85,7 @@ public class CustomProxyDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         Context context = requireContext();
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(context);
         View view = LayoutInflater.from(builder.getContext()).inflate(R.layout.dialog_custom_proxy, null, false);
         type = view.findViewById(R.id.customProxyType);
         hostLayout = view.findViewById(R.id.customProxyHostLayout);

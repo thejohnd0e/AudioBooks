@@ -114,23 +114,6 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
         return new ClearSavedPresenter(getApplicationContext());
     }
 
-
-    @Override
-    public Resources.Theme getTheme() {
-        Resources.Theme theme = super.getTheme();
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            theme.applyStyle(R.style.AppTheme_SwipeOnClose, true);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            theme.applyStyle(R.style.LightAppTheme_SwipeOnClose, true);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            theme.applyStyle(R.style.AppThemeBlack_SwipeOnClose, true);
-        }
-        return theme;
-    }
-
     public static void startActivity(@NotNull Activity activity) {
         Intent intent = new Intent(activity, ClearSavedActivity.class);
         activity.startActivity(intent);
@@ -263,7 +246,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
         final List<DownloadItem> chosen = Collections.singletonList(item);
         String name = item.getBookName() != null ? item.getBookName() : "";
         String message = name.isEmpty() ? "Удалить эту загрузку?" : "Удалить загрузку \"" + name + "\"?";
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle("Удаление загрузки")
                 .setMessage(message)
                 .setPositiveButton("ОК", (dialog, which) -> mPresenter.remove(chosen))
@@ -323,7 +306,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
             // Resolved now into an immutable list: a refresh while the dialog is open cannot change what OK deletes.
             final List<DownloadItem> chosen = mAdapter.getSelectedItems();
             if (!chosen.isEmpty()) {
-                new AlertDialog.Builder(this)
+                new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                         .setTitle("Удаление загрузок")
                         .setMessage("Удалить выбранные загрузки (" + chosen.size() + ")?")
                         .setPositiveButton("ОК", (dialog, which) -> {
@@ -357,7 +340,7 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
 
     @Override
     public void showLogsDialog(String logs) {
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle("Логи удаления файлов")
                 .setMessage(logs != null ? logs : "Логи пусты")
                 .setPositiveButton("ОК", null)

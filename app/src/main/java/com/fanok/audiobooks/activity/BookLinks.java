@@ -57,7 +57,7 @@ final class BookLinks {
         for (int i = 0; i < labels.length; i++) {
             labels[i] = a.getString(items.get(i));
         }
-        new AlertDialog.Builder(a)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(a)
                 .setTitle(R.string.share)
                 .setItems(labels, (d, which) -> {
                     int item = items.get(which);
@@ -94,7 +94,7 @@ final class BookLinks {
         int pad = (int) (20 * a.getResources().getDisplayMetrics().density);
         box.setPadding(pad, pad / 2, pad, 0);
         box.addView(field);
-        AlertDialog dialog = new AlertDialog.Builder(a)
+        AlertDialog dialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(a)
                 .setTitle(R.string.book_link_open_title)
                 .setView(box)
                 .setPositiveButton(R.string.open, (d, which) -> {

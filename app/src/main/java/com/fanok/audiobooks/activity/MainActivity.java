@@ -3,6 +3,7 @@ package com.fanok.audiobooks.activity;
 import static com.fanok.audiobooks.Consts.handleUserInput;
 
 import com.fanok.audiobooks.FontScale;
+import com.fanok.audiobooks.PaletteBinder;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -462,7 +463,7 @@ public class MainActivity extends MvpAppCompatActivity
         }
         long offered = state.exhaustedAt;
         boolean[] accepted = new boolean[1];
-        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+        AlertDialog dialog = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.proxy_exhausted_title)
                 .setMessage(R.string.proxy_exhausted_message)
                 .setPositiveButton(R.string.proxy_rescan, (d, which) -> {
@@ -505,7 +506,7 @@ public class MainActivity extends MvpAppCompatActivity
             return;
         }
         // any answer puts it off for a day (a check by hand shows it again); a dialog closed by recreation does not
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+        AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.update_title)
                 .setIcon(R.drawable.ic_update)
                 .setNegativeButton(R.string.update_later, (dialog, which) -> Updater.snooze(this, offer))
@@ -569,7 +570,7 @@ public class MainActivity extends MvpAppCompatActivity
     }
 
     private void showPrivacyDialog(@NonNull Runnable done) {
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(getString(R.string.privacy))
                 .setMessage(getString(R.string.privacy_message))
                 .setIcon(R.drawable.ic_privacy)
@@ -584,7 +585,7 @@ public class MainActivity extends MvpAppCompatActivity
 
     /** Asked once: either answer is remembered, so it does not come back with every new main screen. */
     private void showNotificationRationale(@NonNull Runnable done) {
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.notification_permission_rationale)
                 .setCancelable(false)
@@ -601,7 +602,7 @@ public class MainActivity extends MvpAppCompatActivity
     }
 
     private void showBatteryDialog(@NonNull Runnable done) {
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.app_name)
                 .setMessage(R.string.setIgnoredBatteryOptimyze)
                 .setNegativeButton(R.string.cancel, null)
@@ -621,7 +622,7 @@ public class MainActivity extends MvpAppCompatActivity
     private void showAutoRankDialog(@NonNull Runnable done) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean[] accepted = new boolean[1];
-        new AlertDialog.Builder(this)
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
                 .setTitle(R.string.sources_autorank_offer_title)
                 .setMessage(R.string.sources_autorank_offer_message)
                 .setPositiveButton(R.string.sources_autorank_offer_yes, (dialog, which) -> {
@@ -705,6 +706,7 @@ public class MainActivity extends MvpAppCompatActivity
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        PaletteBinder.bind(this);
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

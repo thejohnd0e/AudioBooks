@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Semantic color attributes for calm nature palettes (Sage, Umbra, Steel) -->
+    <attr name="colorBackgroundMain" format="color" />
+    <attr name="colorSurfaceCard" format="color" />
+    <attr name="colorAccentPrimary" format="color" />
+    <attr name="colorTextMuted" format="color" />
+
     <declare-styleable name="NavigationView">
         <attr name="colorSelected" format="color" />
         <attr name="colorUnSelected" format="color" />
