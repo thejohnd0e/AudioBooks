@@ -174,6 +174,26 @@ public class MediaPlayerServiceTest {
     }
 
     @Test
+    public void listeningTimeIsStoredWhilePlayingAndNothingForThePause() throws Exception {
+        long before = totalListenedMs();
+        MediaPlayerService service = startAndBind(book("listen-time", 20), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        Thread.sleep(3_000);
+        sendAction(MediaPlayerService.ACTION_PAUSE); // a pause stores what is waiting
+        await("paused", 3_000, () -> !player(service).getPlayWhenReady() && !service.isWantPlaying());
+        Thread.sleep(1_000);
+        long listened = totalListenedMs() - before;
+        assertTrue("about 3 s of playing were stored, got " + listened + " ms", listened >= 2_000 && listened <= 6_000);
+
+        Thread.sleep(3_000); // paused: nothing more
+        assertEquals(listened, totalListenedMs() - before);
+    }
+
+    private long totalListenedMs() {
+        return com.fanok.audiobooks.room.AppDatabase.getDatabase(context).listenDayDao().total();
+    }
+
+    @Test
     public void duplicatePauseStaysPaused() throws Exception {
         MediaPlayerService service = startAndBind(book("pause-twice", 20), true);
         await("playing", 8_000, () -> player(service).isPlaying());

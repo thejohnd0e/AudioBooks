@@ -50,6 +50,10 @@
             android:id="@+id/nav_saved"
             android:icon="@drawable/ic_menu_saved"
             android:title="@string/menu_saved" />
+        <item
+            android:id="@+id/nav_stats"
+            android:icon="@drawable/ic_menu_stats"
+            android:title="@string/menu_stats" />
         <!-- opens the book screen; never left checked, shown only while the player holds a book -->
         <item
             android:id="@+id/nav_now_playing"

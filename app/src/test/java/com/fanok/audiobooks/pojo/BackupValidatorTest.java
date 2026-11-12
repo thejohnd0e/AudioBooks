@@ -38,6 +38,25 @@ public class BackupValidatorTest {
     }
 
     @Test
+    public void statisticsAreReadAndAbsentOnesLeftAlone() throws Exception {
+        BackupPOJO with = BackupPOJO.parse("{\"mVersion\":2,\"mListenDays\":[{\"day\":20000,\"listenedMs\":60000}],"
+                + "\"mFinished\":[{\"urlBook\":\"https://example.com/b\",\"finishedAt\":5}]}");
+        assertEquals(1, with.getListenDays().size());
+        assertEquals(60000, with.getListenDays().get(0).getListenedMs());
+        assertEquals(1, with.getFinished().size());
+        assertNull(BackupPOJO.parse("{\"mVersion\":2,\"mBooksFavorite\":[]}").getListenDays());
+        assertNull(BackupPOJO.parse("{\"mVersion\":2,\"mBooksFavorite\":[]}").getFinished());
+    }
+
+    @Test
+    public void rejectsUnstorableStatistics() {
+        assertRejected("{\"mVersion\":2,\"mListenDays\":[{\"day\":1,\"listenedMs\":-5}]}");
+        assertRejected("{\"mVersion\":2,\"mListenDays\":[null]}");
+        assertRejected("{\"mVersion\":2,\"mFinished\":[{\"urlBook\":\" \",\"finishedAt\":5}]}");
+        assertRejected("{\"mVersion\":2,\"mFinished\":[null]}");
+    }
+
+    @Test
     public void rejectsNullAndEmpty() {
         assertRejected(null);
         assertRejected("");
