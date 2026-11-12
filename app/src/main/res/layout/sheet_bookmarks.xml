@@ -34,7 +34,9 @@
         android:textAllCaps="false"
         android:textColor="?attr/colorPrimaryText"
         app:icon="@drawable/ic_bookmark_outline"
-        app:iconTint="?attr/colorAccentPrimary" />
+        app:iconTint="?attr/colorAccentPrimary"
+        app:strokeColor="?attr/colorTextMuted"
+        app:strokeWidth="1dp" />
 
     <TextView
         android:id="@+id/bookmarksEmpty"
