@@ -524,6 +524,7 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
             // after the layout: a page that added no card (all filtered out, or an empty page) moves no visible
             // range, so no scroll event asks for the next one
             binding.list.post(this::fillScreen);
+            updateEmpty();
         } else {
             // Если адаптер еще не создан, это может быть ошибкой в логике,
             // но на всякий случай можно добавить обработку.
@@ -537,6 +538,7 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
             String focused = mListFocus.beforeUpdate(binding.list);
             mAddapterGenre.setItem(genres);
             mListFocus.afterUpdate(binding.list, focused, this);
+            updateEmpty();
         } else {
             showToast(R.string.error_display_data);
         }
@@ -631,6 +633,30 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
         } else {
             binding.mProgressBarLayout.getRoot().setVisibility(View.GONE);
         }
+        updateEmpty();
+    }
+
+    /**
+     * The empty list's message, once the layout has settled: shown while nothing is listed, nothing loads and no
+     * refresh runs. A cancel followed by a reload in one pass never flashes it: the check runs after both.
+     */
+    private void updateEmpty() {
+        if (binding == null) {
+            return;
+        }
+        binding.list.post(() -> {
+            if (binding == null) {
+                return;
+            }
+            RecyclerView.Adapter<?> adapter = binding.list.getAdapter();
+            boolean empty = adapter != null && adapter.getItemCount() == 0
+                    && binding.mProgressBarLayout.getRoot().getVisibility() != View.VISIBLE
+                    && !binding.refresh.isRefreshing();
+            binding.placeholder.getRoot().setVisibility(empty ? View.VISIBLE : View.GONE);
+            if (empty) {
+                binding.placeholder.placeholderText.setText(R.string.books_list_empty);
+            }
+        });
     }
 
     @Override
