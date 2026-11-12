@@ -84,6 +84,7 @@
 
     <ImageView
         style="@style/Widget.App.Sources.RowIcon"
+        android:importantForAccessibility="no"
         app:srcCompat="@drawable/ic_source_chevron"
         tools:ignore="ContentDescription" />
 </LinearLayout>
