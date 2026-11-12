@@ -14,7 +14,7 @@ public class BackupPOJO {
     private static final int LEGACY_VERSION = 1;
     private static final String KEY_VERSION = "mVersion";
     private static final String[] COLLECTIONS = {
-            "mBooksFavorite", "mBooksHistory", "mBooksSaved", "mAudio", "mAudioList", "mPeopleFavorite"};
+            "mBooksFavorite", "mBooksHistory", "mBooksSaved", "mAudio", "mAudioList", "mPeopleFavorite", "mBookmarks"};
 
     private int mVersion = VERSION;
     private ArrayList<BookPOJO> mBooksFavorite;
@@ -24,6 +24,8 @@ public class BackupPOJO {
     private ArrayList<AudioListPOJO> mAudioList;
     /** Favourite authors and readers, newest first; absent in files written before them. */
     private ArrayList<FavoritePersonPOJO> mPeopleFavorite;
+    /** The marks in books; absent in files written before them. */
+    private ArrayList<BookmarkPOJO> mBookmarks;
     /** Rows left out of this backup because they could not be read; not written to the file. */
     private transient int mSkippedRows;
 
@@ -104,6 +106,13 @@ public class BackupPOJO {
                         "mPeopleFavorite", i);
             }
         }
+        if (backup.mBookmarks != null) {
+            for (int i = 0; i < backup.mBookmarks.size(); i++) {
+                BookmarkPOJO mark = backup.mBookmarks.get(i);
+                require(mark != null && notBlank(mark.getUrlBook()) && mark.getChapterName() != null
+                        && mark.getChapterIndex() >= 0 && mark.getPositionMs() >= 0, "mBookmarks", i);
+            }
+        }
         return backup;
     }
 
@@ -177,6 +186,14 @@ public class BackupPOJO {
 
     public void setPeopleFavorite(ArrayList<FavoritePersonPOJO> peopleFavorite) {
         mPeopleFavorite = peopleFavorite;
+    }
+
+    public ArrayList<BookmarkPOJO> getBookmarks() {
+        return mBookmarks;
+    }
+
+    public void setBookmarks(ArrayList<BookmarkPOJO> bookmarks) {
+        mBookmarks = bookmarks;
     }
 
     public ArrayList<TimeStartPOJO> getAudio() {

@@ -16,6 +16,27 @@ public class BackupValidatorTest {
             + "\"urls\":[\"https://example.com/author/king\"],\"addedAt\":5}";
     private static final String READER = "{\"kind\":1,\"name\":\"Игорь Князев\",\"addedAt\":3}";
 
+    private static final String MARK = "{\"urlBook\":\"https://example.com/b\",\"chapterIndex\":2,"
+            + "\"chapterName\":\"Глава 3\",\"positionMs\":90000,\"note\":\"тут\",\"createdAt\":7}";
+
+    @Test
+    public void bookmarksAreReadAndAbsentOnesLeftAlone() throws Exception {
+        BackupPOJO with = BackupPOJO.parse("{\"mVersion\":2,\"mBookmarks\":[" + MARK + "]}");
+        assertEquals(1, with.getBookmarks().size());
+        assertEquals(90000, with.getBookmarks().get(0).toEntity().positionMs);
+        assertEquals("Глава 3", with.getBookmarks().get(0).toEntity().chapterName);
+        assertNull(BackupPOJO.parse("{\"mVersion\":2,\"mBooksFavorite\":[]}").getBookmarks());
+        assertEquals(0, BackupPOJO.parse("{\"mVersion\":2,\"mBookmarks\":[]}").getBookmarks().size());
+    }
+
+    @Test
+    public void rejectsUnstorableBookmarks() {
+        assertRejected("{\"mVersion\":2,\"mBookmarks\":[{\"urlBook\":\" \",\"chapterName\":\"a\"}]}");
+        assertRejected("{\"mVersion\":2,\"mBookmarks\":[{\"urlBook\":\"u\"}]}");
+        assertRejected("{\"mVersion\":2,\"mBookmarks\":[{\"urlBook\":\"u\",\"chapterName\":\"a\",\"positionMs\":-1}]}");
+        assertRejected("{\"mVersion\":2,\"mBookmarks\":[null]}");
+    }
+
     @Test
     public void rejectsNullAndEmpty() {
         assertRejected(null);

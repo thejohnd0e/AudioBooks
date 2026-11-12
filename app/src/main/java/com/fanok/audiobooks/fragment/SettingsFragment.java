@@ -61,6 +61,7 @@ import com.fanok.audiobooks.model.FavoritePeople;
 import com.fanok.audiobooks.net.AppProxy;
 import com.fanok.audiobooks.net.ProxyFinder;
 import com.fanok.audiobooks.pojo.BackupPOJO;
+import com.fanok.audiobooks.pojo.BookmarkPOJO;
 import com.fanok.audiobooks.service.SeekStep;
 import com.fanok.audiobooks.service.SkipSilenceProcessor;
 import com.fanok.audiobooks.pojo.BookPOJO;
@@ -909,6 +910,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         backup.setAudio(audioDBModel.getAll());
         backup.setAudioList(audioListDBModel.getAll());
         backup.setPeopleFavorite(FavoritePeople.get(context).backup());
+        backup.setBookmarks(BookmarkPOJO.ofAll(
+                com.fanok.audiobooks.room.AppDatabase.getDatabase(context).bookmarkDao().getAll()));
         backup.setSkippedRows(booksDBModel.getSkippedRows() + audioDBModel.getSkippedRows());
         if (backup.getSkippedRows() > 0) {
             Log.w("SettingsFragment", "Backup left out " + backup.getSkippedRows() + " unreadable rows");
@@ -1087,6 +1090,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     }
                 }
 
+                if (backup.getBookmarks() != null) {
+                    database.bookmarkDao().deleteAll();
+                    for (BookmarkPOJO mark : backup.getBookmarks()) {
+                        database.bookmarkDao().insert(mark.toEntity());
+                    }
+                }
                 if (backup.getPeopleFavorite() != null) {
                     FavoritePeople.replaceAll(database, backup.getPeopleFavorite());
                 }
