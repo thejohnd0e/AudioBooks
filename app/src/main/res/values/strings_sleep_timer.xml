@@ -15,6 +15,14 @@
     <string name="sleep_timer_duration_h">%d ч</string>
     <string name="sleep_timer_duration_m">%d мин</string>
     <string name="sleep_timer_end_of_chapter">Остановить в конце главы</string>
+    <string name="sleep_sound_title">Звук предупреждения</string>
+    <string name="sleep_sound_beep">Сигнал (как раньше)</string>
+    <string name="sleep_sound_soft">Мягкий сигнал</string>
+    <string name="sleep_sound_notification">Звук уведомления</string>
+    <string name="sleep_sound_alarm">Звук будильника</string>
+    <string name="sleep_sound_custom">Своя мелодия…</string>
+    <string name="sleep_sound_custom_named">Мелодия: %1$s</string>
+    <string name="sleep_sound_picker_title">Звук предупреждения</string>
     <string name="sleep_timer_warn_title">Предупреждать за 30 секунд</string>
     <string name="sleep_timer_warn_summary">Громкие сигналы за 30, 20 и 10 секунд до остановки, книга плавно затихает</string>
     <string name="sleep_timer_shake_title">Встряхнуть, чтобы продолжить</string>
