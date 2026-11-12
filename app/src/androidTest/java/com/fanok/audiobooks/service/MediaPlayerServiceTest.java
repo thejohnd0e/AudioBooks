@@ -613,6 +613,138 @@ public class MediaPlayerServiceTest {
 
     // -----------------------------------------------------------------------------------------------------
 
+    // Sleep timer fade-out (spec 2026-11-12): the timer fires into a volume glide to silence, then the old stop.
+
+    @Test
+    public void timerFiresIntoAFadeThenStops() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade", 20), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(1_000);
+            return null;
+        });
+        float before = onMain(() -> player(service).getVolume());
+
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer)
+                .putExtra("start", true).putExtra("time", 2_000L).setPackage(context.getPackageName()));
+
+        await("volume gliding down", 4_000, () -> player(service).getVolume() < before);
+        assertTrue(describe(service), onMain(() -> player(service).isPlaying())); //the fade, not a stop
+        await("stopped after the fade", 6_000, () -> MediaPlayerService.currentBookUrl() == null);
+    }
+
+    @Test
+    public void pauseDuringFadeRestoresVolumeAndPausesNow() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade-pause", 20), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(4_000);
+            return null;
+        });
+        float before = onMain(() -> player(service).getVolume());
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer)
+                .putExtra("start", true).putExtra("time", 2_000L).setPackage(context.getPackageName()));
+        await("fade underway", 4_000, () -> player(service).getVolume() < before);
+
+        sendAction(MediaPlayerService.ACTION_PAUSE);
+        await("paused at once", 1_000, () -> !player(service).isPlaying() && !service.isWantPlaying());
+        assertEquals(before, onMain(() -> player(service).getVolume()), 0.01f);
+        Thread.sleep(4_500); //no stale fade tick pauses or changes anything afterwards
+        assertTrue(describe(service), onMain(() -> !service.isWantPlaying()));
+        assertEquals(before, onMain(() -> player(service).getVolume()), 0.01f);
+    }
+
+    @Test
+    public void cancelBroadcastDuringFadeRestoresVolume() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade-cancel", 20), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(4_000);
+            return null;
+        });
+        float before = onMain(() -> player(service).getVolume());
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer)
+                .putExtra("start", true).putExtra("time", 2_000L).setPackage(context.getPackageName()));
+        await("fade underway", 4_000, () -> player(service).getVolume() < before);
+
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer)
+                .putExtra("start", false).setPackage(context.getPackageName()));
+        await("volume restored", 2_000, () -> player(service).getVolume() >= before - 0.01f);
+        assertTrue(describe(service), onMain(() -> player(service).isPlaying() && service.isWantPlaying()));
+        Thread.sleep(2_500); //the fade's callbacks are gone: nothing stops the book later
+        assertTrue(describe(service), onMain(() -> player(service).isPlaying()));
+    }
+
+    /** A clock-mode timer fires while the book is paused: the immediate stop, no fade of a silent player. */
+    @Test
+    public void clockTimerFiresWhilePausedStopsWithoutAFade() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade-paused", 20), false);
+        await("ready and paused", 8_000, () -> player(service).getPlaybackState() == Player.STATE_READY
+                && !player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(5_000);
+            return null;
+        });
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer).putExtra("start", true)
+                .putExtra("at", System.currentTimeMillis() + 2_000L).setPackage(context.getPackageName()));
+        await("stopped at once, no fade waited out", 5_000, () -> MediaPlayerService.currentBookUrl() == null);
+    }
+
+    /** With the warning on, the final fade continues from its level: no jump back to full volume at the fire. */
+    @Test
+    public void warnOnFadeContinuesFromTheWarningsLevel() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade-warn", 90), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(1_000);
+            return null;
+        });
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer).putExtra("start", true)
+                .putExtra("time", 32_000L).putExtra("warn", true).setPackage(context.getPackageName()));
+        await("warning fade near its floor", 34_000, () -> player(service).getVolume() < 0.17f);
+
+        //from here no burst is due: any rise above the warning's floor would be the fire's restore-jump
+        float peak = 0;
+        long end = SystemClock.elapsedRealtime() + 20_000;
+        while (SystemClock.elapsedRealtime() < end) {
+            if (MediaPlayerService.currentBookUrl() == null || service.getPlayer() == null) {
+                break;
+            }
+            peak = Math.max(peak, onMain(() -> player(service).getVolume()));
+            Thread.sleep(100);
+        }
+        assertTrue("volume jumped up at the fire: peak " + peak, peak <= 0.2f);
+        await("stopped after the fade", 3_000, () -> MediaPlayerService.currentBookUrl() == null);
+    }
+
+    /** A new book started mid-fade plays at full volume; the old fade's end must not silence or stop it. */
+    @Test
+    public void newBookDuringFadePlaysAtFullVolumeAndSurvives() throws Exception {
+        MediaPlayerService service = startAndBind(book("fade-swap", 20), true);
+        await("playing", 8_000, () -> player(service).isPlaying());
+        onMain(() -> {
+            service.setSleepFadeOutMsForTest(4_000);
+            return null;
+        });
+        float before = onMain(() -> player(service).getVolume());
+        context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer)
+                .putExtra("start", true).putExtra("time", 2_000L).setPackage(context.getPackageName()));
+        await("fade underway", 4_000, () -> player(service).getVolume() < before);
+
+        MediaPlayerService.Request next = book("fade-swap-2", 20);
+        MediaPlayerService.start(context, new MediaPlayerService.Request(next.book, next.bookUrl,
+                next.chapters, null, 0, 0, true));
+
+        await("the new book plays at full volume", 8_000,
+                () -> MediaPlayerService.currentBookUrl() != null
+                        && MediaPlayerService.currentBookUrl().equals(next.bookUrl)
+                        && player(service).isPlaying()
+                        && player(service).getVolume() >= before - 0.01f);
+        Thread.sleep(4_500); //the old fade's end has passed: the new book still plays
+        assertTrue(describe(service), onMain(() -> player(service).isPlaying() && service.isWantPlaying()));
+        assertEquals(before, onMain(() -> player(service).getVolume()), 0.01f);
+    }
+
     private MockResponse respond(RecordedRequest request) {
         if (neverAnswer) {
             return new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE);
