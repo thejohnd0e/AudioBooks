@@ -175,6 +175,15 @@ public class MainActivity extends MvpAppCompatActivity
         context.startActivity(intent);
     }
 
+    /**
+     * The intent that opens the app on {@code fragment} ({@code Consts.FRAGMENT_*}), for a shortcut: it has an action,
+     * which a shortcut's intent must.
+     */
+    @NonNull
+    public static Intent sectionIntent(@NonNull Context context, int fragment) {
+        return new Intent(context, MainActivity.class).setAction(Intent.ACTION_VIEW).putExtra(EXSTRA_FRAGMENT, fragment);
+    }
+
     public static void startMainActivity(@NonNull Context context, int fragment) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.putExtra(EXSTRA_FRAGMENT, fragment);

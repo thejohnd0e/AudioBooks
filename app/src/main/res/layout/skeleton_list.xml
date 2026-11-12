@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The placeholder of a list that is loading its first page (BooksFragment): rows of grey blocks that pulse. It
+     takes no touches and is hidden from the screen reader: the progress bar says it is loading. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="false"
+    android:importantForAccessibility="no"
+    android:orientation="vertical"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <include layout="@layout/skeleton_row" />
+
+    <include layout="@layout/skeleton_row" />
+
+    <include layout="@layout/skeleton_row" />
+
+    <include layout="@layout/skeleton_row" />
+
+    <include layout="@layout/skeleton_row" />
+
+    <include layout="@layout/skeleton_row" />
+</LinearLayout>

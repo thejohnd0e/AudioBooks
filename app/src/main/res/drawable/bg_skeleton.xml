@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A grey block of the loading placeholder (skeleton_list): translucent, so it reads on every theme and palette. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#33808080" />
+    <corners android:radius="6dp" />
+</shape>

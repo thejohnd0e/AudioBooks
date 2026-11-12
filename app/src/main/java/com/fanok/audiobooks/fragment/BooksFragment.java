@@ -437,6 +437,10 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
 
     @Override
     public void onDestroyView() {
+        if (mSkeletonPulse != null) {
+            mSkeletonPulse.cancel(); // endless: it would hold the views of a screen that is gone
+            mSkeletonPulse = null;
+        }
         mListFocus.onDestroyView();
         if (mRouteOffer != null) {
             mRouteOffer.dismiss(); // it would outlive the screen on the activity's layout
@@ -636,6 +640,29 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
         updateEmpty();
     }
 
+    /** The placeholder's pulse: runs while it shows. */
+    private android.animation.ObjectAnimator mSkeletonPulse;
+
+    private void showSkeleton(boolean show) {
+        View skeleton = binding.skeleton.getRoot();
+        if (show == (skeleton.getVisibility() == View.VISIBLE)) {
+            return;
+        }
+        skeleton.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (mSkeletonPulse != null) {
+            mSkeletonPulse.cancel();
+            mSkeletonPulse = null;
+        }
+        skeleton.setAlpha(1f);
+        if (show) {
+            mSkeletonPulse = android.animation.ObjectAnimator.ofFloat(skeleton, View.ALPHA, 1f, 0.45f);
+            mSkeletonPulse.setDuration(800);
+            mSkeletonPulse.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+            mSkeletonPulse.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+            mSkeletonPulse.start();
+        }
+    }
+
     /**
      * The empty list's message, once the layout has settled: shown while nothing is listed, nothing loads and no
      * refresh runs. A cancel followed by a reload in one pass never flashes it: the check runs after both.
@@ -653,6 +680,11 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
                     && binding.mProgressBarLayout.getRoot().getVisibility() != View.VISIBLE
                     && !binding.refresh.isRefreshing();
             binding.placeholder.getRoot().setVisibility(empty ? View.VISIBLE : View.GONE);
+            // the first page of a book list on its way: rows of grey blocks, not a blank screen with a bar
+            boolean loading = adapter != null && adapter.getItemCount() == 0
+                    && binding.mProgressBarLayout.getRoot().getVisibility() == View.VISIBLE
+                    && modelID == MODEL_BOOKS;
+            showSkeleton(loading);
             if (empty) {
                 binding.placeholder.placeholderText.setText(R.string.books_list_empty);
             }

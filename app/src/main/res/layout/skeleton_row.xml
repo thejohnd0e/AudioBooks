@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of the loading placeholder: a cover and two lines of text. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/recycler_item_margin"
+    android:paddingTop="8dp"
+    android:paddingEnd="@dimen/recycler_item_margin"
+    android:paddingBottom="8dp"
+    tools:viewBindingIgnore="true">
+
+    <View
+        android:layout_width="64dp"
+        android:layout_height="88dp"
+        android:background="@drawable/bg_skeleton" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_skeleton" />
+
+        <View
+            android:layout_width="160dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_skeleton" />
+
+        <View
+            android:layout_width="110dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_skeleton" />
+    </LinearLayout>
+</LinearLayout>
