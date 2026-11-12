@@ -17,6 +17,14 @@ public class AppThemesTest {
     }
 
     @Test
+    public void unknownOrNullPaletteDefaultsToSteel() {
+        assertEquals(AppThemes.PALETTE_STEEL, AppThemes.normalizePalette(null));
+        assertEquals(AppThemes.PALETTE_STEEL, AppThemes.normalizePalette(""));
+        assertEquals(AppThemes.PALETTE_STEEL, AppThemes.normalizePalette("neon_pink"));
+        assertEquals(AppThemes.PALETTE_STEEL, AppThemes.normalizePalette("random"));
+    }
+
+    @Test
     public void hexParsingAndFormatting() {
         assertEquals("#161b18", AppThemes.formatHex(0xFF161B18));
         assertEquals(0xFF161B18, AppThemes.parseHex("#161b18", 0));
@@ -58,13 +66,5 @@ public class AppThemesTest {
         assertEquals(120f, hsv[0], 0.01f);
         assertEquals(1f, hsv[1], 0.01f);
         assertEquals(1f, hsv[2], 0.01f);
-    }
-
-    @Test
-    public void unknownOrNullPaletteDefaultsToSage() {
-        assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette(null));
-        assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette(""));
-        assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette("neon_pink"));
-        assertEquals(AppThemes.PALETTE_SAGE, AppThemes.normalizePalette("random"));
     }
 }
