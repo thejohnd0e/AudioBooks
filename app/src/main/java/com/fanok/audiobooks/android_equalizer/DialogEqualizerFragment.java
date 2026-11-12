@@ -249,6 +249,7 @@ public class DialogEqualizerFragment extends DialogFragment {
         presetSpinner = view.findViewById(R.id.equalizer_preset_spinner);
         presetSpinner.getBackground().setColorFilter(textColor, PorterDuff.Mode.SRC_ATOP);
         bindBalance(view);
+        bindBoost(view, textColor);
         // night sound, like the balance, is the sink's: heard at once, with the equalizer switch off too
         SwitchCompat nightSwitch = view.findViewById(R.id.equalizer_night);
         nightSwitch.setTextColor(textColor);
@@ -470,6 +471,34 @@ public class DialogEqualizerFragment extends DialogFragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
+            }
+        });
+    }
+
+    /** The volume boost: 100 % to 200 %, heard at once and kept with the other sound settings. */
+    private void bindBoost(View view, int textColor) {
+        SeekBar bar = view.findViewById(R.id.equalizer_boost);
+        TextView value = view.findViewById(R.id.equalizer_boost_value);
+        value.setTextColor(textColor);
+        bar.getThumb().setColorFilter(new PorterDuffColorFilter(themeColor, PorterDuff.Mode.SRC_IN));
+        bar.setMax(BalanceAudioProcessor.BOOST_MAX);
+        bar.setKeyProgressIncrement(10);
+        bar.setProgress(Settings.boost);
+        value.setText(getString(R.string.equalizer_boost_value, 100 + Settings.boost));
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Settings.boost = progress;
+                BalanceAudioProcessor.setBoost(progress);
+                value.setText(getString(R.string.equalizer_boost_value, 100 + progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
     }
