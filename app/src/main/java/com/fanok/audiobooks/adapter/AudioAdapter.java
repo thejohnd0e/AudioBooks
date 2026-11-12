@@ -316,10 +316,26 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
         refresh();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    /**
+     * The chapter that is playing: the two rows that change (the one it leaves and the one it takes) are redrawn,
+     * not the whole list, which blinked and lost the scroll at every chapter change of a long book.
+     */
     public void setIndexSelected(int indexSelected) {
+        int was = this.indexSelected;
         this.indexSelected = indexSelected;
-        notifyDataSetChanged();
+        if (was == indexSelected) {
+            return;
+        }
+        redrawChapter(was);
+        redrawChapter(indexSelected);
+    }
+
+    /** Redraws the row of chapter {@code dataIndex}, if one is shown. */
+    private void redrawChapter(int dataIndex) {
+        int row = displayOf(dataIndex);
+        if (row >= 0) {
+            notifyItemChanged(row);
+        }
     }
 
     public int getIndexSelected() {
@@ -602,11 +618,10 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
             toggle(view, pos);
             return;
         }
-        indexSelected = pos;
+        setIndexSelected(pos);
         if (mListener != null) {
             mListener.onItemSelected(view, pos);
         }
-        notifyDataSetChanged();
     }
 
     /** A long press starts choosing with this chapter alone; while choosing it is a tap. */

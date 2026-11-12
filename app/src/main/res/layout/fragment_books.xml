@@ -92,6 +92,13 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <include
+            android:id="@+id/skeleton"
+            layout="@layout/skeleton_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
             android:id="@+id/mProgressBarLayout"
             layout="@layout/progres_bottom"
             android:layout_width="match_parent"
