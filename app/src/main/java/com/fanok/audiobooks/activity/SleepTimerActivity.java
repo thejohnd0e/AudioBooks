@@ -6,6 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.util.Log;
+import androidx.annotation.Nullable;
+import com.fanok.audiobooks.service.SleepSound;
+import com.fanok.audiobooks.service.SleepSoundPlayer;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.Sensor;
@@ -79,6 +86,24 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
     private TextView mClockCaption;
     private SwitchMaterial mWarn;
     private SwitchMaterial mShake;
+    /** The name of the sound chosen for the warning, under its row. */
+    private TextView mWarnSoundName;
+    /** Plays the sounds on offer as the listener goes through them. */
+    private SleepSoundPlayer mPreview;
+    private final androidx.activity.result.ActivityResultLauncher<Intent> mSoundPicker = registerForActivityResult(
+            new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(), result -> {
+                Intent data = result.getData();
+                Uri picked = data == null ? null
+                        : androidx.core.content.IntentCompat.getParcelableExtra(data,
+                                RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri.class);
+                if (result.getResultCode() == RESULT_OK && picked != null) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putString(SleepSound.PREF, SleepSound.Kind.CUSTOM.id)
+                            .putString(SleepSound.PREF_URI, picked.toString()).apply();
+                    previewSound(SleepSound.Kind.CUSTOM, picked);
+                    bindWarnSound();
+                }
+            });
     private View mStart;
     private TextView mRemaining;
     private TextView mEndCaption;
@@ -131,6 +156,7 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
         mClockCaption = findViewById(R.id.clockCaption);
         mWarn = findViewById(R.id.warn);
         mShake = findViewById(R.id.shake);
+        mWarnSoundName = findViewById(R.id.warnSoundName);
         mStart = findViewById(R.id.start);
         mRemaining = findViewById(R.id.remaining);
         mEndCaption = findViewById(R.id.endCaption);
@@ -184,9 +210,84 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
                 mPresenter.setShake(checked);
             }
         });
+        findViewById(R.id.warnSoundRow).setOnClickListener(view -> showSoundChooser());
+        bindWarnSound();
         mStart.setOnClickListener(view -> mPresenter.start());
         mExtend.setOnClickListener(view -> mPresenter.extend());
         mCancel.setOnClickListener(view -> mPresenter.cancel());
+    }
+
+    /** The chosen sound's name under the row: the kind's, or the picked sound's own title. */
+    private void bindWarnSound() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SleepSound.Kind kind = SleepSound.effective(prefs);
+        String name = getString(kind.title);
+        Uri custom = SleepSound.customUri(prefs);
+        if (kind == SleepSound.Kind.CUSTOM && custom != null) {
+            try {
+                Ringtone ringtone = RingtoneManager.getRingtone(this, custom);
+                if (ringtone != null) {
+                    name = getString(R.string.sleep_sound_custom_named, ringtone.getTitle(this));
+                }
+            } catch (RuntimeException e) {
+                // the sound's title is a nicety: the row reads "Своя мелодия…" without it
+            }
+        }
+        mWarnSoundName.setText(name);
+    }
+
+    private void previewSound(SleepSound.Kind kind, @Nullable Uri custom) {
+        if (mPreview == null) {
+            mPreview = new SleepSoundPlayer(this, new Handler(Looper.getMainLooper()));
+        }
+        mPreview.preview(kind, custom);
+    }
+
+    /** The sounds on offer, each heard as it is chosen; "Своя мелодия…" opens the system's list of sounds. */
+    private void showSoundChooser() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SleepSound.Kind[] kinds = SleepSound.Kind.values();
+        CharSequence[] names = new CharSequence[kinds.length];
+        for (int i = 0; i < kinds.length; i++) {
+            names[i] = getString(kinds[i].title);
+        }
+        int checked = SleepSound.effective(prefs).ordinal();
+        new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(this)
+                .setTitle(R.string.sleep_sound_title)
+                .setSingleChoiceItems(names, checked, (dialog, which) -> {
+                    SleepSound.Kind kind = kinds[which];
+                    if (kind == SleepSound.Kind.CUSTOM) {
+                        Uri existing = SleepSound.customUri(prefs);
+                        Intent picker = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
+                                .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALL)
+                                .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE,
+                                        getString(R.string.sleep_sound_picker_title))
+                                .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                                .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false)
+                                .putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, existing);
+                        dialog.dismiss();
+                        try {
+                            mSoundPicker.launch(picker);
+                        } catch (RuntimeException e) {
+                            Log.w("SleepTimerActivity", "no sound picker", e);
+                        }
+                        return;
+                    }
+                    prefs.edit().putString(SleepSound.PREF, kind.id).apply();
+                    previewSound(kind, null);
+                    bindWarnSound();
+                    dialog.dismiss();
+                })
+                .setNegativeButton(R.string.close, null)
+                .show();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mPreview != null) {
+            mPreview.stop();
+        }
+        super.onStop();
     }
 
     private void stylePaletteControls() {

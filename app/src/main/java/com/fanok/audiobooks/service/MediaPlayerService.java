@@ -44,7 +44,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.media.audiofx.Equalizer;
 import android.media.audiofx.PresetReverb;
 import android.net.ConnectivityManager;
@@ -2787,14 +2786,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private static final long SLEEP_FADE_OUT_TICK_MS = 250;
     private static final float SHAKE_G = 2.4f;
     private static final long SHAKE_DEBOUNCE_MS = 1_500;
-    /**
-     * A beep: a DTMF tone, which lasts as long as asked (the old TONE_PROP_BEEP was cut to 35 ms whatever the
-     * duration), at full tone volume. 941 + 1633 Hz stands out of speech.
-     */
-    private static final int BEEP_TONE = ToneGenerator.TONE_DTMF_D;
-    private static final int BEEP_VOLUME = ToneGenerator.MAX_VOLUME;
-    private static final int BEEP_MS = 300;
-    private static final long BEEP_PERIOD_MS = 500;
+    private static final long BEEP_PERIOD_MS = SleepSoundPlayer.PERIOD_MS;
     private static final int BEEPS_PER_BURST = 4;
     /** Under a burst the book plays this share of its volume before the warning, so the beeps are heard over it. */
     private static final float BEEP_DUCK = 0.2f;
@@ -2826,9 +2818,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private float volumeBeforeFadeOut = -1;
     private long fadeOutStart;
     private final Runnable sleepFadeOutTick = this::runSleepFadeOutTick;
-    /** The beep generator in use; released by its scheduled release or by {@link #releaseSleepTimer()}. */
+    /** The sound of the warning, as the listener chose it (SleepSound); made when first needed. */
     @Nullable
-    private ToneGenerator activeTone;
+    private SleepSoundPlayer sleepSound;
     private final SensorEventListener shakeListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -2945,7 +2937,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             listenForShake(playing);
         }
         if (!playing) {
-            releaseTone(activeTone); //a pause silences a burst still sounding
+            stopSleepSound(); //a pause silences a burst still sounding
         }
         if (sleepTimer == null || sleepMode == SleepTimerPresenter.MODE_CLOCK) {
             return;
@@ -3127,7 +3119,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
         stopSleepWarning();
         closeWakeWindow();
-        releaseTone(activeTone);
+        stopSleepSound();
     }
 
     private void stopSleepWarning() {
@@ -3135,7 +3127,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         duckedUntil = 0;
         beepBursts = 0;
         if (volumeBeforeWarning >= 0) {
-            releaseTone(activeTone); //a burst still sounding stops with the warning
+            stopSleepSound(); //a burst still sounding stops with the warning
             if (player != null) {
                 player.setVolume(volumeBeforeWarning);
             }
@@ -3346,36 +3338,17 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     /** {@code count} short beeps on the music stream; the generator is released after the last one. */
+    /** A burst of {@code count} beats in the sound the listener chose. */
     private void beep(int count) {
-        releaseTone(activeTone);
-        final ToneGenerator tone;
-        try {
-            tone = new ToneGenerator(AudioManager.STREAM_MUSIC, BEEP_VOLUME);
-        } catch (RuntimeException e) {
-            Log.w(TAG, "cannot beep", e);
-            return;
+        if (sleepSound == null) {
+            sleepSound = new SleepSoundPlayer(this, handler);
         }
-        activeTone = tone;
-        for (int i = 0; i < count; i++) {
-            handler.postDelayed(() -> {
-                if (activeTone == tone) {
-                    tone.startTone(BEEP_TONE, BEEP_MS);
-                }
-            }, i * BEEP_PERIOD_MS);
-        }
-        handler.postDelayed(() -> releaseTone(tone), count * BEEP_PERIOD_MS);
+        sleepSound.play(count);
     }
 
-    /** Releases {@code tone} if it is still the active generator (a teardown may have dropped its scheduled release). */
-    private void releaseTone(@Nullable ToneGenerator tone) {
-        if (tone == null || activeTone != tone) {
-            return;
-        }
-        activeTone = null;
-        try {
-            tone.release();
-        } catch (RuntimeException e) {
-            Log.w(TAG, "cannot release beep", e);
+    private void stopSleepSound() {
+        if (sleepSound != null) {
+            sleepSound.stop();
         }
     }
 

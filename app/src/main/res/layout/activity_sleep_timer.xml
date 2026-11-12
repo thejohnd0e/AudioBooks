@@ -255,6 +255,34 @@
                     android:textSize="14sp" />
 
                 <LinearLayout
+                    android:id="@+id/warnSoundRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:minHeight="56dp"
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sleep_sound_title"
+                        android:textColor="?attr/colorPrimaryText"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/warnSoundName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/subTextColor"
+                        android:textSize="14sp"
+                        tools:text="Сигнал (как раньше)" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/shakeRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
