@@ -45,7 +45,7 @@ CloudService` (id, название, `available`, `signIn`, `open`), строк�
 4. **Audience**: External. Для проверки до релиза — Testing и тестовые пользователи (до 100). Перед релизом —
    **Publish app → In production**. Для `drive.appdata` проверка Google не требуется: область «не чувствительная».
 5. **Data Access** → Add scopes → `https://www.googleapis.com/auth/drive.appdata`.
-6. **Clients → Create client → Android**, пакет `com.fanok.books`; по клиенту на каждый SHA-1:
+6. **Clients → Create client → Android**, пакет `link.intertop.audiobooks`; по клиенту на каждый SHA-1:
    - ключ релиза: `keytool -list -v -keystore <файл из keystore.properties> -alias <alias>`;
    - если приложение в Google Play с Play App Signing — SHA-1 ключа подписи из Play Console (App integrity);
    - debug: `keytool -list -v -keystore %USERPROFILE%\.android\debug.keystore -alias androiddebugkey -storepass android`.
@@ -63,7 +63,7 @@ WebDAV не подходит: с 22.06.2026 он доступен только �
 1. Войти любым Яндекс ID на [oauth.yandex.ru](https://oauth.yandex.ru/) → «Создать приложение» →
    **«Для авторизации пользователей»** (тип потом не меняется).
 2. Название `Аудиокниги` (его видят пользователи; по нему же называется папка «Приложения/…» на их Дисках), почта.
-3. Платформы → **«Android-приложение»**: package name `com.fanok.books`, SHA256 Fingerprints — отпечаток ключа
+3. Платформы → **«Android-приложение»**: package name `link.intertop.audiobooks`, SHA256 Fingerprints — отпечаток ключа
    подписи релиза (`apksigner verify --print-certs <apk>`, вид `84:A3:…`); для debug-сборок и подписи Google Play —
    их отпечатки тоже. Redirect URI вводить не нужно: LoginSDK возвращается по `yx<ClientID>.oauth.yandex.ru`.
 4. Доступы: «Яндекс Диск REST API» → **«Доступ к папке приложения на Диске»** (`cloud_api:disk.app_folder`).
@@ -71,7 +71,7 @@ WebDAV не подходит: с 22.06.2026 он доступен только �
 5. Скопировать **ClientID** в `gradle.properties`: `YANDEX_CLIENT_ID=<ClientID>` (не секрет; client secret не
    используется). Можно передать и как `-PYANDEX_CLIENT_ID=…` или в `~/.gradle/gradle.properties`. Пока значение
    пустое, пункт «Яндекс Диск» скрыт.
-6. Проверка: `https://yx<ClientID>.oauth.yandex.ru/.well-known/assetlinks.json` должен показывать `com.fanok.books`
+6. Проверка: `https://yx<ClientID>.oauth.yandex.ru/.well-known/assetlinks.json` должен показывать `link.intertop.audiobooks`
    и отпечаток из шага 3 — иначе Android не вернёт браузер в приложение.
 
 Вход у пользователя — официальный Yandex LoginSDK (`com.yandex.android:authsdk`): приложение Яндекса, если
