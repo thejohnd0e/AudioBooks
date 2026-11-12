@@ -327,11 +327,13 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
     private void showEqualizer(int sessionId) {
         try {
+            int textColor = com.google.android.material.color.MaterialColors.getColor(
+                    this, R.attr.colorPrimaryText, android.graphics.Color.WHITE);
             DialogEqualizerFragment fragment = DialogEqualizerFragment.newBuilder()
                     .setAudioSessionId(sessionId)
-                    .themeColor(ContextCompat.getColor(this, R.color.primaryColorEq))
-                    .textColor(ContextCompat.getColor(this, R.color.textColor))
-                    .setAccentColor(ContextCompat.getColor(this, R.color.secondaryColor))
+                    .themeColor(PaletteBinder.surface(this))
+                    .textColor(textColor)
+                    .setAccentColor(PaletteBinder.accent(this))
                     .build();
 
             fragment.show(getSupportFragmentManager(), "eq");
@@ -504,7 +506,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mSelectionClose = findViewById(R.id.selectionClose);
         mDelete = findViewById(R.id.delete);
         mDownland = findViewById(R.id.dowland);
-        mSpeed = findViewById(R.id.speed);
+        mSpeed = findViewById(R.id.player_action_speed);
         mList = findViewById(R.id.list);
         mNameCurent = findViewById(R.id.name_curent);
         mProgressBar = findViewById(R.id.progressBar);
@@ -780,7 +782,12 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mForward.setOnClickListener(view -> mPresenter.buttomForwardClick(view));
         new SeekHold(mRewind, false, false);
         new SeekHold(mForward, true, false);
-        mSpeed.setOnClickListener(v -> mPresenter.buttonSpeedClick(v));
+        if (mSpeed != null) {
+            mSpeed.setOnClickListener(v -> mPresenter.buttonSpeedClick(v));
+        }
+        findViewById(R.id.player_action_timer).setOnClickListener(v -> performPlayerAction(R.id.sleep_timer));
+        findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
+        findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
         getSystemService(AUDIO_SERVICE);
 
 
@@ -1002,7 +1009,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         }
     }
 
-    /** The player's speed button: the same "1,5×" as the toolbar, opening the speed dialog. */
+    /** The player's speed chip: icon + "1,5×", opening the speed dialog. */
     private void bindSpeedButton() {
         if (mSpeed == null) {
             return;
@@ -1085,6 +1092,10 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     /** The description's listen button acts on this book, even while the bottom player holds another. */
     public void playThisBook() {
         mPresenter.playThisBook();
+    }
+
+    private void performPlayerAction(int id) {
+        mPresenter.onPlayerActionSelected(id);
     }
 
     /** Opens the bottom player sheet and begins chapter selection for download or deletion. */

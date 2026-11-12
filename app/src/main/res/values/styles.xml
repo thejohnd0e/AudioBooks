@@ -31,6 +31,18 @@
         <item name="colorSurfaceCard">@color/palette_sage_surface</item>
         <item name="colorAccentPrimary">@color/palette_sage_accent</item>
         <item name="colorTextMuted">@color/palette_sage_text_muted</item>
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
+    </style>
+
+    <style name="Widget.AudioBooks.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    </style>
+
+    <style name="Widget.AudioBooks.PopupMenu.Overflow" parent="Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
     </style>
 
     <style name="ThemeOverlay.AudioBooks.Dialog.Alert" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -43,6 +55,7 @@
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.AudioBooks.Dialog</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.AudioBooks.DialogButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.AudioBooks.DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.AudioBooks.DialogButton</item>
     </style>
 
     <style name="ShapeAppearance.AudioBooks.Dialog" parent="">
@@ -58,10 +71,28 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="colorSurface">?attr/colorSurfaceCard</item>
+        <item name="android:colorBackground">?attr/colorSurfaceCard</item>
+        <item name="colorBackgroundFloating">?attr/colorSurfaceCard</item>
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
+        <item name="elevationOverlayEnabled">false</item>
+    </style>
 
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark">
+        <item name="colorSurface">?attr/colorSurfaceCard</item>
+        <item name="android:colorBackground">?attr/colorSurfaceCard</item>
+        <item name="colorBackgroundFloating">?attr/colorSurfaceCard</item>
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
+        <item name="elevationOverlayEnabled">false</item>
+    </style>
 
     <style name="AppTheme.SwipeOnClose" parent="AppTheme.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
@@ -138,6 +169,10 @@
         <item name="colorSurfaceCard">@color/primaryDarkColorBlack</item>
         <item name="colorAccentPrimary">@color/palette_sage_accent</item>
         <item name="colorTextMuted">@color/palette_sage_text_muted</item>
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
     </style>
 
     <style name="AppThemeBlack.NoActionBar">
@@ -145,10 +180,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppThemeBlack.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+    <style name="AppThemeBlack.AppBarOverlay" parent="AppTheme.AppBarOverlay" />
 
 
-    <style name="AppThemeBlack.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Dark" />
+    <style name="AppThemeBlack.PopupOverlay" parent="AppTheme.PopupOverlay" />
 
     <style name="AppThemeBlack.SwipeOnClose" parent="AppThemeBlack.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
@@ -215,6 +250,10 @@
         <item name="colorSurfaceCard">@color/palette_sage_surface</item>
         <item name="colorAccentPrimary">@color/palette_sage_accent</item>
         <item name="colorTextMuted">@color/palette_sage_text_muted</item>
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuBackground">@drawable/bg_popup_menu</item>
+        <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
     </style>
 
     <style name="myCustomMenuTextAppearanceLight" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
@@ -226,9 +265,9 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="LightAppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.ActionBar" />
+    <style name="LightAppTheme.AppBarOverlay" parent="AppTheme.AppBarOverlay" />
 
-    <style name="LightAppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <style name="LightAppTheme.PopupOverlay" parent="AppTheme.PopupOverlay" />
 
     <style name="LightAppTheme.SwipeOnClose" parent="LightAppTheme.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>

@@ -188,6 +188,9 @@ public class DialogEqualizerFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+        if (getDialog() != null) {
+            com.fanok.audiobooks.PaletteBinder.applyPaletteToDialog(getDialog());
+        }
         // a dialog keeps its portrait width on its side: in landscape its two columns take most of the screen
         Window window = getDialog() == null ? null : getDialog().getWindow();
         if (window != null && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -205,11 +208,21 @@ public class DialogEqualizerFragment extends DialogFragment {
             dismissAllowingStateLoss();
             return;
         }
+        backgroundColor = com.fanok.audiobooks.PaletteBinder.surface(requireContext());
+        themeColor = com.fanok.audiobooks.PaletteBinder.accent(requireContext());
+        textColor = com.google.android.material.color.MaterialColors.getColor(
+                requireContext(), R.attr.colorPrimaryText, Color.WHITE);
 
         ImageView backBtn = view.findViewById(R.id.equalizer_back_btn);
         backBtn.setOnClickListener(v -> dismiss());
         backBtn.setColorFilter(textColor);
-        view.findViewById(R.id.equalizerLayout).setBackgroundColor(backgroundColor);
+        float density = getResources().getDisplayMetrics().density;
+        android.graphics.drawable.GradientDrawable cardBg = new android.graphics.drawable.GradientDrawable();
+        cardBg.setShape(android.graphics.drawable.GradientDrawable.RECTANGLE);
+        cardBg.setCornerRadius(16f * density);
+        cardBg.setColor(backgroundColor);
+        cardBg.setStroke(Math.max(1, Math.round(density)), 0x26FFFFFF);
+        view.findViewById(R.id.equalizerLayout).setBackground(cardBg);
 
         titleTextView = view.findViewById(R.id.equalizer_fragment_title);
         titleTextView.setTextColor(textColor);
@@ -257,12 +270,17 @@ public class DialogEqualizerFragment extends DialogFragment {
         reverbController.setEnabled(presetReverb != null);
 
 
+        bassController.circlePaint.setColor(com.fanok.audiobooks.PaletteBinder.background(requireContext()));
+        bassController.textPaint.setColor(textColor);
         bassController.circlePaint2.setColor(themeColor);
         bassController.linePaint.setColor(themeColor);
         bassController.invalidate();
+        reverbController.circlePaint.setColor(com.fanok.audiobooks.PaletteBinder.background(requireContext()));
+        reverbController.textPaint.setColor(textColor);
         reverbController.circlePaint2.setColor(themeColor);
         reverbController.linePaint.setColor(themeColor);
         reverbController.invalidate();
+        com.fanok.audiobooks.PaletteBinder.tintControls(view, themeColor);
 
         int x = 0;
         if (!Settings.isEqualizerReloaded) {

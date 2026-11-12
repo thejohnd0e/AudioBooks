@@ -13,12 +13,12 @@
     <attr name="carPress" format="color" />
 
     <style name="AppTheme.CarMode" parent="AppTheme.NoActionBar">
-        <item name="carBackground">#1A1E34</item>
-        <item name="carForeground">#ECEDF2</item>
-        <item name="carAccent">#F08C55</item>
-        <item name="carTrack">#383D56</item>
-        <item name="carPlay">#ECEDF2</item>
-        <item name="carPlayGlyph">#1A1E34</item>
+        <item name="carBackground">?attr/colorBackgroundMain</item>
+        <item name="carForeground">?attr/colorPrimaryText</item>
+        <item name="carAccent">?attr/colorAccentPrimary</item>
+        <item name="carTrack">?attr/colorSurfaceCard</item>
+        <item name="carPlay">?attr/colorAccentPrimary</item>
+        <item name="carPlayGlyph">?attr/colorBackgroundMain</item>
         <item name="carPress">#33FFFFFF</item>
         <item name="android:windowBackground">?attr/carBackground</item>
         <item name="android:statusBarColor">?attr/carBackground</item>
@@ -26,12 +26,12 @@
     </style>
 
     <style name="AppThemeBlack.CarMode" parent="AppThemeBlack.NoActionBar">
-        <item name="carBackground">#000000</item>
-        <item name="carForeground">#E6E6E6</item>
-        <item name="carAccent">#F08C55</item>
-        <item name="carTrack">#2C2C31</item>
-        <item name="carPlay">#E6E6E6</item>
-        <item name="carPlayGlyph">#000000</item>
+        <item name="carBackground">?attr/colorBackgroundMain</item>
+        <item name="carForeground">?attr/colorPrimaryText</item>
+        <item name="carAccent">?attr/colorAccentPrimary</item>
+        <item name="carTrack">?attr/colorSurfaceCard</item>
+        <item name="carPlay">?attr/colorAccentPrimary</item>
+        <item name="carPlayGlyph">?attr/colorBackgroundMain</item>
         <item name="carPress">#2EFFFFFF</item>
         <item name="android:windowBackground">?attr/carBackground</item>
         <item name="android:statusBarColor">?attr/carBackground</item>
@@ -39,18 +39,16 @@
     </style>
 
     <style name="LightAppTheme.CarMode" parent="LightAppTheme.NoActionBar">
-        <item name="carBackground">#F3F5F5</item>
-        <item name="carForeground">#1F2A29</item>
-        <item name="carAccent">#00897B</item>
-        <item name="carTrack">#D5DEDC</item>
-        <item name="carPlay">#00897B</item>
-        <item name="carPlayGlyph">#FFFFFF</item>
+        <item name="carBackground">?attr/colorBackgroundMain</item>
+        <item name="carForeground">?attr/colorPrimaryText</item>
+        <item name="carAccent">?attr/colorAccentPrimary</item>
+        <item name="carTrack">?attr/colorSurfaceCard</item>
+        <item name="carPlay">?attr/colorAccentPrimary</item>
+        <item name="carPlayGlyph">?attr/colorBackgroundMain</item>
         <item name="carPress">#1F000000</item>
         <item name="android:windowBackground">?attr/carBackground</item>
         <item name="android:statusBarColor">?attr/carBackground</item>
         <item name="android:navigationBarColor">?attr/carBackground</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
     </style>
 
     <style name="CarModeCover">

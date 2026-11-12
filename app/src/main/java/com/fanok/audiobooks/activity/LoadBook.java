@@ -42,20 +42,11 @@ public class LoadBook extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        com.fanok.audiobooks.AppThemes.apply(this, R.style.AppTheme_NoAnimTheme, R.style.LightAppTheme_NoAnimTheme,
+                R.style.AppThemeBlack_NoAnimTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.load_book_activity);
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            setTheme(R.style.AppTheme_NoAnimTheme);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            setTheme(R.style.LightAppTheme_NoAnimTheme);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            setTheme(R.style.AppThemeBlack_NoAnimTheme);
-        }
+        com.fanok.audiobooks.PaletteBinder.bind(this);
 
         mContext = this;
         Intent intent = getIntent();

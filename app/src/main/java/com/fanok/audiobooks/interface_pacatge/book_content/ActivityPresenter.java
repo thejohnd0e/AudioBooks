@@ -17,6 +17,8 @@ public interface ActivityPresenter {
 
     void onOptionsMenuItemSelected(MenuItem item);
 
+    void onPlayerActionSelected(int itemId);
+
     void onItemSelected(View view, int position);
 
     void getAudio();

@@ -207,21 +207,11 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
         Log.d(TAG, "onCreate: called");
         mRecreated = savedInstanceState != null;
         mSavedQuery = savedInstanceState == null ? null : savedInstanceState.getString(STATE_QUERY);
+        com.fanok.audiobooks.AppThemes.apply(this, R.style.AppTheme_SwipeOnClose, R.style.LightAppTheme_SwipeOnClose,
+                R.style.AppThemeBlack_SwipeOnClose);
         super.onCreate(savedInstanceState);
         binding = ActivitySearchableBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        String themeName = pref.getString("pref_theme", getString(R.string.theme_dark_value));
-        if (themeName.equals(getString(R.string.theme_dark_value))) {
-            setTheme(R.style.AppTheme_SwipeOnClose);
-        } else if (themeName.equals(getString(R.string.theme_light_value))) {
-            setTheme(R.style.LightAppTheme_SwipeOnClose);
-        } else if (themeName.equals(getString(R.string.theme_black_value))) {
-            setTheme(R.style.AppThemeBlack_SwipeOnClose);
-        }
 
         Intent intent = getIntent();
         mModelId = intent.getIntExtra(Consts.ARG_MODEL, Consts.MODEL_BOOKS);
@@ -229,6 +219,9 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
+        binding.progress.setIndicatorColor(com.fanok.audiobooks.PaletteBinder.accent(this));
+        binding.action.setTextColor(com.fanok.audiobooks.PaletteBinder.accent(this));
 
         binding.searchView.onActionViewExpanded();
         binding.searchView.setIconified(false);
@@ -1016,6 +1009,9 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
     }
 
     private int attrColor(int attr) {
+        if (attr == R.attr.hrefColor || attr == R.attr.colorAccentPrimary) {
+            return com.fanok.audiobooks.PaletteBinder.accent(this);
+        }
         TypedValue value = new TypedValue();
         getTheme().resolveAttribute(attr, value, true);
         return value.resourceId != 0 ? ContextCompat.getColor(this, value.resourceId) : value.data;
