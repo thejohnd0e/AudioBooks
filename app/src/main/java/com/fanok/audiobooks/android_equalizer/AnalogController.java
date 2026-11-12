@@ -109,21 +109,25 @@ public class AnalogController extends View {
         float radius = radius();
         boolean off = value == 0 || !isEnabled();
 
+        int faceColor = com.fanok.audiobooks.PaletteBinder.background(getContext());
+        int mutedColor = com.google.android.material.color.MaterialColors.getColor(
+                this, R.attr.colorTextMuted, OFF_COLOR);
+
         for (int i = 0; i <= max; i++) {
             float position = positionOf(i);
-            circlePaint.setColor(Color.parseColor("#111111"));
+            circlePaint.setColor(0x33FFFFFF);
             canvas.drawCircle(x(position, radius), y(position, radius), radius / 15,
                     !off && i <= value ? circlePaint2 : circlePaint);
         }
 
-        circlePaint.setColor(Color.parseColor("#222222"));
+        circlePaint.setColor(0x18FFFFFF);
         canvas.drawCircle(midx, midy, radius * (13f / 15), circlePaint);
-        circlePaint.setColor(Color.parseColor("#000000"));
+        circlePaint.setColor(faceColor);
         canvas.drawCircle(midx, midy, radius * (11f / 15), circlePaint);
 
         int textColor = textPaint.getColor();
         if (off) {
-            textPaint.setColor(OFF_COLOR);
+            textPaint.setColor(mutedColor);
         }
         canvas.drawText(label, midx, midy + radius * 1.1f, textPaint);
         canvas.drawText(value == 0 ? offText : String.valueOf(value), midx,
@@ -133,7 +137,7 @@ public class AnalogController extends View {
         float position = positionOf(value);
         int lineColor = linePaint.getColor();
         if (off) {
-            linePaint.setColor(OFF_COLOR);
+            linePaint.setColor(mutedColor);
         }
         canvas.drawLine(x(position, radius * 0.45f), y(position, radius * 0.45f),
                 x(position, radius * 0.65f), y(position, radius * 0.65f), linePaint);

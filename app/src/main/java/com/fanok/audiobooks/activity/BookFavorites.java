@@ -201,6 +201,7 @@ public final class BookFavorites implements FavoritePeople.Listener {
         bindPanel(panel, sheet::dismiss);
         NestedScrollView scroll = new NestedScrollView(a); // many people, landscape or large text: it scrolls
         scroll.addView(panel);
+        com.fanok.audiobooks.PaletteBinder.bindBottomSheet(scroll, sheet);
         sheet.setContentView(scroll);
         sheet.setOnDismissListener(dialog -> {
             if (mSheet == sheet) {

@@ -118,6 +118,7 @@ public class ActivityCookies extends AppCompatActivity {
         page = asked != null && Url.isHost(Url.canonical(asked), server) ? Url.canonical(asked) : server;
         book = clearance && !page.equals(server) && getIntent().getBooleanExtra(EXTRA_BOOK, false);
         setSupportActionBar(binding.toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         setTitle(Url.hostOf(server));
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

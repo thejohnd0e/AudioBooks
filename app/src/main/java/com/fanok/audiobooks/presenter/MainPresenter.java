@@ -145,11 +145,10 @@ public class MainPresenter extends MvpPresenter<MainView> implements
                 break;
             case Consts.FRAGMENT_SETTINGS:
                 if (BOOK_TOOLBAR.equals(url)) {
-                    // Settings → Оформление → Панель книги, each on the back stack, so Back walks up
+                    // Settings → Оформление, each on the back stack, so Back walks up
                     getViewState().showFragment(new SettingsFragment(), "settings");
                     getViewState().showFragment(SettingsFragment.withRoot("group_appearance"),
                             "settings:group_appearance");
-                    getViewState().showFragment(SettingsFragment.withRoot(BOOK_TOOLBAR), "settings:" + BOOK_TOOLBAR);
                 } else {
                     startFragment(fragmentID, false);
                 }

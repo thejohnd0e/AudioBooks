@@ -54,6 +54,7 @@ public class ForumLoginActivity extends AppCompatActivity {
         Slidr.attach(this);
 
         setSupportActionBar(binding.toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         setTitle("4pda");
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

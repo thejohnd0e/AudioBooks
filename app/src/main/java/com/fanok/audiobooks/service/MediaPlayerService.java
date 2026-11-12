@@ -659,6 +659,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         currentBookUrl = null;
         restoringBookUrl = null;
         currentBook = null;
+        sendPlayIcon();
 
         //5. the executor goes last; every submit checks isShutdown()
         dbExecutor.shutdown();
@@ -998,7 +999,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             publishMetadata();
             publishQueue();
         }
+        shownIcon = 0; // force Broadcast_SET_IMAGE even when stopping from a paused state
         publishState();
+        sendInternal(new Intent(Broadcast_SET_TITLE).putExtra("title", ""));
         removeNotification();
         notifyChildrenChanged(MY_MEDIA_ROOT_ID);
         stopSelf();

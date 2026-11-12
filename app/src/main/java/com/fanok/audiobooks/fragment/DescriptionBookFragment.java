@@ -4,8 +4,12 @@ import static android.content.Context.CLIPBOARD_SERVICE;
 import static android.content.Context.UI_MODE_SERVICE;
 
 import android.app.UiModeManager;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -31,10 +35,13 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.AttrRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.arellomobile.mvp.MvpAppCompatFragment;
@@ -61,6 +68,7 @@ import com.fanok.audiobooks.download.BookDownloader;
 import com.fanok.audiobooks.download.DownloadIds;
 import com.fanok.audiobooks.download.DownloadMonitor;
 import com.fanok.audiobooks.download.DownloadStatus;
+import com.fanok.audiobooks.download.DownloadStatusText;
 import com.fanok.audiobooks.pojo.BookPOJO;
 import com.fanok.audiobooks.pojo.DescriptionPOJO;
 import com.fanok.audiobooks.pojo.OtherArtistPOJO;
@@ -77,6 +85,7 @@ import com.fanok.audiobooks.util.BookHeader;
 import com.fanok.audiobooks.util.BookProgress;
 import com.fanok.audiobooks.util.RemainingTime;
 import com.fanok.audiobooks.util.SeriesPeek;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
@@ -85,7 +94,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DescriptionBookFragment extends MvpAppCompatFragment
-        implements Description, BookProgress.Listener, BookFavorites.Listener {
+        implements Description, BookProgress.Listener, BookFavorites.Listener, DownloadMonitor.Listener {
 
     private static final String TAG = "DescriptionBookFragment";
     private static final String ARG_BOOK_POJO = "arg_book_pojo";
@@ -132,6 +141,18 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     private TextView mDisLike;
     private View mDescLine;
     private View mOtherBookLine;
+    @Nullable
+    private MaterialButton mBtnListen;
+    @Nullable
+    private MaterialButton mBtnFavorite;
+    @Nullable
+    private MaterialButton mBtnDownload;
+    private final BroadcastReceiver mPlaybackReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            bindListenButton();
+        }
+    };
     @InjectPresenter
     BookDescriptionPresenter mPresenter;
     private BooksOtherAdapter mAdapterBooksRecomended;
@@ -264,6 +285,9 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         if (favorites != null) {
             bindLabel(mAuthorLabel, favorites, FavoritePeople.AUTHOR, R.drawable.ic_autor);
             bindLabel(mArtistLabel, favorites, FavoritePeople.READER, R.drawable.ic_artist);
+            bindFavoriteButton(favorites.isBook());
+        } else {
+            bindFavoriteButton(false);
         }
         if (mHeaderTitle.isEmpty()) {
             return; // as before: no title, no header
@@ -474,30 +498,27 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mDescLine = view.findViewById(R.id.descLine);
         mOtherBookLine = view.findViewById(R.id.otherBookLine);
 
-        View btnListen = view.findViewById(R.id.btnListenBook);
-        if (btnListen != null) {
-            btnListen.setOnClickListener(v -> {
-                if (getActivity() != null) {
-                    View playTop = getActivity().findViewById(R.id.playTop);
-                    if (playTop != null) {
-                        playTop.performClick();
-                    }
+        mBtnListen = view.findViewById(R.id.btnListenBook);
+        if (mBtnListen != null) {
+            mBtnListen.setOnClickListener(v -> {
+                if (getActivity() instanceof BookActivity) {
+                    ((BookActivity) getActivity()).playThisBook();
                 }
             });
         }
 
-        View btnFavorite = view.findViewById(R.id.btnFavoriteBook);
-        if (btnFavorite != null) {
-            btnFavorite.setOnClickListener(v -> toggleBook());
+        mBtnFavorite = view.findViewById(R.id.btnFavoriteBook);
+        if (mBtnFavorite != null) {
+            mBtnFavorite.setOnClickListener(v -> toggleBook());
         }
 
-        View btnDownload = view.findViewById(R.id.btnDownloadBook);
-        if (btnDownload != null) {
+        mBtnDownload = view.findViewById(R.id.btnDownloadBook);
+        if (mBtnDownload != null) {
             BookPOJO book = book();
             if (!BookDownloader.canDownload(requireContext(), book)) {
-                btnDownload.setVisibility(View.GONE); // a site's collection or an imported book: nothing to download
+                mBtnDownload.setVisibility(View.GONE); // a site's collection or an imported book: nothing to download
             } else {
-                btnDownload.setOnClickListener(v -> downloadBook(book));
+                mBtnDownload.setOnClickListener(v -> downloadBook(book));
             }
         }
 
@@ -577,12 +598,33 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter(BookActivity.Broadcast_SET_IMAGE);
+        filter.addAction(BookActivity.Broadcast_SET_TITLE);
+        filter.addAction(BookActivity.Broadcast_SET_SELECTION);
+        ContextCompat.registerReceiver(requireContext(), mPlaybackReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
+        DownloadMonitor.get().addListener(this);
+        bindDownloadButton();
+    }
+
+    @Override
+    public void onStop() {
+        DownloadMonitor.get().removeListener(this);
+        requireContext().unregisterReceiver(mPlaybackReceiver);
+        super.onStop();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (mBookUrl != null) {
             mCheckpoint = new StorageUtil(requireContext()).loadCheckpoint(mBookUrl);
             BookProgress.addListener(this);
         }
+        bindListenButton();
+        bindFavorites();
+        bindDownloadButton();
         showTime();
         if (mSeriesPeek != null) {
             mSeriesPeek.schedule();
@@ -602,6 +644,7 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     @Override
     public void onBookProgress(@NonNull String bookUrl) {
         if (bookUrl.equals(mBookUrl)) {
+            bindListenButton();
             showTime();
         }
     }
@@ -609,6 +652,11 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     @Override
     public void onFavoritesChanged() {
         bindFavorites();
+    }
+
+    @Override
+    public void onDownloadsChanged() {
+        bindDownloadButton();
     }
 
     /** The book screen's one «Пройти» offer: the chapters fail on the same page and offer it too. */
@@ -664,6 +712,9 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mDisLike = null;
         mDescLine = null;
         mOtherBookLine = null;
+        mBtnListen = null;
+        mBtnFavorite = null;
+        mBtnDownload = null;
         mAdapterBooksRecomended = null;
         super.onDestroyView();
     }
@@ -686,6 +737,14 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             mArtistLabel.setBackgroundResource(R.drawable.focusable);
             mSeriesLabel.setBackgroundResource(R.drawable.focusable);
             mShowMore.setBackgroundResource(R.drawable.focusable);
+            for (MaterialButton button : new MaterialButton[] {mBtnListen, mBtnFavorite, mBtnDownload}) {
+                if (button != null) {
+                    button.setOnFocusChangeListener((v, hasFocus) -> {
+                        button.setScaleX(hasFocus ? 1.03f : 1f);
+                        button.setScaleY(hasFocus ? 1.03f : 1f);
+                    });
+                }
+            }
         }
         try {
             BookFavorites favorites = favorites();
@@ -964,10 +1023,15 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
      */
     private void downloadBook(@NonNull BookPOJO book) {
         Context context = requireContext();
-        DownloadStatus status = DownloadMonitor.get()
-                .statusOfBook(DownloadIds.bookKey(book.getUrl()));
+        DownloadStatus status = currentDownloadStatus();
         if (isRunning(status)) {
             ClearSavedActivity.startActivity(requireActivity());
+            return;
+        }
+        if (status.isCompleteBook()) {
+            if (getActivity() instanceof BookActivity) {
+                ((BookActivity) getActivity()).openDownloadSelection();
+            }
             return;
         }
         BookDownloader.downloadAll(context, book);
@@ -985,6 +1049,162 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             default:
                 return false;
         }
+    }
+
+    public static final int ACTION_START_THIS = 1;
+    public static final int ACTION_TOGGLE_ACTIVE = 2;
+
+    public static final class ListenAction {
+        @StringRes public final int textRes;
+        @DrawableRes public final int iconRes;
+        public final int action;
+
+        ListenAction(@StringRes int textRes, @DrawableRes int iconRes, int action) {
+            this.textRes = textRes;
+            this.iconRes = iconRes;
+            this.action = action;
+        }
+    }
+
+    public static final class FavoriteAction {
+        @StringRes public final int textRes;
+        @DrawableRes public final int iconRes;
+        @AttrRes public final int tintAttr;
+
+        FavoriteAction(@StringRes int textRes, @DrawableRes int iconRes, @AttrRes int tintAttr) {
+            this.textRes = textRes;
+            this.iconRes = iconRes;
+            this.tintAttr = tintAttr;
+        }
+    }
+
+    @NonNull
+    public static ListenAction listenAction(@Nullable String bookUrl, @Nullable String activeBookUrl,
+            boolean isPlaying, @Nullable Checkpoint checkpoint) {
+        return listenAction(bookUrl, activeBookUrl, isPlaying, checkpoint, -1, 0);
+    }
+
+    @NonNull
+    public static ListenAction listenAction(@Nullable String bookUrl, @Nullable String activeBookUrl,
+            boolean isPlaying, @Nullable Checkpoint checkpoint, int liveChapter, long livePositionMs) {
+        boolean thisActive = bookUrl != null && bookUrl.equals(activeBookUrl);
+        if (thisActive && isPlaying) {
+            return new ListenAction(R.string.pause, R.drawable.ic_pause, ACTION_TOGGLE_ACTIVE);
+        }
+        if (thisActive) {
+            return new ListenAction(R.string.action_resume, R.drawable.ic_play, ACTION_TOGGLE_ACTIVE);
+        }
+        boolean hasProgress = checkpoint != null && (checkpoint.chapterIndex > 0 || checkpoint.positionMs > 0)
+                || liveChapter > 0 || livePositionMs > 0;
+        return new ListenAction(hasProgress ? R.string.action_resume : R.string.action_listen,
+                R.drawable.ic_play, ACTION_START_THIS);
+    }
+
+    @NonNull
+    public static FavoriteAction favoriteAction(boolean favorite) {
+        return favorite
+                ? new FavoriteAction(R.string.action_in_favorites, R.drawable.ic_star_toggle_on, R.attr.favoriteColor)
+                : new FavoriteAction(R.string.action_to_favorites, R.drawable.ic_favorite_add, R.attr.colorAccentPrimary);
+    }
+
+    private void bindListenButton() {
+        if (mBtnListen == null) {
+            return;
+        }
+        int liveChapter = mBookUrl == null ? -1 : BookProgress.chapter(mBookUrl);
+        long livePos = mBookUrl == null ? 0 : BookProgress.positionMs(mBookUrl);
+        ListenAction state = listenAction(mBookUrl, MediaPlayerService.currentBookUrl(),
+                MediaPlayerService.isPlay(), mCheckpoint, liveChapter, livePos);
+        mBtnListen.setText(state.textRes);
+        mBtnListen.setIconResource(state.iconRes);
+        mBtnListen.setContentDescription(getString(state.textRes));
+    }
+
+    private void bindFavoriteButton(boolean favorite) {
+        if (mBtnFavorite == null) {
+            return;
+        }
+        FavoriteAction state = favoriteAction(favorite);
+        mBtnFavorite.setText(state.textRes);
+        mBtnFavorite.setIconResource(state.iconRes);
+        int iconColor = state.tintAttr == R.attr.colorAccentPrimary
+                ? PaletteBinder.accent(requireContext()) : MaterialColors.getColor(mBtnFavorite, state.tintAttr);
+        mBtnFavorite.setIconTint(ColorStateList.valueOf(iconColor));
+        mBtnFavorite.setStrokeColor(ColorStateList.valueOf(favorite
+                ? iconColor : MaterialColors.getColor(mBtnFavorite, R.attr.colorTextMuted)));
+        mBtnFavorite.setContentDescription(getString(favorite ? R.string.remove_favorite : R.string.add_to_favorite));
+    }
+
+    public static final class DownloadAction {
+        public final boolean visible;
+        @StringRes public final int textRes;
+        @Nullable public final String text;
+        @DrawableRes public final int iconRes;
+        public final boolean highlighted;
+        public final boolean opensDownloads;
+
+        DownloadAction(boolean visible, @StringRes int textRes, @Nullable String text,
+                @DrawableRes int iconRes, boolean highlighted, boolean opensDownloads) {
+            this.visible = visible;
+            this.textRes = textRes;
+            this.text = text;
+            this.iconRes = iconRes;
+            this.highlighted = highlighted;
+            this.opensDownloads = opensDownloads;
+        }
+    }
+
+    @NonNull
+    public static DownloadAction downloadAction(boolean canDownload, @Nullable DownloadStatus status,
+            @Nullable String brief) {
+        if (!canDownload) {
+            return new DownloadAction(false, R.string.action_download, null, R.drawable.ic_download, false, false);
+        }
+        if (status == null || status.state == DownloadStatus.NONE) {
+            return new DownloadAction(true, R.string.action_download, null, R.drawable.ic_download, false, false);
+        }
+        if (status.isCompleteBook()) {
+            return new DownloadAction(true, R.string.action_downloaded, null,
+                    R.drawable.ic_check_circle_outline, true, false);
+        }
+        boolean running = isRunning(status);
+        return new DownloadAction(true, R.string.action_download, brief,
+                running ? R.drawable.ic_progress_download : R.drawable.ic_download,
+                running || status.state == DownloadStatus.COMPLETE, running);
+    }
+
+    @NonNull
+    private DownloadStatus currentDownloadStatus() {
+        if (getActivity() instanceof BookActivity) {
+            DownloadStatus status = ((BookActivity) getActivity()).downloadStatus();
+            if (status != null) {
+                return status;
+            }
+        }
+        return DownloadMonitor.get().statusOfBook(DownloadIds.bookKey(mBookUrl == null ? book().getUrl() : mBookUrl));
+    }
+
+    private void bindDownloadButton() {
+        if (mBtnDownload == null || getContext() == null) {
+            return;
+        }
+        BookPOJO book = book();
+        boolean canDownload = BookDownloader.canDownload(requireContext(), book);
+        DownloadStatus status = canDownload ? currentDownloadStatus() : null;
+        String brief = status == null ? null : DownloadStatusText.brief(requireContext(), status);
+        DownloadAction state = downloadAction(canDownload, status, brief);
+        mBtnDownload.setVisibility(state.visible ? View.VISIBLE : View.GONE);
+        if (!state.visible) {
+            return;
+        }
+        String label = state.text != null ? state.text : getString(state.textRes);
+        mBtnDownload.setText(label);
+        mBtnDownload.setIconResource(state.iconRes);
+        int accent = PaletteBinder.accent(requireContext());
+        int muted = MaterialColors.getColor(mBtnDownload, R.attr.colorTextMuted);
+        mBtnDownload.setIconTint(ColorStateList.valueOf(accent));
+        mBtnDownload.setStrokeColor(ColorStateList.valueOf(state.highlighted ? accent : muted));
+        mBtnDownload.setContentDescription(label);
     }
 
     /** The book this page describes, as the pager passed it in. */

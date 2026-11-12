@@ -17,6 +17,8 @@ public interface ActivityPresenter {
 
     void onOptionsMenuItemSelected(MenuItem item);
 
+    void onPlayerActionSelected(int itemId);
+
     void onItemSelected(View view, int position);
 
     void getAudio();
@@ -26,6 +28,8 @@ public interface ActivityPresenter {
     boolean canSwitchToThisBook();
 
     void switchToThisBook();
+
+    void playThisBook();
 
     void buttomPreviousClick(View view);
 

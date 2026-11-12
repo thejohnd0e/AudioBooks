@@ -90,10 +90,17 @@ public class CarModeActivity extends AppCompatActivity {
         AppThemes.apply(this, R.style.AppTheme_CarMode, R.style.LightAppTheme_CarMode, R.style.AppThemeBlack_CarMode);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_car_mode);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         mCover = findViewById(R.id.cover); // none in landscape
         mPlay = findViewById(R.id.play);
         mRemaining = findViewById(R.id.remaining);
         mProgress = findViewById(R.id.progress);
+        int bg = com.fanok.audiobooks.PaletteBinder.background(this);
+        int accent = com.fanok.audiobooks.PaletteBinder.accent(this);
+        androidx.core.view.ViewCompat.setBackgroundTintList(
+                mPlay, android.content.res.ColorStateList.valueOf(accent));
+        androidx.core.widget.ImageViewCompat.setImageTintList(
+                mPlay, android.content.res.ColorStateList.valueOf(bg));
 
         findViewById(R.id.close).setOnClickListener(v -> finish());
         mPlay.setOnClickListener(v -> send(Broadcast_PLAY, 0, v));

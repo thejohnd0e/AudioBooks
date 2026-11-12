@@ -77,11 +77,37 @@ public final class PaletteBinder {
                 public void onChildViewDetachedFromWindow(@NonNull View view) {}
             };
 
+    private static final androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks FRAGMENT_PALETTE_CALLBACKS =
+            new androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+                @Override
+                public void onFragmentViewCreated(@NonNull androidx.fragment.app.FragmentManager fm,
+                        @NonNull androidx.fragment.app.Fragment f, @NonNull View v,
+                        @Nullable android.os.Bundle savedInstanceState) {
+                    Context ctx = f.getContext();
+                    if (ctx == null) return;
+                    bindView(v, ctx);
+                    watchLists(v);
+                    if (f instanceof androidx.fragment.app.DialogFragment) {
+                        android.app.Dialog d = ((androidx.fragment.app.DialogFragment) f).getDialog();
+                        if (d != null) {
+                            applyPaletteToDialog(d);
+                        }
+                    }
+                }
+            };
+
     /** Applies the current palette to the activity window, toolbar, cards and controls. */
     public static void bind(@NonNull Activity activity) {
         int bg = background(activity);
         int surface = surface(activity);
         int accent = accent(activity);
+
+        if (activity instanceof androidx.fragment.app.FragmentActivity) {
+            androidx.fragment.app.FragmentManager fm =
+                    ((androidx.fragment.app.FragmentActivity) activity).getSupportFragmentManager();
+            fm.unregisterFragmentLifecycleCallbacks(FRAGMENT_PALETTE_CALLBACKS);
+            fm.registerFragmentLifecycleCallbacks(FRAGMENT_PALETTE_CALLBACKS, true);
+        }
 
         // Seamless window and system bars
         activity.getWindow().setBackgroundDrawable(new ColorDrawable(bg));
@@ -93,6 +119,16 @@ public final class PaletteBinder {
         Toolbar toolbar = activity.findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setBackgroundColor(bg);
+            AppThemes.applyPalette(activity, toolbar.getContext().getTheme());
+            bindToolbarOverflowPopup(toolbar, activity);
+        }
+
+        com.google.android.material.navigation.NavigationView navView = activity.findViewById(R.id.nav_view);
+        if (navView != null) {
+            navView.setBackgroundColor(surface);
+            for (int i = 0; i < navView.getHeaderCount(); i++) {
+                paint(navView.getHeaderView(i), bg, surface, accent);
+            }
         }
 
         TabLayout tabs = activity.findViewById(R.id.tabs);
@@ -127,6 +163,42 @@ public final class PaletteBinder {
     }
 
     /** Repaints a list row as it comes into view; a list has no rows when its screen is built. */
+    private static void bindToolbarOverflowPopup(@NonNull Toolbar toolbar, @NonNull Activity activity) {
+        toolbar.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            try {
+                java.lang.reflect.Field menuViewField = Toolbar.class.getDeclaredField("mMenuView");
+                menuViewField.setAccessible(true);
+                Object menuView = menuViewField.get(toolbar);
+                if (menuView == null) return;
+                java.lang.reflect.Field presenterField = menuView.getClass().getDeclaredField("mPresenter");
+                presenterField.setAccessible(true);
+                Object presenter = presenterField.get(menuView);
+                if (presenter == null) return;
+                java.lang.reflect.Field popupField = presenter.getClass().getDeclaredField("mOverflowPopup");
+                popupField.setAccessible(true);
+                Object overflowPopup = popupField.get(presenter);
+                if (overflowPopup == null) return;
+                java.lang.reflect.Method getPopup = overflowPopup.getClass().getMethod("getPopup");
+                Object menuPopup = getPopup.invoke(overflowPopup);
+                if (menuPopup == null) return;
+                java.lang.reflect.Method getListView = menuPopup.getClass().getMethod("getListView");
+                View listView = (View) getListView.invoke(menuPopup);
+                if (listView == null) return;
+                int surface = surface(activity);
+                float density = activity.getResources().getDisplayMetrics().density;
+                GradientDrawable bg = new GradientDrawable();
+                bg.setShape(GradientDrawable.RECTANGLE);
+                bg.setCornerRadius(12f * density);
+                bg.setColor(surface);
+                bg.setStroke(Math.max(1, Math.round(density)), 0x26FFFFFF);
+                View target = listView.getParent() instanceof View ? (View) listView.getParent() : listView;
+                target.setBackground(bg);
+                listView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            } catch (Throwable ignored) {
+            }
+        });
+    }
+
     private static void watchLists(@NonNull View view) {
         if (view instanceof RecyclerView) {
             RecyclerView list = (RecyclerView) view;
@@ -147,7 +219,11 @@ public final class PaletteBinder {
 
         View btnListen = view.findViewById(R.id.btnListenBook);
         if (btnListen instanceof MaterialButton) {
-            ((MaterialButton) btnListen).setBackgroundTintList(ColorStateList.valueOf(accent));
+            MaterialButton button = (MaterialButton) btnListen;
+            int bg = background(context);
+            button.setBackgroundTintList(ColorStateList.valueOf(accent));
+            button.setTextColor(bg);
+            button.setIconTint(ColorStateList.valueOf(bg));
         }
 
         View genre = view.findViewById(R.id.genre);
@@ -298,7 +374,17 @@ public final class PaletteBinder {
 
         // anything coloured by a theme accent attribute keeps the palette's built-in colour,
         // because theme attributes cannot hold a colour chosen at runtime; replace it here
-        if (view instanceof MaterialButton) {
+        if (view instanceof com.google.android.material.chip.Chip) {
+            com.google.android.material.chip.Chip chip = (com.google.android.material.chip.Chip) view;
+            int surfaceColor = surface(chip.getContext());
+            int[][] states = new int[][] {new int[] {android.R.attr.state_checked}, new int[] {}};
+            chip.setChipBackgroundColor(new ColorStateList(states,
+                    new int[] {(accent & 0x00FFFFFF) | 0x33000000, surfaceColor}));
+            chip.setChipStrokeColor(new ColorStateList(states,
+                    new int[] {accent, 0x44FFFFFF}));
+            chip.setChipStrokeWidth(chip.getResources().getDisplayMetrics().density);
+            chip.setTextColor(MaterialColors.getColor(chip, R.attr.colorPrimaryText, 0xFFECEDE8));
+        } else if (view instanceof MaterialButton) {
             MaterialButton mb = (MaterialButton) view;
             if (mb.getIcon() != null && matchesThemeAccent(mb.getContext(), mb.getIconTint())) {
                 mb.setIconTint(accentList);
@@ -360,11 +446,14 @@ public final class PaletteBinder {
 
         Context context = dialog.getContext();
         int surface = surface(context);
+        int accent = accent(context);
+        float density = context.getResources().getDisplayMetrics().density;
 
         GradientDrawable card = new GradientDrawable();
         card.setShape(GradientDrawable.RECTANGLE);
-        card.setCornerRadius(16f * context.getResources().getDisplayMetrics().density);
+        card.setCornerRadius(16f * density);
         card.setColor(surface);
+        card.setStroke(Math.max(1, Math.round(density)), 0x26FFFFFF);
 
         window.setBackgroundDrawable(card.getConstantState().newDrawable());
 
@@ -374,7 +463,8 @@ public final class PaletteBinder {
         if (content != null && content != decor) {
             content.setBackground(card.getConstantState().newDrawable());
         }
-        paint(decor, background(context), surface, accent(context));
+        paint(decor, background(context), surface, accent);
+        styleAlertDialogWidgets(dialog, accent);
 
         // Material applies its own card while the dialog starts, so paint once more afterwards
         decor.post(() -> {
@@ -384,6 +474,42 @@ public final class PaletteBinder {
                 content.setBackground(card.getConstantState().newDrawable());
             }
             paint(decor, background(context), surface, accent(context));
+            styleAlertDialogWidgets(dialog, accent(context));
+        });
+    }
+
+    private static void styleAlertDialogWidgets(@NonNull android.app.Dialog dialog, int accent) {
+        if (dialog instanceof androidx.appcompat.app.AlertDialog) {
+            androidx.appcompat.app.AlertDialog alert = (androidx.appcompat.app.AlertDialog) dialog;
+            for (int which : new int[] {
+                    androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
+                    androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
+                    androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL}) {
+                android.widget.Button btn = alert.getButton(which);
+                if (btn != null) {
+                    btn.setTextColor(accent);
+                }
+            }
+        }
+        View icon = dialog.findViewById(android.R.id.icon);
+        if (icon instanceof ImageView) {
+            ((ImageView) icon).setImageTintList(ColorStateList.valueOf(accent));
+        }
+    }
+
+    public static void bindBottomSheet(@NonNull View content, @NonNull android.app.Dialog dialog) {
+        Context context = content.getContext();
+        int bg = background(context);
+        int surface = surface(context);
+        int accent = accent(context);
+        content.setBackgroundColor(surface);
+        paint(content, bg, surface, accent);
+        dialog.setOnShowListener(d -> {
+            View sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            if (sheet != null) {
+                sheet.setBackgroundColor(surface);
+            }
+            paint(content, background(context), surface(context), accent(context));
         });
     }
 }
