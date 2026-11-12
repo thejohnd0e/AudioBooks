@@ -963,6 +963,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** Ends playback: checkpoint, release the media, remove the notification, stop the service. */
     public void stop() {
+        cancelSleepFadeOut(); //the fire's fade must not outlive the service's teardown of the book
         wantPlaying = false;
         resumeOnSkip = false;
         cancelRetry();
@@ -1040,6 +1041,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     private void apply(@NonNull Request request) {
+        cancelSleepFadeOut(); //a book swapped mid-fade plays at its full volume, the old fade's tick cannot touch it
         if (request.chapters.isEmpty() || player == null) {
             return;
         }
@@ -2820,7 +2822,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** The timer ran out: the volume glides to silence, then the stop the timer always made. */
     private void startSleepFadeOut() {
-        if (player == null || !wantPlaying || !player.getPlayWhenReady()) {
+        if (player == null || !wantPlaying || !player.getPlayWhenReady() || !player.isPlaying()) {
             finishSleepFadeOut(); //nothing audible to fade: the stop as it always was
             return;
         }
