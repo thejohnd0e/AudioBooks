@@ -62,7 +62,7 @@ public class MigrationTest {
         AppDatabase room = openWithRoom();
         try {
             SupportSQLiteDatabase db = room.getOpenHelper().getWritableDatabase();
-            assertEquals(21, db.getVersion());
+            assertEquals(22, db.getVersion());
             assertEquals(2, count(db, "favorite"));
             assertEquals(1, count(db, "history"));
             assertEquals(1, count(db, "saved"));
@@ -183,6 +183,26 @@ public class MigrationTest {
         db.execSQL("INSERT INTO bookmark (url_book, chapter_index, chapter_name, position_ms, note, created_at)"
                 + " VALUES ('https://example.com/h1', 2, 'Chapter 3', 90000, NULL, 7)");
         assertEquals(1, count(db, "bookmark"));
+    }
+
+    @Test
+    public void migrate21To22AddsPersonBooksAndKeepsTheRest() throws Exception {
+        try (SupportSQLiteDatabase db = helper.createDatabase(DB, 21)) {
+            db.execSQL("INSERT INTO history (name, url_book, coments, opened_at) VALUES ('H', 'https://example.com/h1', 0, 5)");
+            db.execSQL("INSERT INTO bookmark (url_book, chapter_index, chapter_name, position_ms, note, created_at)"
+                    + " VALUES ('https://example.com/h1', 2, 'Chapter 3', 90000, NULL, 7)");
+        }
+
+        SupportSQLiteDatabase db = helper.runMigrationsAndValidate(DB, 22, true, AppDatabase.MIGRATION_21_22);
+        assertEquals(1, count(db, "history"));
+        assertEquals(1, count(db, "bookmark"));
+        assertEquals(0, count(db, "person_book"));
+        assertEquals(Boolean.TRUE, indexes(db, "person_book").get("index_person_book_kind_person_key_url_book"));
+        db.execSQL("INSERT INTO person_book (kind, person_key, url_book, name, found_at, is_new)"
+                + " VALUES (0, 'king', 'https://example.com/b1', 'Book', 9, 1)");
+        db.execSQL("INSERT OR IGNORE INTO person_book (kind, person_key, url_book, name, found_at, is_new)"
+                + " VALUES (0, 'king', 'https://example.com/b1', 'Again', 10, 1)");
+        assertEquals(1, count(db, "person_book")); // a book seen twice is one row
     }
 
     private SQLiteDatabase createVersion16() {

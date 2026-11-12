@@ -61,6 +61,28 @@
             android:nestedScrollingEnabled="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+        <TextView
+            android:id="@+id/homeNewTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp"
+            android:text="@string/home_new_releases"
+            android:textColor="?attr/colorPrimaryText"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:ignore="UnusedAttribute"
+            tools:visibility="visible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/homeNewList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
         <LinearLayout
             android:id="@+id/homeEmpty"
             android:layout_width="match_parent"

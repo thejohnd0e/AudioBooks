@@ -23,8 +23,11 @@ import com.fanok.audiobooks.adapter.CoverBinder;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.model.ContinueListening;
 import com.fanok.audiobooks.model.ContinueModel;
+import com.fanok.audiobooks.model.NewReleases;
 import com.fanok.audiobooks.policy.ParentalControl;
 import com.fanok.audiobooks.pojo.BookPOJO;
+import com.fanok.audiobooks.room.AppDatabase;
+import com.fanok.audiobooks.room.PersonBookEntity;
 import com.fanok.audiobooks.service.MediaPlayerService;
 import com.fanok.audiobooks.util.RemainingTime;
 import com.google.android.material.navigation.NavigationView;
@@ -44,21 +47,29 @@ public class HomeFragment extends Fragment {
 
     public static final String TAG = "home";
     private static final String LOG = "HomeFragment";
+    /** New books of the favourite people shown in the lane. */
+    private static final int FRESH_LIMIT = 20;
 
     /** What one read returned. */
     private static final class Content {
         final List<ContinueListening.Item> keep;
         final List<BookPOJO> saved;
+        /** New books of the favourite people (search.ReleaseCheck). */
+        final List<BookPOJO> fresh;
 
-        Content(List<ContinueListening.Item> keep, List<BookPOJO> saved) {
+        Content(List<ContinueListening.Item> keep, List<BookPOJO> saved, List<BookPOJO> fresh) {
             this.keep = keep;
             this.saved = saved;
+            this.fresh = fresh;
         }
     }
 
     private final CompositeDisposable mDisposables = new CompositeDisposable();
     private final ContinueAdapter mContinue = new ContinueAdapter();
     private final SavedAdapter mSaved = new SavedAdapter();
+    private final SavedAdapter mFresh = new SavedAdapter();
+    private View mNewTitle;
+    private View mNewList;
     private View mContinueTitle;
     private View mSavedTitle;
     private View mSavedList;
@@ -79,6 +90,11 @@ public class HomeFragment extends Fragment {
         RecyclerView saved = (RecyclerView) mSavedList;
         saved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         saved.setAdapter(mSaved);
+        mNewTitle = view.findViewById(R.id.homeNewTitle);
+        mNewList = view.findViewById(R.id.homeNewList);
+        RecyclerView fresh = (RecyclerView) mNewList;
+        fresh.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        fresh.setAdapter(mFresh);
         view.findViewById(R.id.homeOpenCatalog).setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).openSection(R.id.nav_audiobooks);
@@ -120,7 +136,15 @@ public class HomeFragment extends Fragment {
                         saved.add(book);
                     }
                 }
-                return new Content(ContinueModel.load(app, ContinueListening.LIMIT), saved);
+                List<BookPOJO> fresh = new ArrayList<>();
+                for (PersonBookEntity row : AppDatabase.getDatabase(app).personBookDao().getNew(
+                        System.currentTimeMillis() - NewReleases.FRESH_MS, FRESH_LIMIT)) {
+                    BookPOJO book = row.toPojo();
+                    if (ParentalControl.isAllowed(app, book)) {
+                        fresh.add(book);
+                    }
+                }
+                return new Content(ContinueModel.load(app, ContinueListening.LIMIT), saved, fresh);
             } finally {
                 books.closeDB();
             }
@@ -134,13 +158,17 @@ public class HomeFragment extends Fragment {
         }
         mContinue.set(content.keep);
         mSaved.set(content.saved);
+        mFresh.set(content.fresh);
         boolean any = !content.keep.isEmpty();
         boolean anySaved = !content.saved.isEmpty();
+        boolean anyFresh = !content.fresh.isEmpty();
+        mNewTitle.setVisibility(anyFresh ? View.VISIBLE : View.GONE);
+        mNewList.setVisibility(anyFresh ? View.VISIBLE : View.GONE);
         mContinueTitle.setVisibility(any ? View.VISIBLE : View.GONE);
         mContinueList.setVisibility(any ? View.VISIBLE : View.GONE);
         mSavedTitle.setVisibility(anySaved ? View.VISIBLE : View.GONE);
         mSavedList.setVisibility(anySaved ? View.VISIBLE : View.GONE);
-        mEmpty.setVisibility(any || anySaved ? View.GONE : View.VISIBLE);
+        mEmpty.setVisibility(any || anySaved || anyFresh ? View.GONE : View.VISIBLE);
     }
 
     private void open(@NonNull BookPOJO book) {
