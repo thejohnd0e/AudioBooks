@@ -630,7 +630,7 @@ public class MediaPlayerServiceTest {
 
         await("volume gliding down", 4_000, () -> player(service).getVolume() < before);
         assertTrue(describe(service), onMain(() -> player(service).isPlaying())); //the fade, not a stop
-        await("stopped after the fade", 6_000, () -> !MediaPlayerService.isRunning());
+        await("stopped after the fade", 6_000, () -> MediaPlayerService.currentBookUrl() == null);
     }
 
     @Test
@@ -687,7 +687,7 @@ public class MediaPlayerServiceTest {
         });
         context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer).putExtra("start", true)
                 .putExtra("at", System.currentTimeMillis() + 2_000L).setPackage(context.getPackageName()));
-        await("stopped at once, no fade waited out", 5_000, () -> !MediaPlayerService.isRunning());
+        await("stopped at once, no fade waited out", 5_000, () -> MediaPlayerService.currentBookUrl() == null);
     }
 
     /** With the warning on, the final fade continues from its level: no jump back to full volume at the fire. */
@@ -701,19 +701,20 @@ public class MediaPlayerServiceTest {
         });
         context.sendBroadcast(new Intent(SleepTimerPresenter.Broadcast_SleepTimer).putExtra("start", true)
                 .putExtra("time", 32_000L).putExtra("warn", true).setPackage(context.getPackageName()));
-        await("warning fade underway", 34_000, () -> player(service).getVolume() < 0.4f);
+        await("warning fade near its floor", 34_000, () -> player(service).getVolume() < 0.17f);
 
+        //from here no burst is due: any rise above the warning's floor would be the fire's restore-jump
         float peak = 0;
         long end = SystemClock.elapsedRealtime() + 20_000;
         while (SystemClock.elapsedRealtime() < end) {
-            if (!MediaPlayerService.isRunning() || service.getPlayer() == null) {
+            if (MediaPlayerService.currentBookUrl() == null || service.getPlayer() == null) {
                 break;
             }
             peak = Math.max(peak, onMain(() -> player(service).getVolume()));
             Thread.sleep(100);
         }
-        assertTrue("volume jumped up at the fire: peak " + peak, peak <= 0.45f);
-        await("stopped after the fade", 3_000, () -> !MediaPlayerService.isRunning());
+        assertTrue("volume jumped up at the fire: peak " + peak, peak <= 0.2f);
+        await("stopped after the fade", 3_000, () -> MediaPlayerService.currentBookUrl() == null);
     }
 
     private MockResponse respond(RecordedRequest request) {
