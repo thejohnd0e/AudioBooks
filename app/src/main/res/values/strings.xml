@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">AudioBooks</string>
+    <string name="app_name" translatable="false">ABooks++</string>
     <string name="navigation_drawer_open">Открыть меню</string>
     <string name="navigation_drawer_close">Закрыть меню</string>
 
