@@ -2576,7 +2576,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /** A clock-mode timer that a shake extends or re-arms ends this much later. */
     private static final long SLEEP_CLOCK_EXTEND_MS = 15 * 60_000L;
     /** The final fade before a timed stop, always — options or none: the volume glides to silence over this long. */
-    private static final long SLEEP_FADE_OUT_MS = 15_000;
+    private static final long SLEEP_FADE_OUT_MS = 20_000;
     /** How often the final fade updates the volume. */
     private static final long SLEEP_FADE_OUT_TICK_MS = 250;
     private static final float SHAKE_G = 2.4f;
