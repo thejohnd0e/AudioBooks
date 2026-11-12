@@ -108,7 +108,10 @@
                 android:layout_marginTop="16dp"
                 android:minHeight="48dp"
                 android:text="@string/home_open_catalog"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:textColor="?attr/colorPrimaryText"
+                app:strokeColor="?attr/colorTextMuted"
+                app:strokeWidth="1dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
