@@ -17,6 +17,7 @@ import com.fanok.audiobooks.fragment.AboutFragment;
 import com.fanok.audiobooks.fragment.BooksFragment;
 import com.fanok.audiobooks.fragment.FavoriteFragment;
 import com.fanok.audiobooks.fragment.FavoritesSwitcher;
+import com.fanok.audiobooks.fragment.HomeFragment;
 import com.fanok.audiobooks.fragment.SettingsFragment;
 import com.fanok.audiobooks.fragment.SourcesFragment;
 import com.fanok.audiobooks.interface_pacatge.main.MainView;
@@ -62,6 +63,11 @@ public class MainPresenter extends MvpPresenter<MainView> implements
 
     @Override
     public void onItemSelected(int id) {
+        if (id == R.id.nav_home || id == R.id.layout_nav_home) {
+            // the books to continue need no source
+            getViewState().showFragment(new HomeFragment(), HomeFragment.TAG);
+            return;
+        }
         if (id == R.id.nav_sources || id == R.id.layout_nav_sources) {
             // every site, not a section of the selected one
             getViewState().showFragment(new SourcesFragment(), SourcesFragment.TAG);
@@ -166,7 +172,9 @@ public class MainPresenter extends MvpPresenter<MainView> implements
         System.out.println(getViewState());
         Provider source = Provider.current();
         Fragment fragment;
-        if (fragmentID == Consts.FRAGMENT_AUDIOBOOK) {
+        if (fragmentID == Consts.FRAGMENT_HOME) {
+            getViewState().showFragment(new HomeFragment(), HomeFragment.TAG);
+        } else if (fragmentID == Consts.FRAGMENT_AUDIOBOOK) {
             if (source != null) {
                 openAudiobooks(source);
             }

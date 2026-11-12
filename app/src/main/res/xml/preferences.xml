@@ -351,7 +351,7 @@
         android:title="@string/settings_general">
 
         <ListPreference
-            android:defaultValue="0"
+            android:defaultValue="9"
             android:dialogTitle="@string/setting_start_menu"
             android:entries="@array/settings_start_screen_titles"
             android:entryValues="@array/settings_start_screen_values"

@@ -22,6 +22,21 @@
 
 
             <TextView
+                android:id="@+id/layout_nav_home"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:selectableItemBackground"
+                android:drawablePadding="20dp"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="@string/menu_home"
+                android:textColor="?attr/prefIconColor"
+                app:drawableStartCompat="@drawable/ic_menu_home"
+                tools:textColor="" />
+
+            <TextView
                 android:id="@+id/layout_nav_audiobooks"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"

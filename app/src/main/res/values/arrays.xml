@@ -38,6 +38,7 @@
         <item>@string/menu_history</item>
         <item>@string/last_book</item>
         <item>@string/menu_saved</item>
+        <item>@string/menu_home</item>
     </string-array>
 
     <string-array name="settings_start_screen_values">
@@ -49,6 +50,7 @@
         <item>5</item>
         <item>6</item>
         <item>7</item>
+        <item>9</item>
     </string-array>
 
     <string-array name="settings_sort_titles">

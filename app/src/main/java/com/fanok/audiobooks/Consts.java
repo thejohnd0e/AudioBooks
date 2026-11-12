@@ -98,6 +98,8 @@ public class Consts {
     public static final int FRAGMENT_SETTINGS = 7;
 
     public static final int FRAGMENT_SAVED = 8;
+    /** "Продолжить": the books to continue; the app's start screen unless another is chosen. */
+    public static final int FRAGMENT_HOME = 9;
 
     public static final int IMPORT_SITE_KNIGA_V_UHE = 0;
 

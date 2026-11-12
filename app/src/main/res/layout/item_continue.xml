@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A book to continue (fragment.HomeFragment): cover, title, the chapter and the time left, progress, play. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/bg_book_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    tools:viewBindingIgnore="true">
+
+    <LinearLayout
+        android:id="@+id/continueCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/continueCover"
+            android:layout_width="64dp"
+            android:layout_height="88dp"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/avatars" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/continueTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="?attr/colorPrimaryText"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                tools:text="Название книги" />
+
+            <TextView
+                android:id="@+id/continueMeta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="?attr/subTextColor"
+                android:textSize="13sp"
+                tools:text="Глава 5 · осталось 3 ч. 20 мин." />
+
+            <ProgressBar
+                android:id="@+id/continueProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginTop="8dp"
+                android:importantForAccessibility="no"
+                android:max="100"
+                tools:progress="40" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/continuePlay"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/play"
+        android:src="@drawable/ic_play"
+        android:tint="?attr/colorAccentPrimary"
+        tools:ignore="UseAppTint" />
+</LinearLayout>
