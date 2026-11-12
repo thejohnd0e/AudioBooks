@@ -19,8 +19,9 @@ import java.util.Set;
     AudioEntity.class,
     BooksAudioEntity.class,
     FavoritePersonEntity.class,
-    BookmarkEntity.class
-}, version = 21)
+    BookmarkEntity.class,
+    PersonBookEntity.class
+}, version = 22)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract FavoriteDao favoriteDao();
     public abstract HistoryDao historyDao();
@@ -29,6 +30,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract BooksAudioDao booksAudioDao();
     public abstract FavoritePersonDao favoritePersonDao();
     public abstract BookmarkDao bookmarkDao();
+    public abstract PersonBookDao personBookDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -112,9 +114,18 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_21_22 = new Migration(21, 22) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // books seen on the listings of favourite authors and readers: the news of search.ReleaseCheck
+            database.execSQL("CREATE TABLE IF NOT EXISTS `person_book` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `kind` INTEGER NOT NULL, `person_key` TEXT NOT NULL, `url_book` TEXT NOT NULL, `name` TEXT NOT NULL, `photo` TEXT, `author` TEXT, `artist` TEXT, `time` TEXT, `found_at` INTEGER NOT NULL, `is_new` INTEGER NOT NULL DEFAULT 0)");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_person_book_kind_person_key_url_book` ON `person_book` (`kind`, `person_key`, `url_book`)");
+        }
+    };
+
     /** Every upgrade path, chained; the builder and the migration tests use the same list. */
     static final Migration[] MIGRATIONS = {MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20, MIGRATION_20_21};
+            MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22};
 
     /**
      * Recreates {@code table} with {@code columns}. The new table is filled under a temporary name and gets

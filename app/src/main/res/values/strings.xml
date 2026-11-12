@@ -662,6 +662,9 @@
     <string name="auto_current">Текущая книга</string>
     <string name="home_continue">Продолжить слушать</string>
     <string name="home_saved">Загруженные</string>
+    <string name="home_new_releases">Новое у ваших авторов и чтецов</string>
+    <string name="check_releases">Новинки избранных авторов и чтецов</string>
+    <string name="check_releases_desc">Раз в сутки по Wi-Fi смотреть новые книги избранных авторов и чтецов и показывать их на экране «Продолжить»</string>
     <string name="home_empty">Здесь появятся книги, которые вы слушаете. Начните с каталога.</string>
     <string name="home_open_catalog">Открыть каталог</string>
     <string name="home_left">%1$s · осталось %2$s</string>

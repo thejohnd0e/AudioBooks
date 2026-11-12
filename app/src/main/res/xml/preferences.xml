@@ -266,6 +266,13 @@
             android:title="@string/setting_sort_favorite" />
 
         <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_menu_favorite"
+            android:key="pref_check_releases"
+            android:summary="@string/check_releases_desc"
+            android:title="@string/check_releases" />
+
+        <CheckBoxPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_magnify"
             android:key="search_pref"

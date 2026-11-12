@@ -191,7 +191,8 @@ public final class SourceHealth {
         return results;
     }
 
-    private static boolean unmetered(@NonNull Context context) {
+    /** The default network is unmetered: no mobile data is spent on what the app does by itself. */
+    static boolean unmetered(@NonNull Context context) {
         ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkCapabilities network = connectivity == null ? null
                 : connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
