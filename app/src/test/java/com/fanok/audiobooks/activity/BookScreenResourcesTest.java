@@ -56,7 +56,7 @@ public class BookScreenResourcesTest {
         Document actions = resource("layout/player_actions.xml");
         assertEquals("horizontal", actions.getDocumentElement().getAttribute("android:orientation"));
         NodeList buttons = actions.getElementsByTagName("com.google.android.material.button.MaterialButton");
-        assertEquals(4, buttons.getLength());
+        assertEquals(5, buttons.getLength()); // speed, timer, equalizer, car mode, bookmark
         for (int i = 0; i < buttons.getLength(); i++) {
             Element btn = (Element) buttons.item(i);
             assertEquals("@style/Widget.MaterialComponents.Button.OutlinedButton", btn.getAttribute("style"));

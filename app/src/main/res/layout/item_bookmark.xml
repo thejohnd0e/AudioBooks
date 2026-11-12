@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A mark in the list of fragment.BookmarksSheet: chapter, time and date, the note; "Заметка" and the bin. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    tools:viewBindingIgnore="true">
+
+    <LinearLayout
+        android:id="@+id/bookmarkRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:minHeight="56dp"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/bookmarkChapter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="?attr/colorPrimaryText"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="Глава 12" />
+
+        <TextView
+            android:id="@+id/bookmarkMeta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/sources_text_secondary"
+            android:textSize="13sp"
+            tools:text="7:05 · 13 нояб. 2026 г." />
+
+        <TextView
+            android:id="@+id/bookmarkNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:textColor="?attr/colorPrimaryText"
+            android:textSize="14sp"
+            tools:text="Вернуться к этому месту" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/bookmarkEdit"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:minWidth="0dp"
+        android:text="@string/bookmark_note"
+        android:textAllCaps="false" />
+
+    <ImageButton
+        android:id="@+id/bookmarkDelete"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/bookmark_delete"
+        android:src="@drawable/ic_delete"
+        android:tint="?attr/colorTextMuted"
+        tools:ignore="UseAppTint" />
+</LinearLayout>

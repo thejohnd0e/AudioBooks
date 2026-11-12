@@ -85,6 +85,15 @@ public class BookmarksTest {
     }
 
     @Test
+    public void findSameFindsTheSamePlaceOnly() {
+        BookmarkEntity here = Bookmarks.create("u", 1, "Глава", 1000, null, 1L);
+        List<BookmarkEntity> all = Arrays.asList(Bookmarks.create("u", 1, "Глава", 2000, null, 1L), here);
+        assertEquals(here, Bookmarks.findSame(all, Bookmarks.create("u", 1, "Глава", 1000, "x", 9L)));
+        assertNull(Bookmarks.findSame(all, Bookmarks.create("u", 1, "Глава", 3000, null, 9L)));
+        assertNull(Bookmarks.findSame(java.util.Collections.<BookmarkEntity>emptyList(), here));
+    }
+
+    @Test
     public void timeIsMinutesThenHours() {
         assertEquals("0:00", Bookmarks.time(0));
         assertEquals("7:05", Bookmarks.time(425_900));

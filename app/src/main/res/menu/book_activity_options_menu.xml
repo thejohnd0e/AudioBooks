@@ -84,6 +84,13 @@
             app:showAsAction="never" />
 
         <item
+            android:id="@+id/bookmarks"
+            android:icon="@drawable/ic_bookmark_outline"
+            android:title="@string/bookmarks_title"
+            app:iconTint="?attr/colorItemMenu"
+            app:showAsAction="never" />
+
+        <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_menu_settings"
             android:title="@string/book_toolbar_settings"

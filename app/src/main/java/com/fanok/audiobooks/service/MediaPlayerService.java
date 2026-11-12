@@ -1,6 +1,7 @@
 package com.fanok.audiobooks.service;
 
 import static android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE;
+import static com.fanok.audiobooks.activity.BookActivity.Broadcast_BOOKMARK_ADDED;
 import static com.fanok.audiobooks.activity.BookActivity.Broadcast_SET_IMAGE;
 import static com.fanok.audiobooks.activity.BookActivity.Broadcast_SET_PROGRESS;
 import static com.fanok.audiobooks.activity.BookActivity.Broadcast_SET_SELECTION;
@@ -11,6 +12,7 @@ import static com.fanok.audiobooks.activity.SleepTimerActivity.Broadcast_UPDATE_
 import static com.fanok.audiobooks.activity.SleepTimerActivity.bradcast_FinishTimer;
 import static com.fanok.audiobooks.activity.SleepTimerActivity.bradcast_UpdateTimer;
 import static com.fanok.audiobooks.android_equalizer.EqualizerFragment.Broadcast_EqualizerEnabled;
+import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_ADD_BOOKMARK;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_Equalizer;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_PAUSE;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_PLAY;
@@ -109,7 +111,11 @@ import com.fanok.audiobooks.model.AudioListDBModel;
 import com.fanok.audiobooks.model.AudioModel;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.pojo.AudioPOJO;
+import com.fanok.audiobooks.model.Bookmarks;
 import com.fanok.audiobooks.pojo.BookPOJO;
+import com.fanok.audiobooks.room.AppDatabase;
+import com.fanok.audiobooks.room.BookmarkDao;
+import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.pojo.StorageUtil;
 import com.fanok.audiobooks.policy.DefaultCover;
 import com.fanok.audiobooks.policy.EmbeddedCover;
@@ -2478,7 +2484,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 Broadcast_PLAY_PREVIOUS,
                 Broadcast_SEEK_TO, Broadcast_SEEK_NEXT_30, Broadcast_SEEK_PREVIOUS_10, Broadcast_SET_SPEED,
                 Broadcast_SHOW_TITLE, Broadcast_SleepTimer, Broadcast_UPDATE_TIMER_START, Broadcast_Equalizer,
-                Broadcast_EqualizerEnabled}) {
+                Broadcast_EqualizerEnabled, Broadcast_ADD_BOOKMARK}) {
             filter.addAction(action);
         }
         ContextCompat.registerReceiver(this, commandReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
@@ -2543,6 +2549,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 }
                 sendInternal(reply);
                 break;
+            case Broadcast_ADD_BOOKMARK:
+                addBookmark();
+                break;
             case Broadcast_EqualizerEnabled:
                 mEqualizerEnabled = intent.getBooleanExtra("enabled", false);
                 if (!mEqualizerEnabled) {
@@ -2554,6 +2563,34 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 break;
             default:
         }
+    }
+
+    /**
+     * Marks the place now: the chapter (by its place in the full list and by name) and the position. The same place
+     * marked again is the one mark. The screen is told with {@code Broadcast_BOOKMARK_ADDED} once it is stored.
+     */
+    private void addBookmark() {
+        if (player == null || !hasBook()) {
+            return;
+        }
+        final String url = bookUrl;
+        final String bookTitle = bookName();
+        final String chapterName = chapters.get(chapterIndex).getName();
+        final BookmarkEntity mark = Bookmarks.create(url, ordinalOf(chapterIndex), chapterName,
+                currentPositionMs(), null, System.currentTimeMillis());
+        final Context app = getApplicationContext();
+        execDb(() -> {
+            try {
+                BookmarkDao dao = AppDatabase.getDatabase(app).bookmarkDao();
+                BookmarkEntity same = Bookmarks.findSame(dao.getByBook(url), mark);
+                int id = same != null ? same.id : (int) dao.insert(mark);
+                sendInternal(new Intent(Broadcast_BOOKMARK_ADDED).putExtra("id", id).putExtra("url", url)
+                        .putExtra("bookName", bookTitle).putExtra("name", chapterName)
+                        .putExtra("time", Bookmarks.time(mark.positionMs)));
+            } catch (RuntimeException e) {
+                Log.e(TAG, "addBookmark failed", e);
+            }
+        });
     }
 
     /** The app's seek adapters: {@link #seekAndPlay(long)} while "resume after seeking" is on, else a plain seek. */
