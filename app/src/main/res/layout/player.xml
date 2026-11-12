@@ -276,7 +276,7 @@
             android:layout_width="@dimen/player_btn_size"
             android:layout_height="@dimen/player_btn_size"
             android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="@string/rewind_10"
+            android:contentDescription="@string/seek_back_generic"
             android:scaleType="centerInside"
             android:src="@drawable/ic_rewind_30" />
 
@@ -318,7 +318,7 @@
             android:layout_width="@dimen/player_btn_size"
             android:layout_height="@dimen/player_btn_size"
             android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="@string/forward_30"
+            android:contentDescription="@string/seek_forward_generic"
             android:scaleType="centerInside"
             android:src="@drawable/ic_fast_forward_30" />
 
