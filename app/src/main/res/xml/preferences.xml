@@ -125,6 +125,13 @@
         <!-- SkipSilenceProcessor.PREF / PREF_LEVEL: applied by the player at once -->
         <CheckBoxPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_bookmark_outline"
+            android:key="notification_bookmark"
+            android:summary="@string/notification_bookmark_desc"
+            android:title="@string/notification_bookmark" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:icon="@drawable/ic_skip_silence"
             android:key="skip_silence"
             android:summary="@string/skip_silence_desc"
