@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The search field above a long chapter list (BookActivity.bindChapterSearch): a part of a name or a number.
+     Gone for books of up to ChapterFilter.SEARCH_FROM chapters; the TV's player has none (a text field is no
+     place for a remote's focus, see the TV plan). -->
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chapterSearch"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="4dp"
+    android:autofillHints="no"
+    android:drawablePadding="8dp"
+    android:drawableStart="@drawable/ic_magnify"
+    android:hint="@string/chapter_search_hint"
+    android:imeOptions="actionSearch"
+    android:importantForAutofill="no"
+    android:inputType="text"
+    android:maxLines="1"
+    android:singleLine="true"
+    android:textColor="?attr/colorPrimaryText"
+    android:textColorHint="?attr/colorTextMuted"
+    android:textSize="15sp"
+    android:visibility="gone"
+    tools:ignore="LabelFor" />

@@ -123,6 +123,11 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
 
     /** The playing chapter's index in the book's full list while the player holds this book, else -1. */
     private int mPlayingChapter = -1;
+    /** Where the player stands in this book (the chapter's index in the list, the position in it), as last heard. */
+    private int mPlaceChapter = -1;
+    private int mPlaceMs;
+    /** Takes back a seek made by mistake (util.SeekUndo). */
+    private final com.fanok.audiobooks.util.SeekUndo mSeekUndo = new com.fanok.audiobooks.util.SeekUndo();
 
     /** Legacy last-chapter title, shown until the chapter list is loaded; never used to resume. */
     private String last = "";
@@ -350,6 +355,7 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
         if (mAudioPOJO != null && position >= 0 && position < mAudioPOJO.size()) {
             last = mAudioPOJO.get(position).getName();
             getViewState().showTitle(last);
+            offerSeekUndo(position, 0);
             playAudio(position, 0, true);
         }
     }
@@ -660,6 +666,7 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
 
     @Override
     public void seekChange(int progress) {
+        offerSeekUndo(mPlaceChapter, progress);
         Intent broadcastIntent = new Intent(Broadcast_SEEK_TO);
         broadcastIntent.putExtra("postion", progress);
         getViewState().broadcastSend(broadcastIntent);
@@ -683,6 +690,7 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
     @Override
     public void updateTime(int timeCurrent, int timeEnd, int buffered) {
         getViewState().updateTime(timeCurrent, timeEnd, buffered);
+        mPlaceMs = timeCurrent;
         if (mPlayingChapter >= 0 && playsThisBook()) {
             BookProgress.position(mBookPOJO.getUrl(), mPlayingChapter, timeCurrent);
         }
@@ -693,6 +701,9 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
     public void setSelected(int pos, @NonNull String name) {
         if (playsThisBook()) { // another book's chapter of the same number and name is not this one's
             getViewState().setSelected(pos, name);
+            mPlaceChapter = pos;
+        } else {
+            mPlaceChapter = -1;
         }
         mPlayingChapter = playsThisBook() && mAudioPOJO != null && pos >= 0 && pos < mAudioPOJO.size()
                 && name.equals(mAudioPOJO.get(pos).getName()) ? ordinal(mOrdinals, pos) : -1;
@@ -1030,6 +1041,33 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
             app.unbindService(serviceConnection);
         } catch (IllegalArgumentException e) {
             Log.w(TAG, "service was not bound", e);
+        }
+    }
+
+    /**
+     * A move of the place made by the listener (the scrub bar, a chapter chosen): when it is a jump, the screen offers
+     * the way back for a few seconds. Only while this book plays, since the place is its own.
+     */
+    private void offerSeekUndo(int toChapter, long toMs) {
+        if (!playsThisBook() || mPlaceChapter < 0 || mAudioPOJO == null) {
+            return;
+        }
+        com.fanok.audiobooks.util.SeekUndo.Place back = mSeekUndo.move(android.os.SystemClock.uptimeMillis(),
+                mPlaceChapter, mPlaceMs, toChapter, toMs);
+        if (back != null && back.chapter >= 0 && back.chapter < mAudioPOJO.size()) {
+            getViewState().showSeekUndo(back.chapter, back.positionMs, mAudioPOJO.get(back.chapter).getName());
+        }
+    }
+
+    /** Takes the jump back: the same chapter is a seek, another one is loaded at the place. */
+    public void undoSeek(int chapter, long positionMs) {
+        mSeekUndo.clear();
+        if (chapter == mPlaceChapter) {
+            Intent broadcastIntent = new Intent(Broadcast_SEEK_TO);
+            broadcastIntent.putExtra("postion", (int) positionMs);
+            getViewState().broadcastSend(broadcastIntent);
+        } else {
+            playAudio(chapter, positionMs, MediaPlayerService.isPlay());
         }
     }
 

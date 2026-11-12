@@ -45,6 +45,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -86,6 +87,8 @@ import com.fanok.audiobooks.download.DownloadStatusText;
 import com.fanok.audiobooks.adapter.SectionsPagerAdapter;
 import com.fanok.audiobooks.interface_pacatge.book_content.Activity;
 import com.fanok.audiobooks.fragment.BookmarksSheet;
+import com.fanok.audiobooks.model.Bookmarks;
+import com.fanok.audiobooks.util.ChapterFilter;
 import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.model.FavoritePeople;
 import com.fanok.audiobooks.net.Covers;
@@ -793,6 +796,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
         findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
         findViewById(R.id.player_action_bookmark).setOnClickListener(v -> addBookmarkHere());
+        setUpChapterSearch();
         getSystemService(AUDIO_SERVICE);
 
 
@@ -904,8 +908,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
         int selected = mAudioAdapter.getIndexSelected();
         boolean b = pref.getBoolean("scrollToSelectedPref", false);
-        if (selected != -1 && b) {
-            mLinearLayoutManager.scrollToPositionWithOffset(selected, 0);
+        int row = selected == -1 ? -1 : mAudioAdapter.displayOf(selected);
+        if (row != -1 && b) {
+            mLinearLayoutManager.scrollToPositionWithOffset(row, 0);
         }
 
     }
@@ -1145,6 +1150,21 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             bar.show();
         }
     };
+
+    @Override
+    public void showSeekUndo(int chapter, long positionMs, String chapterName) {
+        String name = chapterName == null ? "" : chapterName;
+        String chapterText = !name.isEmpty() && android.text.TextUtils.isDigitsOnly(name)
+                ? getString(R.string.player_chapter_number, name) : name;
+        Snackbar bar = Snackbar.make(findViewById(R.id.view_pager),
+                getString(R.string.seek_undo, Bookmarks.time(positionMs), chapterText), 8000)
+                .setAction(R.string.seek_undo_action, v -> mPresenter.undoSeek(chapter, positionMs));
+        //above the collapsed player, which is drawn over the screen's bottom
+        if (bottomSheetBehavior != null && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            bar.setAnchorView(mPlayer);
+        }
+        bar.show();
+    }
 
     /** Marks the place the player is at; with nothing loaded there is no place to mark. */
     @Override
@@ -1703,11 +1723,48 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         }
     }
 
+    /** The search field of a long chapter list: shown from {@link ChapterFilter#SEARCH_FROM} chapters. */
+    private void bindChapterSearch(int chapters) {
+        View field = findViewById(R.id.chapterSearch);
+        if (field == null) {
+            return; // a layout without it (the TV's)
+        }
+        boolean show = chapters > ChapterFilter.SEARCH_FROM;
+        field.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show && field instanceof EditText && ((EditText) field).length() > 0) {
+            ((EditText) field).setText(""); // the filter goes with the field
+        }
+    }
+
+    private void setUpChapterSearch() {
+        View field = findViewById(R.id.chapterSearch);
+        if (!(field instanceof EditText)) {
+            return;
+        }
+        ((EditText) field).addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                if (mAudioAdapter != null) {
+                    mAudioAdapter.setFilter(s.toString());
+                }
+            }
+        });
+    }
+
     @UnstableApi
     @Override
     public void showData(@NonNull ArrayList<AudioPOJO> data, @NonNull String bookUrl, int chaptersTotal) {
         if (mAudioAdapter != null) {
             mAudioAdapter.setData(data, chaptersTotal);
+            bindChapterSearch(data.size());
         }
     }
 
@@ -1789,7 +1846,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     @Override
     public void setSelected(int id, String name) {
         if (mAudioAdapter != null) {
-            if (id >= 0 && id < mAudioAdapter.getItemCount()) {
+            if (id >= 0 && id < mAudioAdapter.getDataCount()) {
                 if (mAudioAdapter.getData(id).getName().equals(name)) {
                     mAudioAdapter.setIndexSelected(id);
                 }

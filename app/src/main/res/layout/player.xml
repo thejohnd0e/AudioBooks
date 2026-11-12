@@ -226,6 +226,8 @@
         android:textColor="?attr/colorPrimaryText"
         android:textStyle="bold" />
 
+    <include layout="@layout/chapter_search" />
+
     <com.fanok.audiobooks.ChapterListView
         android:id="@+id/list"
         android:layout_width="match_parent"
