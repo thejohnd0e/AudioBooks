@@ -758,6 +758,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** Plays the loaded book; after an error re-prepares the chapter, after the end replays the book. */
     public void play() {
+        cancelSleepFadeOut();
         resumeOnSkip = false;
         wantPlaying = true;
         untouched = false;
@@ -828,6 +829,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** Pauses in every state; pending retries and source resolution can no longer start audio. */
     public void pause() {
+        cancelSleepFadeOut();
         //also before the book or the player exists: a pending restore or resolution reads this when it lands
         resumeOnSkip = false;
         resetFlip(); //a pause ends the face-down countdown and resume, even with the player already paused
@@ -961,6 +963,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** Ends playback: checkpoint, release the media, remove the notification, stop the service. */
     public void stop() {
+        cancelSleepFadeOut(); //the fire's fade must not outlive the service's teardown of the book
         wantPlaying = false;
         resumeOnSkip = false;
         cancelRetry();
@@ -1038,6 +1041,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     private void apply(@NonNull Request request) {
+        cancelSleepFadeOut(); //a book swapped mid-fade plays at its full volume, the old fade's tick cannot touch it
         if (request.chapters.isEmpty() || player == null) {
             return;
         }
@@ -2571,6 +2575,10 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private static final long SLEEP_WAKE_WINDOW_MS = 60_000;
     /** A clock-mode timer that a shake extends or re-arms ends this much later. */
     private static final long SLEEP_CLOCK_EXTEND_MS = 15 * 60_000L;
+    /** The final fade before a timed stop, always — options or none: the volume glides to silence over this long. */
+    private static final long SLEEP_FADE_OUT_MS = 15_000;
+    /** How often the final fade updates the volume. */
+    private static final long SLEEP_FADE_OUT_TICK_MS = 250;
     private static final float SHAKE_G = 2.4f;
     private static final long SHAKE_DEBOUNCE_MS = 1_500;
     /**
@@ -2605,6 +2613,13 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @Nullable
     private PowerManager.WakeLock wakeWindowLock;
     private final Runnable wakeWindowEnd = this::onWakeWindowEnd;
+    /** The final fade's length; a test shortens it. */
+    private long sleepFadeOutMs = SLEEP_FADE_OUT_MS;
+    private boolean fadingOut;
+    /** The volume before the final fade; -1 while none runs. */
+    private float volumeBeforeFadeOut = -1;
+    private long fadeOutStart;
+    private final Runnable sleepFadeOutTick = this::runSleepFadeOutTick;
     /** The beep generator in use; released by its scheduled release or by {@link #releaseSleepTimer()}. */
     @Nullable
     private ToneGenerator activeTone;
@@ -2780,18 +2795,62 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     }
 
     /**
-     * The timer ran out. The volume comes back first, so the next play is at normal volume. An end-of-chapter timer
+     * The timer ran out. A timed stop glides the volume to silence first ({@link #startSleepFadeOut()}); an
+     * end-of-chapter timer
      * leaves the pause to {@link #onChapterEnded()}; a timed one pauses with a wake window ("shake", while the book
      * was playing) or stops the service as it always did.
      */
     private void onSleepTimerFired(boolean endOfChapter) {
-        stopSleepWarning();
-        SleepTimerPresenter.setTimerStarted(false);
-        sendInternal(new Intent(bradcast_FinishTimer));
         if (endOfChapter) {
+            stopSleepWarning();
+            SleepTimerPresenter.setTimerStarted(false);
+            sendInternal(new Intent(bradcast_FinishTimer));
             publishState();
             return;
         }
+        //the fade picks up where the warning's fade stands (15% with one, the user's volume without): the restore
+        //stopSleepWarning makes and the re-set below land in the same main-thread turn, so only the last is heard
+        float fadeFrom = player != null ? player.getVolume() : -1;
+        stopSleepWarning();
+        SleepTimerPresenter.setTimerStarted(false);
+        sendInternal(new Intent(bradcast_FinishTimer));
+        if (fadeFrom >= 0) {
+            player.setVolume(fadeFrom);
+        }
+        startSleepFadeOut();
+    }
+
+    /** The timer ran out: the volume glides to silence, then the stop the timer always made. */
+    private void startSleepFadeOut() {
+        if (player == null || !wantPlaying || !player.getPlayWhenReady() || !player.isPlaying()) {
+            finishSleepFadeOut(); //nothing audible to fade: the stop as it always was
+            return;
+        }
+        fadingOut = true;
+        volumeBeforeFadeOut = player.getVolume();
+        fadeOutStart = SystemClock.uptimeMillis();
+        handler.postDelayed(sleepFadeOutTick, SLEEP_FADE_OUT_TICK_MS);
+    }
+
+    private void runSleepFadeOutTick() {
+        if (!fadingOut) {
+            return;
+        }
+        long left = sleepFadeOutMs - (SystemClock.uptimeMillis() - fadeOutStart);
+        if (left <= 0 || player == null) {
+            if (player != null) {
+                player.setVolume(0f);
+            }
+            finishSleepFadeOut();
+            return;
+        }
+        player.setVolume(volumeBeforeFadeOut * (left / (float) sleepFadeOutMs));
+        handler.postDelayed(sleepFadeOutTick, SLEEP_FADE_OUT_TICK_MS);
+    }
+
+    /** The fade is over: the volume comes back first (the next play is normal), then the timed stop as before. */
+    private void finishSleepFadeOut() {
+        cancelSleepFadeOut();
         if (sleepShake && wantPlaying && hasAccelerometer()) {
             pause();
             openWakeWindow();
@@ -2800,8 +2859,32 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
     }
 
+    /** Stops the fade and puts the volume back; nothing to undo while none runs. */
+    private void cancelSleepFadeOut() {
+        handler.removeCallbacks(sleepFadeOutTick);
+        fadingOut = false;
+        if (volumeBeforeFadeOut >= 0) {
+            if (player != null) {
+                player.setVolume(volumeBeforeFadeOut);
+            }
+            volumeBeforeFadeOut = -1;
+        }
+    }
+
+    /** Shortens the final fade so a test can watch it inside seconds. */
+    @VisibleForTesting
+    public void setSleepFadeOutMsForTest(long ms) {
+        sleepFadeOutMs = ms;
+    }
+
     /** More time for a running countdown or clock-mode timer; a warning in progress ends (volume back). */
     private void extendSleepTimer(long ms) {
+        if (fadingOut) {
+            //"more time" revives the book at its volume; the timer starts over as a shake re-arms it
+            cancelSleepFadeOut();
+            armSleepTimer(sleepMode == SleepTimerPresenter.MODE_CLOCK ? SLEEP_CLOCK_EXTEND_MS : sleepDurationMs);
+            return;
+        }
         if (sleepTimer == null || sleepMode == SleepTimerPresenter.MODE_END_OF_CHAPTER) {
             return;
         }
@@ -2831,6 +2914,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** Cancels the timer and all it started: the fade (volume back), the accelerometer, the wake window. */
     private void releaseSleepTimer() {
+        cancelSleepFadeOut();
         if (sleepTimer != null) {
             sleepTimer.cancel();
             sleepTimer = null;
