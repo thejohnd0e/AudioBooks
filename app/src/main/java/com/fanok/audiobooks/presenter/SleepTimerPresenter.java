@@ -70,7 +70,8 @@ public class SleepTimerPresenter extends MvpPresenter<SleepTimerView>
             minutes = 30;
         }
         return new Intent(Broadcast_SleepTimer).putExtra("start", true).putExtra("time", minutes * 60_000L)
-                .putExtra("warn", prefs.getBoolean(PREF_WARN, true)).putExtra("shake", prefs.getBoolean(PREF_SHAKE, true));
+                .putExtra("warn", prefs.getBoolean(PREF_WARN, false))
+                .putExtra("shake", prefs.getBoolean(PREF_SHAKE, false));
     }
 
     /** The player service sets this when it arms the timer and resets it when the timer fires, is cancelled or ends. */
@@ -110,8 +111,8 @@ public class SleepTimerPresenter extends MvpPresenter<SleepTimerView>
                 //the default stays
             }
         }
-        warn = mPrefs.getBoolean(PREF_WARN, true);
-        shake = mPrefs.getBoolean(PREF_SHAKE, true);
+        warn = mPrefs.getBoolean(PREF_WARN, false);
+        shake = mPrefs.getBoolean(PREF_SHAKE, false);
         showSetup();
         if (timerStarted) {
             //the service replies with the state
