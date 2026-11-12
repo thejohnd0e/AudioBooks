@@ -14,7 +14,8 @@ public class BackupPOJO {
     private static final int LEGACY_VERSION = 1;
     private static final String KEY_VERSION = "mVersion";
     private static final String[] COLLECTIONS = {
-            "mBooksFavorite", "mBooksHistory", "mBooksSaved", "mAudio", "mAudioList", "mPeopleFavorite", "mBookmarks"};
+            "mBooksFavorite", "mBooksHistory", "mBooksSaved", "mAudio", "mAudioList", "mPeopleFavorite", "mBookmarks",
+            "mListenDays", "mFinished"};
 
     private int mVersion = VERSION;
     private ArrayList<BookPOJO> mBooksFavorite;
@@ -26,6 +27,9 @@ public class BackupPOJO {
     private ArrayList<FavoritePersonPOJO> mPeopleFavorite;
     /** The marks in books; absent in files written before them. */
     private ArrayList<BookmarkPOJO> mBookmarks;
+    /** The statistics: the days listened and the books finished; absent in files written before them. */
+    private ArrayList<ListenDayPOJO> mListenDays;
+    private ArrayList<FinishedBookPOJO> mFinished;
     /** Rows left out of this backup because they could not be read; not written to the file. */
     private transient int mSkippedRows;
 
@@ -113,6 +117,18 @@ public class BackupPOJO {
                         && mark.getChapterIndex() >= 0 && mark.getPositionMs() >= 0, "mBookmarks", i);
             }
         }
+        if (backup.mListenDays != null) {
+            for (int i = 0; i < backup.mListenDays.size(); i++) {
+                ListenDayPOJO day = backup.mListenDays.get(i);
+                require(day != null && day.getListenedMs() >= 0, "mListenDays", i);
+            }
+        }
+        if (backup.mFinished != null) {
+            for (int i = 0; i < backup.mFinished.size(); i++) {
+                FinishedBookPOJO book = backup.mFinished.get(i);
+                require(book != null && notBlank(book.getUrlBook()), "mFinished", i);
+            }
+        }
         return backup;
     }
 
@@ -194,6 +210,22 @@ public class BackupPOJO {
 
     public void setBookmarks(ArrayList<BookmarkPOJO> bookmarks) {
         mBookmarks = bookmarks;
+    }
+
+    public ArrayList<ListenDayPOJO> getListenDays() {
+        return mListenDays;
+    }
+
+    public void setListenDays(ArrayList<ListenDayPOJO> listenDays) {
+        mListenDays = listenDays;
+    }
+
+    public ArrayList<FinishedBookPOJO> getFinished() {
+        return mFinished;
+    }
+
+    public void setFinished(ArrayList<FinishedBookPOJO> finished) {
+        mFinished = finished;
     }
 
     public ArrayList<TimeStartPOJO> getAudio() {

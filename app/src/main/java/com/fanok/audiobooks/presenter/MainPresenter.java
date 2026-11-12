@@ -20,6 +20,7 @@ import com.fanok.audiobooks.fragment.FavoritesSwitcher;
 import com.fanok.audiobooks.fragment.HomeFragment;
 import com.fanok.audiobooks.fragment.SettingsFragment;
 import com.fanok.audiobooks.fragment.SourcesFragment;
+import com.fanok.audiobooks.fragment.StatsFragment;
 import com.fanok.audiobooks.interface_pacatge.main.MainView;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.pojo.BookPOJO;
@@ -66,6 +67,10 @@ public class MainPresenter extends MvpPresenter<MainView> implements
         if (id == R.id.nav_home || id == R.id.layout_nav_home) {
             // the books to continue need no source
             getViewState().showFragment(new HomeFragment(), HomeFragment.TAG);
+            return;
+        }
+        if (id == R.id.nav_stats || id == R.id.layout_nav_stats) {
+            getViewState().showFragment(new StatsFragment(), StatsFragment.TAG);
             return;
         }
         if (id == R.id.nav_sources || id == R.id.layout_nav_sources) {

@@ -62,7 +62,7 @@ public class MigrationTest {
         AppDatabase room = openWithRoom();
         try {
             SupportSQLiteDatabase db = room.getOpenHelper().getWritableDatabase();
-            assertEquals(22, db.getVersion());
+            assertEquals(23, db.getVersion());
             assertEquals(2, count(db, "favorite"));
             assertEquals(1, count(db, "history"));
             assertEquals(1, count(db, "saved"));
@@ -203,6 +203,26 @@ public class MigrationTest {
         db.execSQL("INSERT OR IGNORE INTO person_book (kind, person_key, url_book, name, found_at, is_new)"
                 + " VALUES (0, 'king', 'https://example.com/b1', 'Again', 10, 1)");
         assertEquals(1, count(db, "person_book")); // a book seen twice is one row
+    }
+
+    @Test
+    public void migrate22To23AddsStatisticsAndKeepsTheRest() throws Exception {
+        try (SupportSQLiteDatabase db = helper.createDatabase(DB, 22)) {
+            db.execSQL("INSERT INTO history (name, url_book, coments, opened_at) VALUES ('H', 'https://example.com/h1', 0, 5)");
+            db.execSQL("INSERT INTO person_book (kind, person_key, url_book, name, found_at, is_new)"
+                    + " VALUES (0, 'king', 'https://example.com/b1', 'Book', 9, 1)");
+        }
+
+        SupportSQLiteDatabase db = helper.runMigrationsAndValidate(DB, 23, true, AppDatabase.MIGRATION_22_23);
+        assertEquals(1, count(db, "history"));
+        assertEquals(1, count(db, "person_book"));
+        assertEquals(0, count(db, "listen_day"));
+        assertEquals(0, count(db, "finished_book"));
+        assertEquals(Boolean.TRUE, indexes(db, "finished_book").get("index_finished_book_url_book"));
+        db.execSQL("INSERT INTO listen_day (day, listened_ms) VALUES (20000, 60000)");
+        db.execSQL("INSERT INTO finished_book (url_book, finished_at) VALUES ('https://example.com/b1', 5)");
+        db.execSQL("INSERT OR IGNORE INTO finished_book (url_book, finished_at) VALUES ('https://example.com/b1', 9)");
+        assertEquals(1, count(db, "finished_book")); // a book finished twice is one row
     }
 
     private SQLiteDatabase createVersion16() {

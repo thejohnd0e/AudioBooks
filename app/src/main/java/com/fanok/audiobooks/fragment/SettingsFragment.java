@@ -62,6 +62,8 @@ import com.fanok.audiobooks.net.AppProxy;
 import com.fanok.audiobooks.net.ProxyFinder;
 import com.fanok.audiobooks.pojo.BackupPOJO;
 import com.fanok.audiobooks.pojo.BookmarkPOJO;
+import com.fanok.audiobooks.pojo.FinishedBookPOJO;
+import com.fanok.audiobooks.pojo.ListenDayPOJO;
 import com.fanok.audiobooks.service.SeekStep;
 import com.fanok.audiobooks.service.SkipSilenceProcessor;
 import com.fanok.audiobooks.pojo.BookPOJO;
@@ -912,6 +914,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         backup.setPeopleFavorite(FavoritePeople.get(context).backup());
         backup.setBookmarks(BookmarkPOJO.ofAll(
                 com.fanok.audiobooks.room.AppDatabase.getDatabase(context).bookmarkDao().getAll()));
+        com.fanok.audiobooks.room.AppDatabase stats = com.fanok.audiobooks.room.AppDatabase.getDatabase(context);
+        ArrayList<ListenDayPOJO> listenDays = new ArrayList<>();
+        for (com.fanok.audiobooks.room.ListenDayEntity day : stats.listenDayDao().getAll()) {
+            listenDays.add(new ListenDayPOJO(day.day, day.listenedMs));
+        }
+        backup.setListenDays(listenDays);
+        ArrayList<FinishedBookPOJO> finished = new ArrayList<>();
+        for (com.fanok.audiobooks.room.FinishedBookEntity book : stats.finishedBookDao().getAll()) {
+            finished.add(new FinishedBookPOJO(book.urlBook, book.finishedAt));
+        }
+        backup.setFinished(finished);
         backup.setSkippedRows(booksDBModel.getSkippedRows() + audioDBModel.getSkippedRows());
         if (backup.getSkippedRows() > 0) {
             Log.w("SettingsFragment", "Backup left out " + backup.getSkippedRows() + " unreadable rows");
@@ -1090,6 +1103,25 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     }
                 }
 
+                if (backup.getListenDays() != null) {
+                    database.listenDayDao().deleteAll();
+                    for (ListenDayPOJO day : backup.getListenDays()) {
+                        com.fanok.audiobooks.room.ListenDayEntity row = new com.fanok.audiobooks.room.ListenDayEntity();
+                        row.day = day.getDay();
+                        row.listenedMs = day.getListenedMs();
+                        database.listenDayDao().insert(row);
+                    }
+                }
+                if (backup.getFinished() != null) {
+                    database.finishedBookDao().deleteAll();
+                    for (FinishedBookPOJO book : backup.getFinished()) {
+                        com.fanok.audiobooks.room.FinishedBookEntity row =
+                                new com.fanok.audiobooks.room.FinishedBookEntity();
+                        row.urlBook = book.getUrlBook();
+                        row.finishedAt = book.getFinishedAt();
+                        database.finishedBookDao().insert(row);
+                    }
+                }
                 if (backup.getBookmarks() != null) {
                     database.bookmarkDao().deleteAll();
                     for (BookmarkPOJO mark : backup.getBookmarks()) {

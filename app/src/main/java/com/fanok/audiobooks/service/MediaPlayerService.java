@@ -111,6 +111,7 @@ import com.fanok.audiobooks.model.AudioListDBModel;
 import com.fanok.audiobooks.model.AudioModel;
 import com.fanok.audiobooks.model.ContinueListening;
 import com.fanok.audiobooks.model.ContinueModel;
+import com.fanok.audiobooks.model.ListenStore;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.pojo.AudioPOJO;
 import com.fanok.audiobooks.model.Bookmarks;
@@ -202,6 +203,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     public static final int countAudioWereShowingRatingPopUp = 15;
     private static final long PROGRESS_INTERVAL_MS = 500;
     private static final long CHECKPOINT_INTERVAL_MS = 10_000;
+    /** The listening time waits this long in memory before it is stored (and at every pause). */
+    private static final long LISTEN_FLUSH_MS = 30_000;
     /** How far the session's position may run from the player's before it is sent again. */
     private static final long SESSION_DRIFT_MS = 1_000;
     /** How long the retry wake lock outlasts the delay of the retry it keeps on time. */
@@ -325,6 +328,8 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /** Generation of the newest queued legacy write per kind and book; an older one queued before it is stale. */
     private final ConcurrentHashMap<String, Integer> legacyWrites = new ConcurrentHashMap<>();
     private final PlaybackErrorPolicy errorPolicy = new PlaybackErrorPolicy();
+    /** The time really listened to, for the statistics. */
+    private final com.fanok.audiobooks.util.ListeningClock listenClock = new com.fanok.audiobooks.util.ListeningClock();
     private final PatientLoadErrorPolicy loadErrorPolicy = new PatientLoadErrorPolicy(() -> this.wantPlaying);
     private final DefaultExtractorsFactory extractorsFactory =
             new DefaultExtractorsFactory().setConstantBitrateSeekingEnabled(true);
@@ -573,6 +578,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             }
             sendProgress();
             syncSessionPosition();
+            tickListening();
             if (SystemClock.elapsedRealtime() - lastCheckpointAt >= CHECKPOINT_INTERVAL_MS) {
                 checkpointNow(false);
             }
@@ -622,6 +628,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         //1. nothing started before this point may act any more; the final position is written synchronously
         gen++;
         checkpointNow(true);
+        flushListening();
 
         //2. timers, handlers, artwork
         mPreferences.unregisterOnSharedPreferenceChangeListener(prefListener);
@@ -1483,6 +1490,11 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             loadChapter(chapterIndex + 1, 0, true);
         } else {
             //end of the book: paused at the end, Play replays it
+            final String finishedUrl = bookUrl;
+            final Context app = getApplicationContext();
+            if (finishedUrl != null) {
+                execDb(() -> ListenStore.finished(app, finishedUrl, System.currentTimeMillis()));
+            }
             wantPlaying = false;
             pausedAt = SystemClock.elapsedRealtime();
             player.setPlayWhenReady(false);
@@ -2209,6 +2221,29 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     private void stopProgress() {
         handler.removeCallbacks(progressTick);
+        listenClock.stop(); // a pause counts nothing
+        flushListening();
+    }
+
+    /** One tick of the playing player: the time since the last one is listening time. */
+    private void tickListening() {
+        long wall = System.currentTimeMillis();
+        listenClock.tick(SystemClock.elapsedRealtime(), wall, java.util.TimeZone.getDefault().getOffset(wall));
+        if (listenClock.pendingMs() >= LISTEN_FLUSH_MS) {
+            flushListening();
+        }
+    }
+
+    /** Stores the listening time waiting in memory. */
+    private void flushListening() {
+        final java.util.Map<Integer, Long> drained = listenClock.drain();
+        if (drained.isEmpty()) {
+            return;
+        }
+        final Context app = getApplicationContext();
+        if (!execDb(() -> ListenStore.add(app, drained))) {
+            ListenStore.add(app, drained); // the executor is gone (the service is being destroyed)
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------

@@ -20,8 +20,10 @@ import java.util.Set;
     BooksAudioEntity.class,
     FavoritePersonEntity.class,
     BookmarkEntity.class,
-    PersonBookEntity.class
-}, version = 22)
+    PersonBookEntity.class,
+    ListenDayEntity.class,
+    FinishedBookEntity.class
+}, version = 23)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract FavoriteDao favoriteDao();
     public abstract HistoryDao historyDao();
@@ -31,6 +33,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract FavoritePersonDao favoritePersonDao();
     public abstract BookmarkDao bookmarkDao();
     public abstract PersonBookDao personBookDao();
+    public abstract ListenDayDao listenDayDao();
+    public abstract FinishedBookDao finishedBookDao();
 
     private static volatile AppDatabase INSTANCE;
 
@@ -123,9 +127,19 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_22_23 = new Migration(22, 23) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // the statistics: real listening time per local day and the books listened to the end
+            database.execSQL("CREATE TABLE IF NOT EXISTS `listen_day` (`day` INTEGER NOT NULL, `listened_ms` INTEGER NOT NULL, PRIMARY KEY(`day`))");
+            database.execSQL("CREATE TABLE IF NOT EXISTS `finished_book` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `url_book` TEXT NOT NULL, `finished_at` INTEGER NOT NULL)");
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_finished_book_url_book` ON `finished_book` (`url_book`)");
+        }
+    };
+
     /** Every upgrade path, chained; the builder and the migration tests use the same list. */
     static final Migration[] MIGRATIONS = {MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
-            MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22};
+            MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23};
 
     /**
      * Recreates {@code table} with {@code columns}. The new table is filled under a temporary name and gets
