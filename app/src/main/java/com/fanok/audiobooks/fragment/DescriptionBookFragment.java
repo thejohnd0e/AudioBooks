@@ -1088,14 +1088,16 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     public static ListenAction listenAction(@Nullable String bookUrl, @Nullable String activeBookUrl,
             boolean isPlaying, @Nullable Checkpoint checkpoint, int liveChapter, long livePositionMs) {
         boolean thisActive = bookUrl != null && bookUrl.equals(activeBookUrl);
+        boolean hasProgress = checkpoint != null && (checkpoint.chapterIndex > 0 || checkpoint.positionMs > 0)
+                || liveChapter > 0 || livePositionMs > 0;
         if (thisActive && isPlaying) {
             return new ListenAction(R.string.pause, R.drawable.ic_pause, ACTION_TOGGLE_ACTIVE);
         }
         if (thisActive) {
-            return new ListenAction(R.string.action_resume, R.drawable.ic_play, ACTION_TOGGLE_ACTIVE);
+            //the page loads its book into the player paused: without a place reached that is still «Слушать»
+            return new ListenAction(hasProgress ? R.string.action_resume : R.string.action_listen,
+                    R.drawable.ic_play, ACTION_TOGGLE_ACTIVE);
         }
-        boolean hasProgress = checkpoint != null && (checkpoint.chapterIndex > 0 || checkpoint.positionMs > 0)
-                || liveChapter > 0 || livePositionMs > 0;
         return new ListenAction(hasProgress ? R.string.action_resume : R.string.action_listen,
                 R.drawable.ic_play, ACTION_START_THIS);
     }
