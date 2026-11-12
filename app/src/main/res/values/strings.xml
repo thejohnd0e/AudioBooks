@@ -658,6 +658,14 @@
     <string name="ok">ОК</string>
     <string name="continue_">Продолжить</string>
     <string name="undo">Отменить</string>
+    <string name="menu_home">Продолжить</string>
+    <string name="home_continue">Продолжить слушать</string>
+    <string name="home_saved">Загруженные</string>
+    <string name="home_empty">Здесь появятся книги, которые вы слушаете. Начните с каталога.</string>
+    <string name="home_open_catalog">Открыть каталог</string>
+    <string name="home_left">%1$s · осталось %2$s</string>
+    <string name="home_resuming">Продолжаем: %1$s</string>
+    <string name="home_play_book">Продолжить «%1$s»</string>
     <string name="bookmark_add">Закладка</string>
     <string name="notification_bookmark">Закладка в уведомлении</string>
     <string name="notification_bookmark_desc">Кнопка закладки в уведомлении плеера вместо кнопки «Выход»</string>

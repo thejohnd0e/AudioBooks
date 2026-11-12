@@ -367,7 +367,8 @@ public class MainActivity extends MvpAppCompatActivity
         } else {
             SharedPreferences pref = PreferenceManager
                     .getDefaultSharedPreferences(this);
-            fragment = Integer.parseInt(pref.getString("pref_start_screen", "0"));
+            fragment = Integer.parseInt(pref.getString("pref_start_screen",
+                    String.valueOf(Consts.FRAGMENT_HOME)));
             boolean notificationClick = intent.getBooleanExtra("notificationClick", false);
             mPresenter.startFragment(fragment, notificationClick);
             if (!notificationClick && pref.getBoolean("pref_play_last_book", false)) {
@@ -663,7 +664,7 @@ public class MainActivity extends MvpAppCompatActivity
         View currentFocus = getCurrentFocus();
         if (currentFocus!=null){
             if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                if (currentFocus.getId()==R.id.layout_nav_audiobooks||currentFocus.getId()==R.id.toolbar) {
+                if (currentFocus.getId()==R.id.layout_nav_home||currentFocus.getId()==R.id.toolbar) {
                     View menuItem = findViewById(R.id.app_bar_search);
                     if (menuItem != null && menuItem.requestFocus()) {
                         return true; // handled: unhandled, the key would move the focus on past the search
@@ -679,7 +680,7 @@ public class MainActivity extends MvpAppCompatActivity
                     }
                 }
                 if (currentFocus.getId()==R.id.toolbar){
-                    View view = findViewById(R.id.layout_nav_audiobooks);
+                    View view = findViewById(R.id.layout_nav_home);
                     if (view != null && view.requestFocus()) {
                         return true;
                     }

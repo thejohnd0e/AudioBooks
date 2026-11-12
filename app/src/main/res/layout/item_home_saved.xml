@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A downloaded book in the lane of fragment.HomeFragment: the cover and two lines of title. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="112dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="4dp"
+    tools:viewBindingIgnore="true">
+
+    <ImageView
+        android:id="@+id/savedCover"
+        android:layout_width="104dp"
+        android:layout_height="140dp"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        tools:src="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/savedTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="?attr/colorPrimaryText"
+        android:textSize="13sp"
+        tools:text="Название книги" />
+</LinearLayout>
