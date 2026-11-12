@@ -51,6 +51,8 @@ import com.fanok.audiobooks.model.AudioDBModel;
 import com.fanok.audiobooks.model.AudioListDBModel;
 import com.fanok.audiobooks.model.AudioModel;
 import com.fanok.audiobooks.model.BooksDBModel;
+import com.fanok.audiobooks.model.Bookmarks;
+import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.model.OtherArtistModel;
 import com.fanok.audiobooks.model.OtherSourceModel;
 import com.fanok.audiobooks.net.RateLimitedException;
@@ -93,6 +95,8 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
     public static final String Broadcast_PAUSE = "Pause";
     public static final String Broadcast_SEEK_TO = "SeekTo";
     public static final String Broadcast_SEEK_NEXT_30 = "SeekToNext30";
+    /** The app asks the service to mark the place now; the service answers with BookActivity.Broadcast_BOOKMARK_ADDED. */
+    public static final String Broadcast_ADD_BOOKMARK = "AddBookmark";
 
     public static final String Broadcast_SEEK_PREVIOUS_10 = "SeekToPrevious10";
 
@@ -1027,6 +1031,29 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
         } catch (IllegalArgumentException e) {
             Log.w(TAG, "service was not bound", e);
         }
+    }
+
+    /**
+     * Goes to a mark: the chapter is found again by its name in the list as it is now, so a reordered book still
+     * leads to the right place; a chapter that is gone says so instead of guessing.
+     */
+    public void playBookmark(@NonNull BookmarkEntity mark) {
+        if (mAudioPOJO == null || mAudioPOJO.isEmpty()) {
+            getViewState().showToast(R.string.bookmark_not_loaded);
+            return;
+        }
+        List<String> names = new ArrayList<>(mAudioPOJO.size());
+        for (AudioPOJO chapter : mAudioPOJO) {
+            names.add(chapter.getName());
+        }
+        int index = Bookmarks.resolve(names, mark);
+        if (index < 0) {
+            getViewState().showToast(R.string.bookmark_chapter_gone);
+            return;
+        }
+        last = names.get(index);
+        getViewState().showTitle(last);
+        playAudio(index, mark.positionMs, true);
     }
 
     /** Hands the book to the player in one command: this chapter, this position, this intent. */

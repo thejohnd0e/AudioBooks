@@ -70,6 +70,18 @@ public final class Bookmarks {
         return mark.urlBook + "|" + mark.chapterName + "|" + mark.positionMs;
     }
 
+    /** The mark of {@code existing} at the same place as {@code mark}, or null: pressing twice makes one mark. */
+    @Nullable
+    public static BookmarkEntity findSame(@NonNull List<BookmarkEntity> existing, @NonNull BookmarkEntity mark) {
+        String key = key(mark);
+        for (BookmarkEntity other : existing) {
+            if (key.equals(key(other))) {
+                return other;
+            }
+        }
+        return null;
+    }
+
     /** {@code 7:05} or, from an hour, {@code 1:07:05}. */
     @NonNull
     public static String time(long positionMs) {

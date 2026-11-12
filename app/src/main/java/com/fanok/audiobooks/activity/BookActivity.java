@@ -85,6 +85,8 @@ import com.fanok.audiobooks.download.DownloadStatus;
 import com.fanok.audiobooks.download.DownloadStatusText;
 import com.fanok.audiobooks.adapter.SectionsPagerAdapter;
 import com.fanok.audiobooks.interface_pacatge.book_content.Activity;
+import com.fanok.audiobooks.fragment.BookmarksSheet;
+import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.model.FavoritePeople;
 import com.fanok.audiobooks.net.Covers;
 import com.fanok.audiobooks.pojo.AudioPOJO;
@@ -119,7 +121,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.xmlpull.v1.XmlPullParser;
 
-public class BookActivity extends MvpAppCompatActivity implements Activity {
+public class BookActivity extends MvpAppCompatActivity implements Activity, BookmarksSheet.Host {
 
     /** The screen at the chosen font scale (FontScale). */
     @Override
@@ -135,6 +137,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     public static final String Broadcast_SET_TITLE = "SetTitle";
     public static final String Broadcast_SHOW_RATING = "ShowRating";
     public static final String Broadcast_UPDATE_ADAPTER = "UpdateAdapter";
+    /** A mark was stored: extras id, url, bookName, name (the chapter) and time (as text). */
+    public static final String Broadcast_BOOKMARK_ADDED = "BookmarkAdded";
 
     public static final String Broadcast_SHOW_EQUALIZER = "ShowEqualizer";
 
@@ -788,6 +792,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         findViewById(R.id.player_action_timer).setOnClickListener(v -> performPlayerAction(R.id.sleep_timer));
         findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
         findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
+        findViewById(R.id.player_action_bookmark).setOnClickListener(v -> addBookmarkHere());
         getSystemService(AUDIO_SERVICE);
 
 
@@ -1067,6 +1072,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         } else if (id == R.id.favoriteAuthor || id == R.id.favoriteReader) {
             togglePerson(id == R.id.favoriteAuthor ? FavoritePeople.AUTHOR : FavoritePeople.READER);
             return true;
+        } else if (id == R.id.bookmarks) {
+            showBookmarks();
+            return true;
         } else if (id == R.id.playbackSpeed) {
             //the player's own speed button is the dialog's anchor: a view of this screen's theme, not the toolbar's
             mPresenter.buttonSpeedClick(mSpeed);
@@ -1109,6 +1117,58 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         }
     }
 
+    /** A mark the service stored: said with its place, and "Заметка" to write on it. */
+    private final BroadcastReceiver bookmarkAdded = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String name = intent.getStringExtra("name");
+            String time = intent.getStringExtra("time");
+            String url = intent.getStringExtra("url");
+            String bookName = intent.getStringExtra("bookName");
+            int id = intent.getIntExtra("id", -1);
+            String chapter = name != null && !name.isEmpty() && android.text.TextUtils.isDigitsOnly(name)
+                    ? getString(R.string.player_chapter_number, name) : (name == null ? "" : name);
+            // a mark of the book playing, which may not be the one open: then its book is named
+            boolean other = url != null && mBookPOJO != null && !url.equals(mBookPOJO.getUrl());
+            String text = other
+                    ? getString(R.string.bookmark_added_other, chapter, time, bookName == null ? "" : bookName)
+                    : getString(R.string.bookmark_added, chapter, time);
+            Snackbar bar = Snackbar.make(findViewById(R.id.view_pager), text, Snackbar.LENGTH_LONG)
+                    .setDuration(6000);
+            if (id >= 0) {
+                bar.setAction(R.string.bookmark_note, v -> BookmarksSheet.editNote(BookActivity.this, id, null));
+            }
+            //above the collapsed player, which is drawn over the screen's bottom
+            if (bottomSheetBehavior != null && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                bar.setAnchorView(mPlayer);
+            }
+            bar.show();
+        }
+    };
+
+    /** Marks the place the player is at; with nothing loaded there is no place to mark. */
+    @Override
+    public void addBookmarkHere() {
+        if (MediaPlayerService.currentBookUrl() == null) {
+            showToast(R.string.bookmark_none_playing);
+            return;
+        }
+        broadcastSend(new Intent(BookPresenter.Broadcast_ADD_BOOKMARK));
+    }
+
+    private void showBookmarks() {
+        if (mBookPOJO == null || mBookPOJO.getUrl() == null || isFinishing()
+                || getSupportFragmentManager().findFragmentByTag(BookmarksSheet.TAG) != null) {
+            return;
+        }
+        BookmarksSheet.newInstance(mBookPOJO.getUrl()).show(getSupportFragmentManager(), BookmarksSheet.TAG);
+    }
+
+    @Override
+    public void onBookmarkChosen(@NonNull BookmarkEntity mark) {
+        mPresenter.playBookmark(mark);
+    }
+
     /** The player UI listens only while visible; on the way back the service resends chapter, icon and progress. */
     @Override
     protected void onStart() {
@@ -1120,6 +1180,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         registerInternalReceiver(showRating, Broadcast_SHOW_RATING);
         registerInternalReceiver(updateAdapter, Broadcast_UPDATE_ADAPTER);
         registerInternalReceiver(showEqualizer, Broadcast_SHOW_EQUALIZER);
+        registerInternalReceiver(bookmarkAdded, Broadcast_BOOKMARK_ADDED);
         broadcastSend(new Intent(Broadcast_SHOW_TITLE));
         if (mAudioAdapter != null) mAudioAdapter.startLive();
     }
@@ -1134,6 +1195,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         unregisterReceiver(showRating);
         unregisterReceiver(updateAdapter);
         unregisterReceiver(showEqualizer);
+        unregisterReceiver(bookmarkAdded);
         mPresenter.dismissSpeedDialog();
         mPresenter.onStop();
         super.onStop();
