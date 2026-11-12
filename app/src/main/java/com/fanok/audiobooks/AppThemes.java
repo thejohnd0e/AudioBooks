@@ -25,7 +25,7 @@ public final class AppThemes {
     public static final String PALETTE_STEEL = "steel";
     public static final String PALETTE_ONYX = "onyx";
     public static final String PALETTE_CUSTOM = "custom";
-    public static final String DEFAULT_PALETTE = PALETTE_SAGE;
+    public static final String DEFAULT_PALETTE = PALETTE_STEEL;
 
     public static final int SLOT_BG = 0;
     public static final int SLOT_SURFACE = 1;
@@ -197,7 +197,10 @@ public final class AppThemes {
         if (PALETTE_CUSTOM.equals(palette)) {
             return PALETTE_CUSTOM;
         }
-        return PALETTE_SAGE;
+        if (PALETTE_SAGE.equals(palette)) {
+            return PALETTE_SAGE;
+        }
+        return DEFAULT_PALETTE;
     }
 
     /** The theme overlay resource matching the current palette. */

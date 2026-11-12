@@ -10,7 +10,7 @@
         android:title="@string/settings_appearance">
 
         <ListPreference
-            android:defaultValue="@string/palette_sage_value"
+            android:defaultValue="@string/palette_steel_value"
             android:dialogTitle="@string/setting_palette"
             android:entries="@array/settings_palette_titles"
             android:entryValues="@array/settings_palette_values"
