@@ -32,9 +32,17 @@ public class BookActionStateTest {
         assertEquals(DescriptionBookFragment.ACTION_TOGGLE_ACTIVE, playing.action);
     }
 
-    @Test public void listenButtonShowsResumeWhenThisBookIsPausedOrHasProgress() {
-        DescriptionBookFragment.ListenAction pausedActive =
+    @Test public void listenButtonShowsResumeWhenThisBookIsPausedWithProgress() {
+        //the page loads its book into the player paused: a never-listened book still says «Слушать»
+        DescriptionBookFragment.ListenAction pausedFresh =
                 DescriptionBookFragment.listenAction("http://b", "http://b", false, null);
+        assertEquals(R.string.action_listen, pausedFresh.textRes);
+        assertEquals(R.drawable.ic_play, pausedFresh.iconRes);
+        assertEquals(DescriptionBookFragment.ACTION_TOGGLE_ACTIVE, pausedFresh.action);
+
+        DescriptionBookFragment.ListenAction pausedActive =
+                DescriptionBookFragment.listenAction("http://b", "http://b", false,
+                        new Checkpoint("http://b", 0, 30_000));
         assertEquals(R.string.action_resume, pausedActive.textRes);
         assertEquals(R.drawable.ic_play, pausedActive.iconRes);
         assertEquals(DescriptionBookFragment.ACTION_TOGGLE_ACTIVE, pausedActive.action);
