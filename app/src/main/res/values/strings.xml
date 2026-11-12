@@ -659,6 +659,7 @@
     <string name="continue_">Продолжить</string>
     <string name="undo">Отменить</string>
     <string name="menu_home">Продолжить</string>
+    <string name="auto_current">Текущая книга</string>
     <string name="home_continue">Продолжить слушать</string>
     <string name="home_saved">Загруженные</string>
     <string name="home_empty">Здесь появятся книги, которые вы слушаете. Начните с каталога.</string>

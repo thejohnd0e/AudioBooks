@@ -109,6 +109,8 @@ import com.fanok.audiobooks.broadcasts.OnCancelBroadcastReceiver;
 import com.fanok.audiobooks.model.AudioDBModel;
 import com.fanok.audiobooks.model.AudioListDBModel;
 import com.fanok.audiobooks.model.AudioModel;
+import com.fanok.audiobooks.model.ContinueListening;
+import com.fanok.audiobooks.model.ContinueModel;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.pojo.AudioPOJO;
 import com.fanok.audiobooks.model.Bookmarks;
@@ -700,7 +702,49 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     /** The current book's chapters, unless parental control hides the book; the policy is read off this thread. */
     @Override
     public void onLoadChildren(@NonNull final String parentId, @NonNull final Result<List<MediaItem>> result) {
-        if (!MY_MEDIA_ROOT_ID.equals(parentId) || !hasBook()) {
+        BrowseTree.Kind kind = BrowseTree.kind(parentId);
+        switch (kind) {
+            case ROOT:
+                result.sendResult(rootItems());
+                break;
+            case CURRENT:
+                loadCurrentChapters(result);
+                break;
+            case CONTINUE:
+            case HISTORY:
+            case FAVORITE:
+            case SAVED:
+                loadBookList(kind, result);
+                break;
+            default:
+                result.sendResult(new ArrayList<>());
+        }
+    }
+
+    /** The lists of the library; the book in the player is one of them while there is one. */
+    @NonNull
+    private List<MediaItem> rootItems() {
+        List<MediaItem> items = new ArrayList<>();
+        items.add(listItem(BrowseTree.NODE_CONTINUE, getString(R.string.menu_home)));
+        if (hasBook()) {
+            items.add(listItem(BrowseTree.NODE_CURRENT, getString(R.string.auto_current)));
+        }
+        items.add(listItem(BrowseTree.NODE_HISTORY, getString(R.string.menu_history)));
+        items.add(listItem(BrowseTree.NODE_FAVORITE, getString(R.string.menu_favorite)));
+        items.add(listItem(BrowseTree.NODE_SAVED, getString(R.string.menu_saved)));
+        return items;
+    }
+
+    @NonNull
+    private static MediaItem listItem(@NonNull String id, @NonNull String title) {
+        MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                .setMediaId(id).setTitle(title).build();
+        return new MediaItem(description, MediaItem.FLAG_BROWSABLE);
+    }
+
+    /** The chapters of the book in the player, each playable by its number. */
+    private void loadCurrentChapters(@NonNull final Result<List<MediaItem>> result) {
+        if (!hasBook()) {
             result.sendResult(new ArrayList<>());
             return;
         }
@@ -731,6 +775,75 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         if (!queued) {
             result.sendResult(new ArrayList<>());
         }
+    }
+
+    /** A list of books, read off the main thread; only books this player can start from here are listed. */
+    private void loadBookList(@NonNull final BrowseTree.Kind kind, @NonNull final Result<List<MediaItem>> result) {
+        final Context app = getApplicationContext();
+        result.detach();
+        boolean queued = execDb(() -> {
+            List<MediaItem> items = new ArrayList<>();
+            try {
+                items = bookItems(app, kind);
+            } catch (RuntimeException e) {
+                Log.w(TAG, "onLoadChildren: cannot read " + kind, e);
+            }
+            final List<MediaItem> children = items;
+            handler.post(() -> result.sendResult(children));
+        });
+        if (!queued) {
+            result.sendResult(new ArrayList<>());
+        }
+    }
+
+    /**
+     * The books of a list as playable items: those the parental control allows and whose chapters are stored here (the
+     * player resumes a book by its stored chapters, so a book without them would do nothing when chosen).
+     */
+    @NonNull
+    private static List<MediaItem> bookItems(@NonNull Context app, @NonNull BrowseTree.Kind kind) {
+        BooksDBModel books = new BooksDBModel(app);
+        List<BookPOJO> source = new ArrayList<>();
+        switch (kind) {
+            case CONTINUE:
+                for (ContinueListening.Item item : ContinueModel.load(app, BrowseTree.MAX_ITEMS)) {
+                    if (item.canResume()) {
+                        source.add(item.book);
+                    }
+                }
+                break;
+            case HISTORY:
+                source = books.getAllHistory();
+                break;
+            case FAVORITE:
+                source = books.getAllFavorite();
+                break;
+            case SAVED:
+                source = books.getAllSaved();
+                break;
+            default:
+        }
+        AudioListDBModel chapters = new AudioListDBModel(app);
+        ParentalControl.Store parental = ParentalControl.store(app);
+        List<BookPOJO> playable = new ArrayList<>();
+        for (BookPOJO book : source) {
+            if (book.getUrl() != null && ParentalControl.isAllowed(parental, book) && chapters.isset(book.getUrl())) {
+                playable.add(book);
+                if (playable.size() >= BrowseTree.MAX_ITEMS) {
+                    break;
+                }
+            }
+        }
+        List<MediaItem> items = new ArrayList<>(playable.size());
+        for (BookPOJO book : playable) {
+            MediaDescriptionCompat description = new MediaDescriptionCompat.Builder()
+                    .setMediaId(BrowseTree.bookId(book.getUrl()))
+                    .setTitle(book.getName())
+                    .setSubtitle(book.getAutor())
+                    .build();
+            items.add(new MediaItem(description, FLAG_PLAYABLE));
+        }
+        return items;
     }
 
     @Override
@@ -1019,6 +1132,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         sendInternal(new Intent(Broadcast_SET_TITLE).putExtra("title", ""));
         removeNotification();
         notifyChildrenChanged(MY_MEDIA_ROOT_ID);
+        notifyChildrenChanged(BrowseTree.NODE_CURRENT);
         stopSelf();
     }
 
@@ -1103,6 +1217,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
         }
         loadChapter(index, position, true);
         notifyChildrenChanged(MY_MEDIA_ROOT_ID);
+        notifyChildrenChanged(BrowseTree.NODE_CURRENT);
     }
 
     /**
@@ -1318,8 +1433,12 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     @VisibleForTesting
     void playFromMediaId(@Nullable String mediaId) {
         int index = parseMediaIndex(mediaId);
+        String listed = BrowseTree.bookUrl(mediaId);
         if (index >= 0) {
             select(index, true);
+        } else if (listed != null) {
+            //a book chosen in a list of the library: the same as the book's URL itself
+            playFromMediaId(listed);
         } else if (mediaId != null && (mediaId.startsWith("https://") || mediaId.startsWith("http://"))) {
             //a book this app knows: restoreBook ignores URLs without chapters in the database
             if (mediaId.equals(bookUrl)) {
