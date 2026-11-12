@@ -26,7 +26,7 @@ Commands are written for a POSIX shell (Linux, macOS, Git Bash on Windows) and r
 
 | Item | Value |
 |---|---|
-| Application ID | `com.fanok.books` |
+| Application ID | `link.intertop.audiobooks` |
 | Namespace (Java packages) | `com.fanok.audiobooks` |
 | Gradle module | `app` |
 | Language | Java (source level 8 with core-library desugaring), XML layouts |
@@ -309,8 +309,8 @@ adb wait-for-device shell 'while [ "$(getprop sys.boot_completed)" != 1 ]; do sl
 
 ```bash
 ./gradlew :app:installDebug
-adb shell am start -W -n com.fanok.books/com.fanok.audiobooks.activity.MainActivity
-adb shell am start -n com.fanok.books/com.fanok.audiobooks.activity.SearchableActivity -a android.intent.action.SEARCH --es query 1984
+adb shell am start -W -n link.intertop.audiobooks/com.fanok.audiobooks.activity.MainActivity
+adb shell am start -n link.intertop.audiobooks/com.fanok.audiobooks.activity.SearchableActivity -a android.intent.action.SEARCH --es query 1984
 ```
 
 The last command opens search results directly, which avoids typing into the search field. With several devices connected, add `-s <serial>` (from `adb devices -l`) to every `adb` command.
@@ -333,22 +333,22 @@ Take coordinates from the `bounds` attributes in the UI dump. `adb shell input t
 ## Logs, crashes, and app data
 
 ```bash
-adb logcat -v threadtime --pid=$(adb shell pidof -s com.fanok.books)
+adb logcat -v threadtime --pid=$(adb shell pidof -s link.intertop.audiobooks)
 adb logcat -b crash -d
 adb logcat -v threadtime AndroidRuntime:E MediaPlayerService:D ExoPlayerImplInternal:E '*:S'
 ```
 
-- **Crash reports:** the app writes uncaught exceptions to its private `files/crash.txt` before handing them to the system handler. With a debug build: `adb shell run-as com.fanok.books cat files/crash.txt`.
+- **Crash reports:** the app writes uncaught exceptions to its private `files/crash.txt` before handing them to the system handler. With a debug build: `adb shell run-as link.intertop.audiobooks cat files/crash.txt`.
 - **StrictMode:** debug builds log main-thread disk and network access and leaked closeables under the `StrictMode` tag.
-- **App data** (debug builds only, through `run-as`): the Room database `databases/audioBooksDB` with its `-wal` and `-shm` files, settings in `shared_prefs/com.fanok.books_preferences.xml`, and playback state in `shared_prefs/STORAGE.xml`. Force-stop the app first for a consistent copy:
+- **App data** (debug builds only, through `run-as`): the Room database `databases/audioBooksDB` with its `-wal` and `-shm` files, settings in `shared_prefs/link.intertop.audiobooks_preferences.xml`, and playback state in `shared_prefs/STORAGE.xml`. Force-stop the app first for a consistent copy:
 
 ```bash
-adb shell am force-stop com.fanok.books
-adb exec-out run-as com.fanok.books tar -cf - databases shared_prefs files > app-data.tar
+adb shell am force-stop link.intertop.audiobooks
+adb exec-out run-as link.intertop.audiobooks tar -cf - databases shared_prefs files > app-data.tar
 ```
 
   Android Studio's **App Inspection → Database Inspector** and **Device Explorer** do the same interactively. `run-as` fails on release builds by design.
-- **Debugging from startup:** `adb shell am set-debug-app -w com.fanok.books`, launch the app, attach the Android Studio debugger, and run `adb shell am clear-debug-app` when finished.
+- **Debugging from startup:** `adb shell am set-debug-app -w link.intertop.audiobooks`, launch the app, attach the Android Studio debugger, and run `adb shell am clear-debug-app` when finished.
 - **Bug reports:** `adb bugreport bugreport.zip` collects system-wide diagnostics. Logs and bug reports can contain personal data, cookies, and signed URLs; review them before sharing.
 
 ## Network, proxy, and playback diagnostics
@@ -417,7 +417,7 @@ adb shell dumpsys media_session
 adb shell dumpsys audio
 ```
 
-Look at the session block of `com.fanok.books`; errors in other packages' sessions are not app errors. For detailed player events, temporarily attach Media3's `EventLogger` (`player.addAnalyticsListener(new EventLogger())`) in a debug build; see [Media3 debug logging](https://developer.android.com/media/media3/exoplayer/debug-logging).
+Look at the session block of `link.intertop.audiobooks`; errors in other packages' sessions are not app errors. For detailed player events, temporarily attach Media3's `EventLogger` (`player.addAnalyticsListener(new EventLogger())`) in a debug build; see [Media3 debug logging](https://developer.android.com/media/media3/exoplayer/debug-logging).
 
 Scenarios worth checking after changes to playback or downloads:
 
@@ -440,10 +440,10 @@ Use local fixture servers for error cases. A plain `python -m http.server` does 
 3. Rising memory alone is not a leak; caches and pending work also grow. Confirm a retained object with LeakCanary or a heap dump.
 
 ```bash
-adb shell dumpsys meminfo com.fanok.books
-adb shell dumpsys activity services com.fanok.books
-adb shell dumpsys jobscheduler | grep -A5 com.fanok.books
-adb shell am dumpheap -g com.fanok.books /data/local/tmp/audiobooks.hprof
+adb shell dumpsys meminfo link.intertop.audiobooks
+adb shell dumpsys activity services link.intertop.audiobooks
+adb shell dumpsys jobscheduler | grep -A5 link.intertop.audiobooks
+adb shell am dumpheap -g link.intertop.audiobooks /data/local/tmp/audiobooks.hprof
 adb pull /data/local/tmp/audiobooks.hprof
 ```
 
@@ -452,9 +452,9 @@ LeakCanary is included in debug builds and reports retained activities, fragment
 ## Performance
 
 ```bash
-adb shell dumpsys gfxinfo com.fanok.books reset
+adb shell dumpsys gfxinfo link.intertop.audiobooks reset
 # ...repeat the same scrolling or navigation...
-adb shell dumpsys gfxinfo com.fanok.books framestats
+adb shell dumpsys gfxinfo link.intertop.audiobooks framestats
 adb shell perfetto -o /data/misc/perfetto-traces/audiobooks.perfetto-trace -t 20s sched freq idle am wm gfx view binder_driver dalvik input
 adb pull /data/misc/perfetto-traces/audiobooks.perfetto-trace
 ```
