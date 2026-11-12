@@ -29,6 +29,7 @@ public final class BookSheetDownload {
     }
 
     public static void bind(@NonNull View sheet, @NonNull BookPOJO book, @NonNull Dialog dialog) {
+        com.fanok.audiobooks.PaletteBinder.bindBottomSheet(sheet, dialog);
         TextView row = sheet.findViewById(R.id.download);
         Context context = sheet.getContext();
         if (!BookDownloader.canDownload(context, book)) {

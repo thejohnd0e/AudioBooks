@@ -8,6 +8,7 @@
 - From the repository root, CI runs `./gradlew :app:testDebugUnitTest`, then `:app:lintDebug`, then `:app:assembleDebug`. On Windows use `gradlew.bat`; run only one Gradle build at a time. For a focused JVM test: `./gradlew :app:testDebugUnitTest --tests '*SourceContractTest'`.
 - Do not run `gradlew clean`: preserve existing build artifacts. Release packaging needs the ignored root `keystore.properties`; do not read or print its passwords. `assembleRelease` can clear the release APK output directory; preserve needed APKs elsewhere first.
 - Emulator/device testing is only on explicit owner request. Follow `CLAUDE.md`'s exclusive, sequential procedure; never uninstall, clear app data, wipe the emulator, or install an incompatible debug build without permission. Its `emu.ps1 smoke` targets a different app and must not be used here.
+- Все собранные APK (debug/release) сохранять в `D:\MyProjects\AudioBooks\dist` (или `dist` в корне текущего checkout); не оставлять сборки в `test-apk` и не искать их по диску.
 
 ## Code boundaries and invariants
 
