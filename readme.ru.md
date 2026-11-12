@@ -3,8 +3,10 @@
 [English](readme.md) · **Русский**
 
 [![Build](https://github.com/thejohnd0e/AudioBooks/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/thejohnd0e/AudioBooks/actions/workflows/build.yml)
-[![Latest release](https://img.shields.io/github/v/release/thejohnd0e/AudioBooks?sort=semver&label=release)](https://github.com/thejohnd0e/AudioBooks/releases/latest)
-[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](#требования)
+[![Последний релиз](https://img.shields.io/github/v/release/thejohnd0e/AudioBooks?sort=semver&label=%D1%80%D0%B5%D0%BB%D0%B8%D0%B7)](https://github.com/thejohnd0e/AudioBooks/releases/latest)
+[![Загрузки](https://img.shields.io/github/downloads/thejohnd0e/AudioBooks/total?label=%D1%81%D0%BA%D0%B0%D1%87%D0%B8%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F&logo=github)](https://github.com/thejohnd0e/AudioBooks/releases)
+[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B%20%2F%20TV-3DDC84?logo=android&logoColor=white)](#требования)
+[![Каталоги](https://img.shields.io/badge/%D0%BA%D0%B0%D1%82%D0%B0%D0%BB%D0%BE%D0%B3%D0%B8-29%20%D0%B8%D1%81%D1%82%D0%BE%D1%87%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2-007ACC)](#источники-книг)
 
 **Больше книг в вашей повседневной жизни.** AudioBooks — бесплатное приложение для Android, которое помогает находить и слушать аудиокниги из 29 онлайн-каталогов. Включайте истории по дороге на работу, скачивайте книги перед поездкой или засыпайте под любимую озвучку с таймером сна.
 

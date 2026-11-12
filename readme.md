@@ -4,7 +4,9 @@
 
 [![Build](https://github.com/thejohnd0e/AudioBooks/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/thejohnd0e/AudioBooks/actions/workflows/build.yml)
 [![Latest release](https://img.shields.io/github/v/release/thejohnd0e/AudioBooks?sort=semver&label=release)](https://github.com/thejohnd0e/AudioBooks/releases/latest)
-[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white)](#requirements)
+[![Downloads](https://img.shields.io/github/downloads/thejohnd0e/AudioBooks/total?label=downloads&logo=github)](https://github.com/thejohnd0e/AudioBooks/releases)
+[![Android 7.0+](https://img.shields.io/badge/Android-7.0%2B%20%2F%20TV-3DDC84?logo=android&logoColor=white)](#requirements)
+[![Catalogs](https://img.shields.io/badge/catalogs-29%20sources-007ACC)](#book-sources)
 
 **Make room for books in your everyday life.** AudioBooks is a free Android app for discovering and listening to audiobooks from 29 online catalogs. Enjoy a story on your commute, download a book before a trip, or fall asleep listening with a sleep timer.
 
