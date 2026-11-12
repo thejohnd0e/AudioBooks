@@ -117,6 +117,8 @@
             tools:progress="30" />
     </LinearLayout>
 
+    <include layout="@layout/chapter_search" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"

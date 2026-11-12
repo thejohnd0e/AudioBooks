@@ -84,6 +84,10 @@ public interface Activity extends MvpView {
     @StateStrategyType(SkipStrategy.class)
     void showRatingDialog();
 
+    /** A jump of the place was made: offers the way back to {@code chapter} (its index and name) at {@code positionMs}. */
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void showSeekUndo(int chapter, long positionMs, String chapterName);
+
     @StateStrategyType(SkipStrategy.class)
     void showToast(int id);
 

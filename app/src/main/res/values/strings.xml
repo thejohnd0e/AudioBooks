@@ -666,6 +666,9 @@
     <string name="home_left">%1$s · осталось %2$s</string>
     <string name="home_resuming">Продолжаем: %1$s</string>
     <string name="home_play_book">Продолжить «%1$s»</string>
+    <string name="seek_undo">Вернуться на %1$s · %2$s</string>
+    <string name="seek_undo_action">Вернуться</string>
+    <string name="chapter_search_hint">Найти главу или номер</string>
     <string name="bookmark_add">Закладка</string>
     <string name="notification_bookmark">Закладка в уведомлении</string>
     <string name="notification_bookmark_desc">Кнопка закладки в уведомлении плеера вместо кнопки «Выход»</string>

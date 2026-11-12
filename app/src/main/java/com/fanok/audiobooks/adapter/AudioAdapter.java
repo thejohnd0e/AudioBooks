@@ -50,6 +50,15 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
 
     private int indexSelected = -1;
 
+    /**
+     * The chapters shown while the list is searched: their indexes in {@link #mData}, in order; null while it is not.
+     * Everything the adapter knows about a chapter (its download, its place, a choice) is by its index in the data;
+     * only what the RecyclerView asks for is by the row, which {@link #dataIndex} translates.
+     */
+    @androidx.annotation.Nullable
+    private int[] mVisible;
+    private String mQuery = "";
+
     private ArrayList<AudioPOJO> mData;
     private int mChaptersTotal;
     /** Positions of the chapters held as exported copies in the download folder (their download may be gone). */
@@ -150,7 +159,8 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
         for (int i = 0; i < mData.size(); i++) {
             String url = mData.get(i).getUrl();
             Download d = url != null ? allDownloads.get(url) : null;
-            if (d != null && d.state != Download.STATE_COMPLETED) notifyItemChanged(i, LIVE);
+            int row = displayOf(i);
+            if (d != null && d.state != Download.STATE_COMPLETED && row >= 0) notifyItemChanged(row, LIVE);
         }
         publishStatus();
     }
@@ -240,14 +250,15 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
     /** The chapters whose file is chosen (several chapters of one file count each). */
     public int getSelectedChapters() {
         int count = 0;
-        for (AudioPOJO audio : mData) {
-            if (audio.getUrl() != null && mSelectedItems.contains(audio.getUrl())) count++;
+        for (int row = 0; row < getItemCount(); row++) {
+            String url = mData.get(dataIndex(row)).getUrl();
+            if (url != null && mSelectedItems.contains(url)) count++;
         }
         return count;
     }
 
     public boolean isAllSelected() {
-        return !mData.isEmpty() && getSelectedChapters() == mData.size();
+        return getItemCount() > 0 && getSelectedChapters() == getItemCount();
     }
 
     /** Starts choosing with every chapter chosen (the Download/Delete menu); while choosing, chooses them all. */
@@ -260,8 +271,10 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
     public void setAllSelected(boolean all) {
         mSelectedItems.clear();
         if (all) {
-            for (AudioPOJO audio : mData) {
-                if (audio.getUrl() != null) mSelectedItems.add(audio.getUrl());
+            // the chapters shown: a search never makes a choice of chapters out of sight
+            for (int row = 0; row < getItemCount(); row++) {
+                String url = mData.get(dataIndex(row)).getUrl();
+                if (url != null) mSelectedItems.add(url);
             }
         }
         selectionChanged();
@@ -291,10 +304,11 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
     public void setData(@NonNull ArrayList<AudioPOJO> data, int chaptersTotal) {
         mData = data;
         mChaptersTotal = chaptersTotal;
+        recomputeVisible();
         if (mSelecting) {
             // a reload keeps the choice of the files still listed
             HashSet<String> listed = new HashSet<>();
-            for (AudioPOJO audio : data) listed.add(audio.getUrl());
+            for (int row = 0; row < getItemCount(); row++) listed.add(mData.get(dataIndex(row)).getUrl());
             mSelectedItems.retainAll(listed);
             if (mSelectedListner != null) mSelectedListner.onItemSelected();
         }
@@ -310,6 +324,61 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
 
     public int getIndexSelected() {
         return indexSelected;
+    }
+
+    /** The chapters of the book held in the list, shown or not (a search hides some). */
+    public int getDataCount() {
+        return mData.size();
+    }
+
+    /** The row showing chapter {@code dataIndex}, or -1 when a search hides it. */
+    public int displayOf(int dataIndex) {
+        if (mVisible == null) {
+            return dataIndex >= 0 && dataIndex < mData.size() ? dataIndex : -1;
+        }
+        for (int row = 0; row < mVisible.length; row++) {
+            if (mVisible[row] == dataIndex) return row;
+        }
+        return -1;
+    }
+
+    /** The chapter shown in row {@code row}, as its index in the data. */
+    private int dataIndex(int row) {
+        return mVisible == null ? row : mVisible[row];
+    }
+
+    private void recomputeVisible() {
+        if (mQuery.isEmpty()) {
+            mVisible = null;
+            return;
+        }
+        List<String> names = new ArrayList<>(mData.size());
+        for (AudioPOJO audio : mData) names.add(audio.getName());
+        mVisible = com.fanok.audiobooks.util.ChapterFilter.match(names, mQuery);
+    }
+
+    /**
+     * Shows only the chapters that match {@code query} (a part of the name, or a chapter number); an empty one shows
+     * all. What was chosen for download or deletion stays only as far as it is shown, so a choice is never made of
+     * chapters the listener cannot see.
+     */
+    @SuppressLint("NotifyDataSetChanged")
+    public void setFilter(@androidx.annotation.Nullable String query) {
+        String next = query == null ? "" : query.trim();
+        if (next.equals(mQuery)) return;
+        mQuery = next;
+        recomputeVisible();
+        if (mSelecting) {
+            HashSet<String> shown = new HashSet<>();
+            for (int row = 0; row < getItemCount(); row++) shown.add(mData.get(dataIndex(row)).getUrl());
+            mSelectedItems.retainAll(shown);
+            if (mSelectedListner != null) mSelectedListner.onItemSelected();
+        }
+        notifyDataSetChanged();
+    }
+
+    public boolean isFiltered() {
+        return mVisible != null;
     }
 
     public AudioPOJO getData(int index) {
@@ -348,12 +417,13 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return mData.size();
+        return mVisible == null ? mData.size() : mVisible.length;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, @SuppressLint("RecyclerView") int i) {
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, @SuppressLint("RecyclerView") int position) {
         Log.d(TAG, "onBindViewHolder: called");
+        final int i = dataIndex(position); // the chapter of this row: all below is by the chapter, not by the row
 
         if (mData.get(i).getTime() != 0) {
             int totalSecs = mData.get(i).getTime();
@@ -455,7 +525,7 @@ public class AudioAdapter extends RecyclerView.Adapter<AudioAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i, @NonNull List<Object> payloads) {
         if (payloads.contains(LIVE)) {
-            bindDownloadState(viewHolder, i);
+            bindDownloadState(viewHolder, dataIndex(i));
         } else {
             super.onBindViewHolder(viewHolder, i, payloads);
         }
