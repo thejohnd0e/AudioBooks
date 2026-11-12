@@ -3,6 +3,7 @@ package com.fanok.audiobooks.sync;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.fanok.audiobooks.pojo.BookPOJO;
+import com.fanok.audiobooks.pojo.BookmarkPOJO;
 import com.fanok.audiobooks.pojo.FavoritePersonPOJO;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -23,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BiPredicate;
@@ -41,6 +43,12 @@ final class Snapshot {
 
     /** Present in every document: one missing makes the file unreadable rather than a deletion of its content. */
     private static final List<String> SECTIONS = Arrays.asList("seq", "books", "fav", "hist", "people", "pos", "prefs");
+
+    /**
+     * Sections a file may lack: it then has none of them, as a file written before them. Unlike {@link #SECTIONS},
+     * their absence is no reason to refuse the document.
+     */
+    private static final List<String> OPTIONAL_SECTIONS = Arrays.asList("bookmarks");
 
     private static final Gson GSON = new Gson();
 
@@ -62,6 +70,8 @@ final class Snapshot {
     Map<String, FavoritePersonPOJO> people = new LinkedHashMap<>();
     /** Where each book was left. */
     Map<String, Pos> pos = new TreeMap<>();
+    /** The bookmarks in books, by {@link com.fanok.audiobooks.model.Bookmarks#key}; the value carries the note and when it was made. */
+    Map<String, BookmarkPOJO> bookmarks = new LinkedHashMap<>();
     /** Synced settings as text, typed and filtered by CloudSync. */
     Map<String, String> prefs = new TreeMap<>();
     /** Members a newer version of the format added: written back as they came, so an older app does not drop them. */
@@ -134,6 +144,9 @@ final class Snapshot {
         out.pos = merge(base.pos, mine.pos, theirs.pos, Pos::equals,
                 (a, b) -> a.start() != b.start() ? (a.start() ? b : a) : a.t > b.t ? a : b);
         out.prefs = merge(base.prefs, mine.prefs, theirs.prefs, String::equals, (a, b) -> b);
+        // the key is the place, so only the note can differ: the cloud's note is kept unless it was cleared there
+        out.bookmarks = merge(base.bookmarks, mine.bookmarks, theirs.bookmarks, Snapshot::sameMark,
+                (a, b) -> b.getNote() != null ? b : a);
         Set<String> urls = new HashSet<>(out.fav.keySet());
         urls.addAll(out.hist.keySet());
         for (String url : urls) {
@@ -174,7 +187,12 @@ final class Snapshot {
     boolean sameData(@NonNull Snapshot o) {
         return sameMap(fav, o.fav, PRESENT) && sameMap(hist, o.hist, Long::equals)
                 && sameMap(people, o.people, PRESENT) && sameMap(pos, o.pos, Pos::equals)
-                && sameMap(prefs, o.prefs, String::equals);
+                && sameMap(prefs, o.prefs, String::equals) && sameMap(bookmarks, o.bookmarks, Snapshot::sameMark);
+    }
+
+    /** The same mark: the place is the key, so the note is all there is to differ. */
+    private static boolean sameMark(BookmarkPOJO a, BookmarkPOJO b) {
+        return Objects.equals(a.getNote(), b.getNote());
     }
 
     /** A copy whose maps change on their own. */
@@ -189,6 +207,7 @@ final class Snapshot {
         s.people.putAll(people);
         s.pos.putAll(pos);
         s.prefs.putAll(prefs);
+        s.bookmarks.putAll(bookmarks);
         s.rest = rest;
         return s;
     }
@@ -302,9 +321,13 @@ final class Snapshot {
         section(json, "people", FavoritePersonPOJO.class, s.people);
         section(json, "pos", Pos.class, s.pos);
         section(json, "prefs", String.class, s.prefs);
+        if (json.get("bookmarks") instanceof JsonObject) {
+            section(json, "bookmarks", BookmarkPOJO.class, s.bookmarks);
+        }
         s.rest = new JsonObject();
         for (Map.Entry<String, JsonElement> e : json.entrySet()) {
-            if (!e.getKey().equals("v") && !e.getKey().equals("at") && !SECTIONS.contains(e.getKey())) {
+            if (!e.getKey().equals("v") && !e.getKey().equals("at") && !SECTIONS.contains(e.getKey())
+                    && !OPTIONAL_SECTIONS.contains(e.getKey())) {
                 s.rest.add(e.getKey(), e.getValue());
             }
         }

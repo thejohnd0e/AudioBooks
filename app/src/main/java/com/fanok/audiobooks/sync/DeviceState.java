@@ -7,12 +7,15 @@ import androidx.annotation.Nullable;
 import com.fanok.audiobooks.model.AudioDBModel;
 import com.fanok.audiobooks.model.BooksDBModel;
 import com.fanok.audiobooks.model.FavoritePeople;
+import com.fanok.audiobooks.model.Bookmarks;
 import com.fanok.audiobooks.pojo.BookPOJO;
+import com.fanok.audiobooks.pojo.BookmarkPOJO;
 import com.fanok.audiobooks.pojo.FavoritePersonPOJO;
 import com.fanok.audiobooks.pojo.StorageUtil;
 import com.fanok.audiobooks.pojo.TimeStartPOJO;
 import com.fanok.audiobooks.room.AppDatabase;
 import com.fanok.audiobooks.room.BookBaseEntity;
+import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.room.FavoriteEntity;
 import com.fanok.audiobooks.room.HistoryEntity;
 import com.fanok.audiobooks.service.Checkpoint;
@@ -48,6 +51,9 @@ final class DeviceState {
         for (FavoritePersonPOJO p : FavoritePeople.get(app).backup()) {
             s.people.put(Snapshot.person(p.getKind(), FavoritePeople.key(p.getName())), p);
         }
+        for (BookmarkEntity mark : db.bookmarkDao().getAll()) {
+            s.bookmarks.put(Bookmarks.key(mark), BookmarkPOJO.of(mark));
+        }
         Map<String, String> chapters = new HashMap<>();
         for (TimeStartPOJO audio : new AudioDBModel(app).getAll()) {
             chapters.put(audio.getUrl(), audio.getName());
@@ -76,11 +82,48 @@ final class DeviceState {
         boolean books = applyBooks(app, mine, merged, kept);
         boolean people = applyPeople(app, mine, merged, kept);
         applyPlaces(app, mine, merged, kept);
+        applyMarks(app, mine, merged);
         SyncedSettings.apply(app, mine.prefs, merged.prefs, kept.prefs);
         if (books || people) {
             app.sendBroadcast(new Intent(BooksDBModel.ACTION_CHANGED).setPackage(app.getPackageName()));
         }
         return kept;
+    }
+
+    /**
+     * The bookmarks in books: those the cloud has and this device lacks are added, those dropped on the other device and
+     * still as they were here are removed, a note changed there is taken unless it was written here since.
+     */
+    private static void applyMarks(Context app, Snapshot mine, Snapshot merged) {
+        AppDatabase db = AppDatabase.getDatabase(app);
+        db.runInTransaction(() -> {
+            Map<String, BookmarkEntity> now = new HashMap<>();
+            for (BookmarkEntity mark : db.bookmarkDao().getAll()) {
+                now.put(Bookmarks.key(mark), mark);
+            }
+            for (Map.Entry<String, BookmarkPOJO> e : merged.bookmarks.entrySet()) {
+                BookmarkPOJO theirs = e.getValue();
+                BookmarkPOJO was = mine.bookmarks.get(e.getKey());
+                BookmarkEntity here = now.get(e.getKey());
+                if (was == null) {
+                    if (here == null && theirs.getUrlBook() != null && !theirs.getUrlBook().trim().isEmpty()
+                            && theirs.getChapterName() != null) {
+                        db.bookmarkDao().insert(theirs.toEntity());
+                    }
+                } else if (here != null && !Objects.equals(here.note, theirs.getNote())
+                        && Objects.equals(here.note, was.getNote())) {
+                    db.bookmarkDao().updateNote(here.id, theirs.getNote());
+                }
+            }
+            for (Map.Entry<String, BookmarkPOJO> e : mine.bookmarks.entrySet()) {
+                BookmarkEntity here = now.get(e.getKey());
+                if (!merged.bookmarks.containsKey(e.getKey()) && here != null
+                        && Objects.equals(here.note, e.getValue().getNote())) {
+                    db.bookmarkDao().delete(here.id);
+                }
+            }
+            return null;
+        });
     }
 
     /** The favourites and the history, in one transaction; whether any row changed. */

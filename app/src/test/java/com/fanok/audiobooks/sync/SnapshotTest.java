@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.fanok.audiobooks.pojo.BookPOJO;
+import com.fanok.audiobooks.pojo.BookmarkPOJO;
+import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.pojo.FavoritePersonPOJO;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -37,6 +39,70 @@ public class SnapshotTest {
         assertEquals(Arrays.asList(B, C), new java.util.ArrayList<>(merged.fav.keySet()));
         assertEquals("Книга " + C, merged.books.get(C).getName());
         assertNull(merged.books.get(A));
+    }
+
+    private static BookmarkPOJO mark(String url, String chapter, long ms, String note) {
+        BookmarkEntity e = new BookmarkEntity();
+        e.urlBook = url;
+        e.chapterName = chapter;
+        e.positionMs = ms;
+        e.note = note;
+        e.createdAt = 1;
+        return BookmarkPOJO.of(e);
+    }
+
+    private static String key(String url, String chapter, long ms) {
+        return url + "|" + chapter + "|" + ms;
+    }
+
+    @Test
+    public void bookmarks_unionDeletionsAndNotes() {
+        Snapshot base = new Snapshot(), mine = new Snapshot(), theirs = new Snapshot();
+        String kept = key(A, "Глава 1", 1000), gone = key(A, "Глава 2", 2000), added = key(B, "Глава 3", 3000);
+        String noted = key(C, "Глава 4", 4000);
+        for (Snapshot s : new Snapshot[] {base, mine, theirs}) {
+            s.bookmarks.put(kept, mark(A, "Глава 1", 1000, null));
+            s.bookmarks.put(gone, mark(A, "Глава 2", 2000, null));
+            s.bookmarks.put(noted, mark(C, "Глава 4", 4000, null));
+        }
+        theirs.bookmarks.remove(gone); // deleted on the other device
+        mine.bookmarks.put(added, mark(B, "Глава 3", 3000, "тут"));
+        theirs.bookmarks.put(noted, mark(C, "Глава 4", 4000, "заметка там"));
+
+        Snapshot merged = Snapshot.merge(base, mine, theirs);
+        assertTrue(merged.bookmarks.containsKey(kept));
+        assertFalse(merged.bookmarks.containsKey(gone));
+        assertEquals("тут", merged.bookmarks.get(added).getNote());
+        assertEquals("заметка там", merged.bookmarks.get(noted).getNote());
+    }
+
+    @Test
+    public void bookmarks_unknownBaseIsAUnionAndSameDataSeesNotes() {
+        Snapshot mine = new Snapshot(), theirs = new Snapshot();
+        mine.bookmarks.put(key(A, "a", 1), mark(A, "a", 1, null));
+        theirs.bookmarks.put(key(B, "b", 2), mark(B, "b", 2, null));
+        assertEquals(2, Snapshot.merge(new Snapshot(), mine, theirs).bookmarks.size());
+
+        Snapshot one = new Snapshot(), other = new Snapshot();
+        one.bookmarks.put(key(A, "a", 1), mark(A, "a", 1, "x"));
+        other.bookmarks.put(key(A, "a", 1), mark(A, "a", 1, "y"));
+        assertFalse(one.sameData(other));
+        assertTrue(one.sameData(one.copy()));
+    }
+
+    @Test
+    public void bookmarks_roundTripAndAFileWithoutThemIsStillReadable() throws Exception {
+        Snapshot s = fav(A);
+        s.bookmarks.put(key(A, "Глава 1", 1000), mark(A, "Глава 1", 1000, "заметка"));
+        Snapshot back = Snapshot.parse(s.toBytes());
+        assertTrue(s.sameData(back));
+        assertEquals("заметка", back.bookmarks.get(key(A, "Глава 1", 1000)).getNote());
+        assertEquals(1000, back.bookmarks.get(key(A, "Глава 1", 1000)).getPositionMs());
+
+        String json = "{\"v\":1,\"seq\":{},\"books\":{},\"fav\":{},\"hist\":{},\"people\":{},\"pos\":{},\"prefs\":{}}";
+        Snapshot old = Snapshot.parse(json.getBytes(StandardCharsets.UTF_8));
+        assertTrue(old.bookmarks.isEmpty());
+        assertEquals(0, old.rest.size());
     }
 
     @Test
