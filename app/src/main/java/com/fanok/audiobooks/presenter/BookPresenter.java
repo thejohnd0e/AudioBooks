@@ -352,8 +352,12 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
 
     @Override
     public void onOptionsMenuItemSelected(MenuItem item) {
+        onPlayerActionSelected(item.getItemId());
+    }
+
+    @Override
+    public void onPlayerActionSelected(int itemId) {
         //the favourite items and the speed are BookActivity's (BookFavorites, buttonSpeedClick)
-        int itemId = item.getItemId();
         if (itemId == R.id.refresh) {
             getViewState().refreshActivity();
         } else if (itemId == R.id.share) {
@@ -508,12 +512,23 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
     private View speedSlider(Context context, final float[] chosen) {
         final LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
+        int padH = Math.round(24 * context.getResources().getDisplayMetrics().density);
+        int padTop = Math.round(12 * context.getResources().getDisplayMetrics().density);
+        int padBottom = Math.round(4 * context.getResources().getDisplayMetrics().density);
+        linearLayout.setPadding(padH, padTop, padH, padBottom);
         final TextView textView = new TextView(context);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setText(speedText(chosen[0]));
-        textView.setTextColor(getAttributeColor(textView.getContext(), R.attr.colorPrimaryText));
+        textView.setTextSize(18f);
+        textView.setTypeface(textView.getTypeface(), android.graphics.Typeface.BOLD);
+        textView.setTextColor(com.fanok.audiobooks.PaletteBinder.accent(context));
         linearLayout.addView(textView);
         final SeekBar seek = new SeekBar(context);
+        LinearLayout.LayoutParams seekParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        seekParams.topMargin = Math.round(8 * context.getResources().getDisplayMetrics().density);
+        seek.setLayoutParams(seekParams);
+        com.fanok.audiobooks.PaletteBinder.tintControls(seek, com.fanok.audiobooks.PaletteBinder.accent(context));
         //no SeekBar.setMin below API 26: position 0 is PlaybackSettings.MIN_SPEED, the end MAX_SPEED
         seek.setMax(speedStep(PlaybackSettings.MAX_SPEED));
         seek.setKeyProgressIncrement(SPEED_KEY_STEPS);
@@ -601,6 +616,23 @@ public class BookPresenter extends MvpPresenter<Activity> implements ActivityPre
     @Override
     public void switchToThisBook() {
         if (!canSwitchToThisBook()) {
+            return;
+        }
+        startThisBookFromCheckpoint();
+    }
+
+    /** The description's listen action: controls this book, switching the player to it when another book is loaded. */
+    @Override
+    public void playThisBook() {
+        if (playsThisBook()) {
+            getViewState().broadcastSend(new Intent(Broadcast_PLAY));
+        } else {
+            startThisBookFromCheckpoint();
+        }
+    }
+
+    private void startThisBookFromCheckpoint() {
+        if (mAudioPOJO == null || mAudioPOJO.isEmpty()) {
             return;
         }
         Checkpoint checkpoint = resumePoint();

@@ -64,6 +64,7 @@ public class NarratorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_narrator);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

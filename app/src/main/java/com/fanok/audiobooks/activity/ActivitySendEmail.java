@@ -34,11 +34,14 @@ public class ActivitySendEmail extends MvpAppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.fanok.audiobooks.AppThemes.apply(this, R.style.AppTheme_SwipeOnClose, R.style.LightAppTheme_SwipeOnClose,
+                R.style.AppThemeBlack_SwipeOnClose);
         super.onCreate(savedInstanceState);
         binding = ActivitySendEmailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Slidr.attach(this);
         setSupportActionBar(binding.toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

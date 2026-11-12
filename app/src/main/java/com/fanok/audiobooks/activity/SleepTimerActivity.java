@@ -113,6 +113,8 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.fanok.audiobooks.AppThemes.apply(this, R.style.AppTheme_SwipeOnClose, R.style.LightAppTheme_SwipeOnClose,
+                R.style.AppThemeBlack_SwipeOnClose);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_sleep_timer);
@@ -140,6 +142,8 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
+        stylePaletteControls();
         initButtons();
         SensorManager sensors = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensors == null || sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) {
@@ -185,12 +189,61 @@ public class SleepTimerActivity extends MvpAppCompatActivity implements SleepTim
         mCancel.setOnClickListener(view -> mPresenter.cancel());
     }
 
+    private void stylePaletteControls() {
+        int accent = com.fanok.audiobooks.PaletteBinder.accent(this);
+        int bg = com.fanok.audiobooks.PaletteBinder.background(this);
+        int surface = com.fanok.audiobooks.PaletteBinder.surface(this);
+        int text = com.google.android.material.color.MaterialColors.getColor(
+                this, R.attr.colorPrimaryText, android.graphics.Color.WHITE);
+        android.content.res.ColorStateList accentList = android.content.res.ColorStateList.valueOf(accent);
+        int[][] states = new int[][] {new int[] {android.R.attr.state_checked}, new int[] {}};
+        for (int id : new int[] {R.id.modeCountdown, R.id.modeClock}) {
+            View v = findViewById(id);
+            if (v instanceof com.google.android.material.button.MaterialButton) {
+                com.google.android.material.button.MaterialButton b =
+                        (com.google.android.material.button.MaterialButton) v;
+                b.setBackgroundTintList(new android.content.res.ColorStateList(
+                        states, new int[] {(accent & 0x00FFFFFF) | 0x33000000, surface}));
+                b.setStrokeColor(new android.content.res.ColorStateList(
+                        states, new int[] {accent, 0x55FFFFFF}));
+                b.setTextColor(new android.content.res.ColorStateList(
+                        states, new int[] {accent, text}));
+            }
+        }
+        if (mStart instanceof com.google.android.material.button.MaterialButton) {
+            com.google.android.material.button.MaterialButton startBtn =
+                    (com.google.android.material.button.MaterialButton) mStart;
+            startBtn.setBackgroundTintList(accentList);
+            startBtn.setTextColor(bg);
+        }
+        for (int id : new int[] {R.id.endOfChapter, R.id.cancel}) {
+            View v = findViewById(id);
+            if (v instanceof com.google.android.material.button.MaterialButton) {
+                com.google.android.material.button.MaterialButton b =
+                        (com.google.android.material.button.MaterialButton) v;
+                b.setStrokeColor(accentList);
+                b.setTextColor(accent);
+            }
+        }
+        if (mExtend instanceof com.google.android.material.button.MaterialButton) {
+            ((com.google.android.material.button.MaterialButton) mExtend).setTextColor(accent);
+        }
+        if (mClockTime != null) {
+            mClockTime.setTextColor(accent);
+        }
+        if (mRemaining != null) {
+            mRemaining.setTextColor(accent);
+        }
+    }
+
     private void initPicker(@NonNull NumberPicker picker, int max) {
         picker.setMinValue(0);
         picker.setMaxValue(max);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             picker.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 28,
                     getResources().getDisplayMetrics()));
+            picker.setTextColor(com.google.android.material.color.MaterialColors.getColor(
+                    this, R.attr.colorPrimaryText, android.graphics.Color.WHITE));
         }
         picker.setOnValueChangedListener((view, oldValue, newValue) -> {
             if (!binding) {

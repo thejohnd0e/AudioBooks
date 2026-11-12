@@ -123,11 +123,14 @@ public class ClearSavedActivity extends MvpAppCompatActivity implements ClearSav
     @OptIn(markerClass = UnstableApi.class)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        com.fanok.audiobooks.AppThemes.apply(this, R.style.AppTheme_SwipeOnClose, R.style.LightAppTheme_SwipeOnClose,
+                R.style.AppThemeBlack_SwipeOnClose);
         super.onCreate(savedInstanceState);
         binding = ActivityClearSavedBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         Slidr.attach(this);
         setSupportActionBar(binding.toolbar);
+        com.fanok.audiobooks.PaletteBinder.bind(this);
         ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

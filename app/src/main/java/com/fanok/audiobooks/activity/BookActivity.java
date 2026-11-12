@@ -213,6 +213,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
     private TextView mSpeed;
     private RecyclerView mList;
     private TextView mNameCurent;
+    private String mLastChapterTitle = "";
     private ProgressBar mProgressBar;
     private View mDownloadStatus;
     private TextView mDownloadStatusText;
@@ -326,11 +327,13 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
     private void showEqualizer(int sessionId) {
         try {
+            int textColor = com.google.android.material.color.MaterialColors.getColor(
+                    this, R.attr.colorPrimaryText, android.graphics.Color.WHITE);
             DialogEqualizerFragment fragment = DialogEqualizerFragment.newBuilder()
                     .setAudioSessionId(sessionId)
-                    .themeColor(ContextCompat.getColor(this, R.color.primaryColorEq))
-                    .textColor(ContextCompat.getColor(this, R.color.textColor))
-                    .setAccentColor(ContextCompat.getColor(this, R.color.secondaryColor))
+                    .themeColor(PaletteBinder.surface(this))
+                    .textColor(textColor)
+                    .setAccentColor(PaletteBinder.accent(this))
                     .build();
 
             fragment.show(getSupportFragmentManager(), "eq");
@@ -503,7 +506,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mSelectionClose = findViewById(R.id.selectionClose);
         mDelete = findViewById(R.id.delete);
         mDownland = findViewById(R.id.dowland);
-        mSpeed = findViewById(R.id.speed);
+        mSpeed = findViewById(R.id.player_action_speed);
         mList = findViewById(R.id.list);
         mNameCurent = findViewById(R.id.name_curent);
         mProgressBar = findViewById(R.id.progressBar);
@@ -779,7 +782,12 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         mForward.setOnClickListener(view -> mPresenter.buttomForwardClick(view));
         new SeekHold(mRewind, false, false);
         new SeekHold(mForward, true, false);
-        mSpeed.setOnClickListener(v -> mPresenter.buttonSpeedClick(v));
+        if (mSpeed != null) {
+            mSpeed.setOnClickListener(v -> mPresenter.buttonSpeedClick(v));
+        }
+        findViewById(R.id.player_action_timer).setOnClickListener(v -> performPlayerAction(R.id.sleep_timer));
+        findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
+        findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
         getSystemService(AUDIO_SERVICE);
 
 
@@ -1001,7 +1009,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
         }
     }
 
-    /** The player's speed button: the same "1,5×" as the toolbar, opening the speed dialog. */
+    /** The player's speed chip: icon + "1,5×", opening the speed dialog. */
     private void bindSpeedButton() {
         if (mSpeed == null) {
             return;
@@ -1079,6 +1087,15 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
         mPresenter.onOptionsMenuItemSelected(menuItem);
         return (super.onOptionsItemSelected(menuItem));
+    }
+
+    /** The description's listen button acts on this book, even while the bottom player holds another. */
+    public void playThisBook() {
+        mPresenter.playThisBook();
+    }
+
+    private void performPlayerAction(int id) {
+        mPresenter.onPlayerActionSelected(id);
     }
 
     /** Opens the bottom player sheet and begins chapter selection for download or deletion. */
@@ -1198,7 +1215,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
             if (item == null || !item.isVisible() && TOOLBAR_ITEMS[i] != R.id.addFavorite) {
                 continue;
             }
-            boolean icon = onToolbar(TOOLBAR_KEYS[i]) && toolbarWidth(TOOLBAR_ITEMS[i]) <= room;
+            boolean icon = false; // Book actions live in the overflow, not in a row of toolbar icons.
             if (icon) {
                 room -= toolbarWidth(TOOLBAR_ITEMS[i]);
             }
@@ -1502,8 +1519,18 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
      * The row above the chapter list: what the book's download is doing (state, chapters, bytes, speed, time left),
      * hidden while nothing is selected for download. Tapping it opens the Downloads screen.
      */
+    @Nullable
+    public DownloadStatus downloadStatus() {
+        return mLastDownloadStatus;
+    }
+
     private void showDownloadStatus(@NonNull DownloadStatus status) {
         mLastDownloadStatus = status;
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof com.fanok.audiobooks.fragment.DescriptionBookFragment) {
+                ((com.fanok.audiobooks.fragment.DescriptionBookFragment) fragment).onDownloadsChanged();
+            }
+        }
         if (mDownloadStatus == null) return;
         String line = DownloadStatusText.line(this, status);
         if (line.isEmpty()) {
@@ -1545,10 +1572,34 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
 
     @Override
     public void showTitle(@NotNull @NonNull String name) {
-        if (!mShowingCount) {
-            mNameCurent.setText(!name.isEmpty() && android.text.TextUtils.isDigitsOnly(name)
-                    ? getString(R.string.player_chapter_number, name) : name);
+        if (!name.isEmpty()) {
+            mLastChapterTitle = name;
         }
+        if (!mShowingCount) {
+            String raw = name.isEmpty() ? mLastChapterTitle : name;
+            String chapter = !raw.isEmpty() && android.text.TextUtils.isDigitsOnly(raw)
+                    ? getString(R.string.player_chapter_number, raw) : raw;
+            BookPOJO playing = MediaPlayerService.currentBook();
+            String shown = collapsedPlayerTitle(playing == null ? null : playing.getName(),
+                    MediaPlayerService.currentBookUrl(),
+                    mBookPOJO == null ? null : mBookPOJO.getName(),
+                    mBookPOJO == null ? null : mBookPOJO.getUrl(), chapter);
+            mNameCurent.setText(shown == null ? "" : shown);
+        }
+    }
+
+    /** When another book is in the player, prefix its chapter with that book's name so the row identifies what plays. */
+    @Nullable
+    public static String collapsedPlayerTitle(@Nullable String activeBookName, @Nullable String activeBookUrl,
+            @Nullable String openBookName, @Nullable String openBookUrl, @Nullable String chapter) {
+        String cleanChapter = chapter == null ? "" : chapter.trim();
+        String cleanActive = activeBookName == null ? "" : activeBookName.trim();
+        boolean differentBook = activeBookUrl != null && !activeBookUrl.equals(openBookUrl)
+                || activeBookUrl == null && !cleanActive.isEmpty() && !cleanActive.equals(openBookName == null ? "" : openBookName.trim());
+        if (differentBook && !cleanActive.isEmpty()) {
+            return cleanChapter.isEmpty() ? cleanActive : cleanActive + " · " + cleanChapter;
+        }
+        return cleanChapter.isEmpty() ? null : cleanChapter;
     }
 
     /**
@@ -1728,11 +1779,15 @@ public class BookActivity extends MvpAppCompatActivity implements Activity {
                     return true;
                 }
             }else if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                View downloadBtn = findViewById(R.id.btnDownloadBook);
+                boolean favoriteIsRightmost = currentFocus.getId() == R.id.btnFavoriteBook
+                        && (downloadBtn == null || downloadBtn.getVisibility() != View.VISIBLE);
                 if (currentFocus.getId()==R.id.genre||currentFocus.getId()==R.id.autorConteiner||currentFocus.getId()==R.id.author||
                         currentFocus.getId()==R.id.artistConteiner||currentFocus.getId()==R.id.artist||currentFocus.getId()==R.id.seriesConteiner||
                         currentFocus.getId()==R.id.series||currentFocus.getId()==R.id.showMore||
                         currentFocus.getId()==R.id.authorLabel||currentFocus.getId()==R.id.artistLabel||
-                        currentFocus.getId()==R.id.seriesLabel) {
+                        currentFocus.getId()==R.id.seriesLabel||currentFocus.getId()==R.id.btnListenBook||
+                        currentFocus.getId()==R.id.btnDownloadBook||favoriteIsRightmost) {
                     View playerView = findViewById(R.id.player);
                     if (playerView != null) {
                         playerView.requestFocus();

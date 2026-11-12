@@ -9,7 +9,7 @@
             android:title="@string/add_to_favorite"
             android:visible="false"
             app:iconTint="?attr/colorItemMenu"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never" />
 
         <item
             android:id="@+id/removeFavorite"
@@ -17,7 +17,7 @@
             android:title="@string/remove_favorite"
             android:visible="false"
             app:iconTint="?attr/colorItemMenu"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never" />
 
         <!-- the book's author / reader in the favourite people (BookFavorites); hidden when the book names none -->
         <item
@@ -43,7 +43,7 @@
             android:icon="@drawable/ic_share"
             android:title="@string/share"
             app:iconTint="?attr/colorItemMenu"
-            app:showAsAction="ifRoom" />
+            app:showAsAction="never" />
 
         <!-- the live speed dialog; on the toolbar the value as text (actionLayout), in the overflow "Скорость · 1,5×" -->
         <item
