@@ -19,6 +19,11 @@ import java.util.Arrays;
  * hands it 16-bit PCM (it converts other PCM first while float output is off, as it is here); anything else and more
  * than two channels pass untouched.
  * <p>
+ * Volume boost lifts a quiet recording by up to {@link #BOOST_MAX} percent (to double): it is part of the channels'
+ * gains, ramped like the balance, and while the gains are above 1 the same per-block peak guard as the bass's holds the
+ * sound just under full scale: a loud passage plays quieter for a moment instead of clipping, and the gain comes back
+ * with the leveler's τ = 100 ms. Without a boost the sound plays exactly as it is.
+ * <p>
  * Bass lifts the body of the voice by up to {@link #BASS_MAX_DB} at {@link #BASS_HZ}: the sound plus a band of it
  * around there, so hum and rumble below gain little and the treble nothing (at full boost +1.3 dB at 50 Hz, +0.3 dB
  * at 1 kHz). The band's filter never changes, only its share does, ramped over a buffer: turning the knob or the
@@ -53,8 +58,13 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
      */
     private static final float ATTACK = .0488f, RELEASE = .00333f, RECOVER = .0488f, BASS_RECOVER = .0198f;
 
+    /** The boost runs from 0 (none) to this many percent more volume: 100 is double. */
+    public static final int BOOST_MAX = 100;
+
     /** Gains of the left and right channel, replaced as a pair so a buffer never gets halves of two balances. */
     private static volatile float[] channelGains = {1f, 1f};
+    private static int balanceSetting;
+    private static int boostSetting;
     private static volatile boolean nightSound;
     /** The share of the bass band added to the sound, 0 for none: 10^(dB/20) − 1. */
     private static volatile float bassShare;
@@ -70,6 +80,8 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
     private float limiter = 1f;
     private float gain = 1f;
     private boolean wasNight;
+    /** The channels' gains are, or were a buffer ago, above 1: the peak guard holds the sound under full scale. */
+    private boolean guarded;
     /** The block as it is played before its gain: left and right of every frame, the bass lifted. */
     private float[] mix = new float[2];
     /** The bass band's share the last buffer ended with, and its step over this one; playback thread. */
@@ -80,8 +92,15 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
     private final float[] state = new float[8];
 
     /** Sets the balance, clamped to {@code ±MAX}; any thread. */
-    public static void setBalance(int balance) {
-        channelGains = gains(balance);
+    public static synchronized void setBalance(int balance) {
+        balanceSetting = balance;
+        channelGains = gains(balanceSetting, boostSetting);
+    }
+
+    /** Sets the volume boost, 0 (none) to {@link #BOOST_MAX} percent more, clamped; any thread. */
+    public static synchronized void setBoost(int percent) {
+        boostSetting = Math.max(0, Math.min(BOOST_MAX, percent));
+        channelGains = gains(balanceSetting, boostSetting);
     }
 
     /** Sets the bass from the knob's strength, 0 (none) to {@link #BASS_MAX}, clamped; any thread. */
@@ -102,6 +121,13 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
     static float[] gains(int balance) {
         int b = Math.max(-MAX, Math.min(MAX, balance));
         return new float[]{b > 0 ? 1f - (float) b / MAX : 1f, b < 0 ? 1f + (float) b / MAX : 1f};
+    }
+
+    /** {@link #gains(int)} with the volume boost of {@code boost} percent on both channels. */
+    static float[] gains(int balance, int boost) {
+        float[] sides = gains(balance);
+        float factor = 1f + Math.max(0, Math.min(BOOST_MAX, boost)) / 100f;
+        return new float[]{sides[0] * factor, sides[1] * factor};
     }
 
     @NonNull
@@ -128,6 +154,8 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
         boolean night = nightSound;
         float share = bassShare;
         boolean lift = share > 0 || bass > 0; //on, or going off
+        //gains above 1, or still coming down from there: the sound is held under full scale like the bass
+        guarded = target[0] > 1f || target[1] > 1f || left > 1f || right > 1f;
         bassStep = (share - bass) / frames;
         if (night && !wasNight) { //starts at the gain it has and adapts from there
             env = TARGET;
@@ -197,10 +225,10 @@ public final class BalanceAudioProcessor extends BaseAudioProcessor {
             limiter = Math.min(limiter + (1f - limiter) * RECOVER * k, cap / slow);
             next = slow * limiter;
         } else { //back to 1, exactly: only a gain still above it, or the bass, is held under full scale
-            if (!lift) {
+            if (!lift && !guarded) {
                 cap = Math.max(1f, cap);
             }
-            float recover = lift ? BASS_RECOVER : RECOVER;
+            float recover = lift ? BASS_RECOVER : RECOVER; //the bass band recovers slowly: a voice is not pumped
             next = Math.min(cap, Math.abs(gain - 1f) < .001f ? 1f : gain + (1f - gain) * recover * k);
         }
         int f = 0;
