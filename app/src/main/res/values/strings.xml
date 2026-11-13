@@ -881,6 +881,8 @@
     <string name="error_reports_desc">Показывать подробный отчет об ошибке в диалоге</string>
     <string name="auto_update">Автообновление</string>
     <string name="auto_update_desc">Проверка автообновлений</string>
+    <string name="beta_updates">Получать пре-релизы</string>
+    <string name="beta_updates_desc">Предлагать и бета-версии: они выходят раньше, но могут работать нестабильно</string>
     <string name="flip_pause">Пауза экраном вниз</string>
     <string name="flip_pause_desc">Экраном вниз — пауза через 4 с, перевернули в течение 2 мин — воспроизведение продолжится</string>
     <string name="update_title">Доступно обновление</string>
