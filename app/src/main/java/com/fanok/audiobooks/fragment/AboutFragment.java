@@ -1,12 +1,9 @@
 package com.fanok.audiobooks.fragment;
 
-import static android.content.Context.CLIPBOARD_SERVICE;
 import static android.content.Context.UI_MODE_SERVICE;
 
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -127,16 +124,6 @@ public class AboutFragment extends PreferenceFragmentCompat {
             return true;
         });
 
-        preferenceClickListner("yandexForm", preference -> {
-            openInBrowser("http://mdpu.mcdir.ru/yd.html");
-            return true;
-        });
-
-        preferenceClickListner("qiwi", preference -> {
-            openInBrowser("http://qiwi.com/n/ONAMA629");
-            return true;
-        });
-
         preferenceClickListner("disable_battary_optimize", preference -> {
             boolean enabled;
             PowerManager pm = (PowerManager) requireContext().getSystemService(Context.POWER_SERVICE);
@@ -162,19 +149,6 @@ public class AboutFragment extends PreferenceFragmentCompat {
         });
 
 
-        Preference.OnPreferenceClickListener clickToCopy = preference -> {
-            ClipboardManager clipboardManager =
-                    (ClipboardManager) requireContext().getSystemService(
-                            CLIPBOARD_SERVICE);
-            String text = preference.getSummary().toString().replaceAll(" ", "");
-            ClipData clipData = ClipData.newPlainText("Source Text", text);
-            if (clipboardManager != null) {
-                clipboardManager.setPrimaryClip(clipData);
-                Toast.makeText(getContext(), getString(R.string.copied), Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        };
-
         preferenceClickListner("open_github", preference -> {
             openInBrowser("https://github.com/thejohnd0e/AudioBooks");
             return true;
@@ -186,23 +160,6 @@ public class AboutFragment extends PreferenceFragmentCompat {
             return true;
         });
 
-        preferenceClickListner("open_rustore", preference -> {
-            openInBrowser("https://apps.rustore.ru/app/com.fanok.audiobooks");
-            return true;
-        });
-
-        preferenceClickListner("monoUAH", clickToCopy);
-        preferenceClickListner("monoUSD", clickToCopy);
-        preferenceClickListner("monoEUR", clickToCopy);
-        preferenceClickListner("psb", clickToCopy);
-        preferenceClickListner("privat", clickToCopy);
-        preferenceClickListner("alpha", clickToCopy);
-        //preferenceClickListner("paypal", clickToCopy);
-        preferenceClickListner("yd", clickToCopy);
-        preferenceClickListner("wmu", clickToCopy);
-        preferenceClickListner("wmr", clickToCopy);
-        preferenceClickListner("wmz", clickToCopy);
-        preferenceClickListner("wme", clickToCopy);
 
 
     }

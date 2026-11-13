@@ -241,64 +241,17 @@
     <string name="back">Назад</string>
     <string name="error_load_photo">Не удалось загрузить изображение</string>
 
-    <!--ADS -->
-
-    <!--
-        baner
-        ca-app-pub-3595775191373219/3956116171 release
-        ca-app-pub-3940256099942544/6300978111 debug
-
-        interstitia
-        ca-app-pub-3595775191373219/9647426557 release
-        ca-app-pub-3940256099942544/1033173712 debug
-
-        rewarded
-        ca-app-pub-3595775191373219/9946826337 release
-        ca-app-pub-3940256099942544/5224354917 debug
-
-     -->
-    <string name="bunerID" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="interstitiaID" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
-    <string name="rewardedID" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
     <string name="setIgnoredBatteryOptimyze">Для корректной работы приложения необходимо добавить его в список игнорирования экономии заряда батареи (Battery optimizetion).</string>
 
 
     <!--About -->
     <string name="privacy">Условия использования</string>
-    <string name="donate" translatable="false">Donate</string>
-    <string name="donate_summary">Поддержать проект</string>
     <string name="write_autor">Написать автору форка</string>
     <string name="feedback_email" translatable="false">android-dev@intertop.link</string>
     <string name="getPlus">Получить Plus версию</string>
     <string name="how_is">Что это?</string>
     <string name="version">Версия</string>
     <string name="privacy_message">Все аудиокниги в приложении проигрываются с открытых ресурсов. Приложение осуществляет только поиск на таких ресурсах. Разработчики приложения не несут ответственность за данные аудио. Если вы обнаружили аудио, которое нарушает Ваши права интеллектуальной собственности, просим перейти по ссылке на сайт источник и обратиться к администрации данного сайта.</string>
-    <string name="MonobanckUAH" translatable="false">Monobank UAH</string>
-    <string name="Monobanck" translatable="false">Monobank</string>
-    <string name="MonobanckNumberUAH" translatable="false">5375 4114 0050 6411</string>
-    <string name="MonobanckUSD" translatable="false">Monobank USD</string>
-    <string name="MonobanckNumberUSD" translatable="false">5375 4188 0202 2079</string>
-    <string name="MonobanckEUR" translatable="false">Monobank EUR</string>
-    <string name="MonobanckNumberEUR" translatable="false">5375 4199 0104 6886</string>
-    <string name="privat">ПриватБанк</string>
-    <string name="privatNumber" translatable="false">5168 7573 6995 1399</string>
-    <string name="alpha">АльфаБанк UA</string>
-    <string name="alphaNumber" translatable="false">5355 5712 8204 2217</string>
-    <string name="psb">Промсвязьбанк</string>
-    <string name="psbNumber" translatable="false">2200 0303 2768 4834</string>
-    <string name="paypal" translatable="false">PayPal</string>
-    <string name="paypalEmail" translatable="false">fanok.inc@gmail.com</string>
-    <string name="qiwi" translatable="false">QIWI</string>
-    <string name="qiwiNumber" translatable="false">ONAMA629</string>
-    <string name="webmoney" translatable="false">WebMoney</string>
-    <string name="wmu" translatable="false">WMU</string>
-    <string name="wmuNumber" translatable="false">U194698990241</string>
-    <string name="wmr" translatable="false">WMR</string>
-    <string name="wmrNumber" translatable="false">R412052005163</string>
-    <string name="wmz" translatable="false">WMZ</string>
-    <string name="wmzNumber" translatable="false">Z159651802111</string>
-    <string name="wme" translatable="false">WME</string>
-    <string name="wmeNumber" translatable="false">E389430023033</string>
     <string name="copied">Скопировано</string>
     <string name="help">Помощь</string>
     <string name="error">Ошибка</string>
@@ -467,9 +420,6 @@
     <string name="seconds">с.</string>
     <string name="zero_time" translatable="false">00</string>
     <string name="equalizer">Эквалайзер</string>
-    <string name="yd">ЮMoney</string>
-    <string name="ydNumb" translatable="false">410014301337309</string>
-    <string name="yandex_form">Яндекс форма</string>
     <string name="exit">Выход</string>
     <string name="exit_confirm">Сохранить изменение?</string>
     <string name="no">Нет</string>
@@ -634,7 +584,6 @@
     <string name="cutting_file_desc">Делить книгу из одного файла на главы</string>
     <string name="thanks">Спасибо!</string>
     <string name="hls_download_channel_name">HLS Downloads</string>
-    <string name="open_rustore">RuStore</string>
     <string name="exo_download_notification_channel_name">Downloads</string>
     <string name="download">Загрузки</string>
     <string name="confirm_clear_saved">Вы уверены, что хотите очистить все загруженные файлы?</string>

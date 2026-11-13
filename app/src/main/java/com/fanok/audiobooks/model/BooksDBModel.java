@@ -21,7 +21,7 @@ public class BooksDBModel extends BooksDBAbstract implements BooksDBHelperInterf
      * Broadcast in this app (setPackage) when the book lists changed behind the screens that show them, as by a
      * cloud sync: a screen showing them reloads.
      */
-    public static final String ACTION_CHANGED = "com.fanok.audiobooks.LISTS_CHANGED";
+    public static final String ACTION_CHANGED = "link.intertop.audiobooks.LISTS_CHANGED";
 
     private static final String TAG = "BookDBModel";
 
