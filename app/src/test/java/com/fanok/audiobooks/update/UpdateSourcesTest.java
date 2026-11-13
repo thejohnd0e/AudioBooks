@@ -58,6 +58,17 @@ public class UpdateSourcesTest {
     }
 
     @Test
+    public void aPreReleaseIsOlderThanItsRelease() {
+        assertTrue(UpdateSources.compare("8.6.0", "8.6.0-beta1") > 0); // the beta is offered the release
+        assertTrue(UpdateSources.compare("8.6.0-beta1", "8.6.0") < 0);
+        assertTrue(UpdateSources.compare("8.6.0-beta2", "8.6.0-beta1") > 0);
+        assertTrue(UpdateSources.compare("8.6.0-beta1", "8.5.3") > 0); // still newer than the earlier release
+        assertTrue(UpdateSources.compare("8.6.1", "8.6.0-beta1") > 0);
+        assertTrue(UpdateSources.compare("8.6.0-rc1", "8.6.0-beta9") > 0);
+        assertEquals(0, UpdateSources.compare("8.6.0-beta1", "8.6.0-beta1"));
+    }
+
+    @Test
     public void githubReleaseComesFromTheTagAndItsChecksums() {
         String tag = UpdateSources.githubTag("https://github.com/korvin2000/AudioBooks/releases/tag/v7.9.1");
         assertEquals("v7.9.1", tag);

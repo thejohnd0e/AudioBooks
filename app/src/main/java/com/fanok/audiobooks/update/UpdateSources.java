@@ -77,10 +77,29 @@ public final class UpdateSources {
         }
     }
 
-    /** Compares dotted numeric versions ("7.10" > "7.9.1" > "7.9"); a part that is not a number counts as 0. */
+    /**
+     * Compares dotted numeric versions ("7.10" > "7.9.1" > "7.9"); a part that is not a number counts as 0. A
+     * pre-release suffix ("8.6.0-beta1") makes the version older than the same one without it ("8.6.0"), and
+     * "-beta2" newer than "-beta1".
+     */
     public static int compare(@NonNull String a, @NonNull String b) {
-        String[] x = a.trim().split("\\.");
-        String[] y = b.trim().split("\\.");
+        String x = a.trim();
+        String y = b.trim();
+        int dx = x.indexOf('-');
+        int dy = y.indexOf('-');
+        int base = compareNumbers(dx < 0 ? x : x.substring(0, dx), dy < 0 ? y : y.substring(0, dy));
+        if (base != 0) {
+            return base;
+        }
+        if (dx < 0 || dy < 0) {
+            return dx < 0 ? (dy < 0 ? 0 : 1) : -1; // the release is newer than its pre-release
+        }
+        return comparePreRelease(x.substring(dx + 1), y.substring(dy + 1));
+    }
+
+    private static int compareNumbers(String a, String b) {
+        String[] x = a.split("\\.");
+        String[] y = b.split("\\.");
         for (int i = 0; i < Math.max(x.length, y.length); i++) {
             long p = i < x.length ? number(x[i]) : 0;
             long q = i < y.length ? number(y[i]) : 0;
@@ -89,6 +108,17 @@ public final class UpdateSources {
             }
         }
         return 0;
+    }
+
+    /** "beta1" against "beta2", "alpha1" against "beta1": the letters as text, then the number after them. */
+    private static int comparePreRelease(String a, String b) {
+        String la = a.replaceAll("[^A-Za-z]", "");
+        String lb = b.replaceAll("[^A-Za-z]", "");
+        int letters = la.compareToIgnoreCase(lb);
+        if (letters != 0) {
+            return letters < 0 ? -1 : 1;
+        }
+        return Long.compare(number(a.replaceAll("[^0-9]", "")), number(b.replaceAll("[^0-9]", "")));
     }
 
     private static long number(String part) {
