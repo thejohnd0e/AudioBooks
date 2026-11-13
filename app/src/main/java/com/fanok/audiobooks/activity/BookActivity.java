@@ -1207,13 +1207,25 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         }
     };
 
+    private int mTvUndoChapter;
+    private long mTvUndoMs;
+    private long mTvUndoUntil;
+    private boolean mTvMenuTaken;
+
     @Override
     public void showSeekUndo(int chapter, long positionMs, String chapterName) {
         String name = chapterName == null ? "" : chapterName;
         String chapterText = !name.isEmpty() && android.text.TextUtils.isDigitsOnly(name)
                 ? getString(R.string.player_chapter_number, name) : name;
-        Snackbar bar = Snackbar.make(snackbarHost(),
-                getString(R.string.seek_undo, Bookmarks.time(positionMs), chapterText), 8000)
+        String text = getString(R.string.seek_undo, Bookmarks.time(positionMs), chapterText);
+        if (Tv.is(this)) {
+            // the remote cannot press a bar: its «Меню» key is the undo, for as long as the bar is shown
+            mTvUndoChapter = chapter;
+            mTvUndoMs = positionMs;
+            mTvUndoUntil = android.os.SystemClock.elapsedRealtime() + 8000;
+            text = getString(R.string.seek_undo_tv, text);
+        }
+        Snackbar bar = Snackbar.make(snackbarHost(), text, 8000)
                 .setAction(R.string.seek_undo_action, v -> mPresenter.undoSeek(chapter, positionMs));
         //above the collapsed player, which is drawn over the screen's bottom
         if (bottomSheetBehavior != null && bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -1227,7 +1239,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         boolean open = bottomSheetBehavior != null && mPlayer != null
                 && bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED
                 && bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN;
-        return open ? mPlayer : findViewById(R.id.view_pager);
+        return open || mTvPlayerShown ? mPlayer : findViewById(R.id.view_pager);
     }
 
     /** Marks the place the player is at; with nothing loaded there is no place to mark. */
@@ -1935,6 +1947,24 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         View currentFocus = getCurrentFocus();
         // the TV's player works as a video player does: on Play, «left» and «right» wind the book by the step (held
         // down, they go on), OK pauses, «up» and «down» move through the chapters, the progress and the buttons
+        if (mTvPlayerShown && currentFocus != null) {
+            int id = currentFocus.getId();
+            boolean inList = mList != null && (currentFocus == mList || mList.findContainingViewHolder(currentFocus) != null);
+            boolean inActions = id == R.id.player_action_timer || id == R.id.player_action_equalizer
+                    || id == R.id.player_action_speed || id == R.id.player_action_car
+                    || id == R.id.player_action_bookmark;
+            View to = null;
+            if (inList && keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                to = mPlayBottom; // out of the long list at once, to the button OK pauses with
+            } else if (id == R.id.playBottom && keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                to = findViewById(R.id.player_action_speed);
+            } else if (inActions && keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                to = mPlayBottom;
+            }
+            if (to != null && to.requestFocus()) {
+                return true;
+            }
+        }
         if (mTvPlayerShown && currentFocus != null && currentFocus.getId() == R.id.playBottom
                 && (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)) {
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
@@ -2257,6 +2287,22 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        // on a TV the «Меню» key undoes a jump while its bar is shown (the system would open the book's menu instead)
+        if (event.getKeyCode() == KeyEvent.KEYCODE_MENU && Tv.is(this)) {
+            boolean offered = android.os.SystemClock.elapsedRealtime() < mTvUndoUntil;
+            if (event.getAction() == KeyEvent.ACTION_DOWN && offered && event.getRepeatCount() == 0) {
+                mTvUndoUntil = 0;
+                mTvMenuTaken = true;
+                mPresenter.undoSeek(mTvUndoChapter, mTvUndoMs);
+                return true;
+            }
+            if (mTvMenuTaken) { // the press the undo took: its release must not open the menu
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    mTvMenuTaken = false;
+                }
+                return true;
+            }
+        }
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0
                 && (event.getKeyCode() == KEYCODE_MEDIA_PLAY || event.getKeyCode() == KEYCODE_MEDIA_PLAY_PAUSE)
                 && !isServiceRunning(getApplicationContext(), MediaPlayerService.class)) {

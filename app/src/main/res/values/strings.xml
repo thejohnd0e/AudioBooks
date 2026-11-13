@@ -696,6 +696,8 @@
     <string name="home_play_book">Продолжить «%1$s»</string>
     <string name="seek_undo">Вернуться на %1$s · %2$s</string>
     <string name="seek_undo_action">Вернуться</string>
+    <string name="seek_undo_tv">%1$s
+Кнопка «Меню» на пульте: вернуться</string>
     <string name="chapter_search_hint">Найти главу или номер</string>
     <string name="bookmark_add">Закладка</string>
     <string name="bookmarks_title">Закладки</string>
