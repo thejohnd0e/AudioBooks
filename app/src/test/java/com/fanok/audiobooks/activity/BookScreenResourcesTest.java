@@ -94,7 +94,7 @@ public class BookScreenResourcesTest {
                 "layout-land/fragment_book_description.xml",
                 "layout-television/fragment_book_description.xml"}) {
             NodeList buttons = resource(layout).getElementsByTagName("com.google.android.material.button.MaterialButton");
-            assertEquals(layout, 3, buttons.getLength());
+            assertEquals(layout, 5, buttons.getLength()); // listen, favourites, bookmarks, download, ask AI
             for (int i = 0; i < buttons.getLength(); i++) {
                 Element button = (Element) buttons.item(i);
                 assertEquals(layout, "1", button.getAttribute("android:maxLines"));

@@ -359,12 +359,14 @@
     </style>
 
     <style name="Widget.App.ActionButton" parent="Widget.AppCompat.ActionButton">
-        <item name="android:minWidth">32dp</item>
+        <!-- 48dp: the size a finger hits; the icons stay as drawn -->
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
         <!-- start/end too: AppCompat's own 12dp paddingStart/End would win over left/right -->
-        <item name="android:paddingLeft">4dp</item>
-        <item name="android:paddingRight">4dp</item>
-        <item name="android:paddingStart">4dp</item>
-        <item name="android:paddingEnd">4dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
     </style>
 
     <!-- A source tile on the search screen: flat and square, name over count; its state is the fill colour,

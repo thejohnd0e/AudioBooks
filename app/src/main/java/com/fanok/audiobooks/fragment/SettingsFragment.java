@@ -70,6 +70,7 @@ import com.fanok.audiobooks.pojo.BookPOJO;
 import com.fanok.audiobooks.pojo.StorageUtil;
 import com.fanok.audiobooks.presenter.FavoritePresenter;
 import com.fanok.audiobooks.search.Provider;
+import com.fanok.audiobooks.search.ReleaseCheck;
 import com.fanok.audiobooks.search.Sources;
 import com.fanok.audiobooks.update.Updater;
 import com.fanok.audiobooks.util.DownloadStorageHelper;
@@ -428,6 +429,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     fillSources();
                     initSourcesEntry();
                 });
+
+        Preference checkNow = findPreference("pref_check_releases_now");
+        if (checkNow != null) {
+            checkNow.setOnPreferenceClickListener(p -> {
+                Context app = requireContext().getApplicationContext();
+                Toast.makeText(app, R.string.check_releases_started, Toast.LENGTH_SHORT).show();
+                ReleaseCheck.checkNow(app, () -> Toast.makeText(app, R.string.check_releases_done,
+                        Toast.LENGTH_LONG).show());
+                return true;
+            });
+        }
 
         Preference customEditPref = findPreference("pref_custom_palette_edit");
         if (customEditPref != null) {

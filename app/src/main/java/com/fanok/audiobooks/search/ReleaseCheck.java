@@ -13,6 +13,7 @@ import com.fanok.audiobooks.room.AppDatabase;
 import com.fanok.audiobooks.room.PersonBookDao;
 import com.fanok.audiobooks.room.PersonBookEntity;
 import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,6 +76,23 @@ public final class ReleaseCheck {
                         ? run(app, prefs) : Flowable.<Integer>empty())
                 .subscribe(done -> { }, e -> Log.w("ReleaseCheck", "The release check failed", e),
                         () -> { });
+    }
+
+    /**
+     * The same check at once, for the «Проверить сейчас» button: no wait for the day, the start delay or the Wi-Fi
+     * (the user asked). {@code done} runs on the main thread whatever the result.
+     */
+    @SuppressLint("CheckResult") // short: it ends by itself, nothing to dispose
+    public static void checkNow(@NonNull Context context, @NonNull Runnable done) {
+        final Context app = context.getApplicationContext();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(app);
+        run(app, prefs)
+                .ignoreElements()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(done::run, e -> {
+                    Log.w("ReleaseCheck", "The release check failed", e);
+                    done.run();
+                });
     }
 
     /** The sites' jobs: {@code people}' listing on each active site that has one; a person has one per site at most. */

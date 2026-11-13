@@ -11,6 +11,12 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_home"
             android:title="@string/menu_home" />
+        <!-- the catalog's search: opens the catalog and its search screen -->
+        <item
+            android:id="@+id/nav_search"
+            android:checkable="false"
+            android:icon="@drawable/ic_magnify"
+            android:title="@string/menu_search" />
         <item
             android:id="@+id/nav_audiobooks"
             android:icon="@drawable/ic_menu_audiobooks"

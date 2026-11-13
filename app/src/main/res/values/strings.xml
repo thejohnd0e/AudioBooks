@@ -122,8 +122,8 @@
 
     <string name="action_listen">Слушать</string>
     <string name="action_resume">Продолжить</string>
-    <string name="action_to_favorites">В избранное</string>
-    <string name="action_in_favorites">В избранном</string>
+    <string name="action_to_favorites">Избранное</string>
+    <string name="action_in_favorites">Избранное</string>
     <string name="action_download">Скачать</string>
     <string name="action_downloaded">Скачано</string>
 
@@ -189,6 +189,7 @@
     <string name="sort_value_series" translatable="false">series</string>
     <string name="sort_value_saved" translatable="false">saved</string>
     <string name="filter">Фильтр</string>
+    <string name="filter_on">Фильтр (включён)</string>
     <string name="filter_series">Серии</string>
     <string name="pref_dowland_path">Папка для загрузок</string>
     <string name="select_folder_description">Выберите папку для загрузки</string>
@@ -660,6 +661,12 @@
     <string name="undo">Отменить</string>
     <string name="menu_home">Продолжить</string>
     <string name="menu_stats">Статистика</string>
+    <string name="menu_search">Поиск</string>
+    <string name="ask_ai">Спросить AI</string>
+    <string name="ask_ai_question">Расскажи о книге «%1$s», автор: %2$s. О чём она, чем известна и стоит ли её слушать? Без спойлеров.</string>
+    <string name="ask_ai_failed">Не удалось открыть приложение AI. Проверьте выбор в Настройки → Основные</string>
+    <string name="setting_ai_app">Приложение для «Спросить AI»</string>
+    <string name="setting_ai_app_desc">Кнопка на странице книги откроет его с готовым вопросом о книге. Передаются только название и автор</string>
     <string name="stats_today">Сегодня</string>
     <string name="stats_week">7 дней</string>
     <string name="stats_month">30 дней</string>
@@ -676,6 +683,11 @@
     <string name="home_saved">Загруженные</string>
     <string name="home_new_releases">Новое у ваших авторов и чтецов</string>
     <string name="check_releases">Новинки избранных авторов и чтецов</string>
+    <string name="check_releases_now">Проверить новинки сейчас</string>
+    <string name="check_releases_now_desc">Не ждать сутки. Новое появится на экране «Продолжить»; в первый раз приложение лишь запоминает, что у авторов и чтецов уже есть</string>
+    <string name="check_releases_started">Проверяю… это может занять минуту</string>
+    <string name="check_releases_done">Проверка завершена</string>
+    <string name="check_releases_empty">Сначала добавьте автора или чтеца в избранное</string>
     <string name="check_releases_desc">Раз в сутки по Wi-Fi смотреть новые книги избранных авторов и чтецов и показывать их на экране «Продолжить»</string>
     <string name="home_empty">Здесь появятся книги, которые вы слушаете. Начните с каталога.</string>
     <string name="home_open_catalog">Открыть каталог</string>
@@ -686,8 +698,6 @@
     <string name="seek_undo_action">Вернуться</string>
     <string name="chapter_search_hint">Найти главу или номер</string>
     <string name="bookmark_add">Закладка</string>
-    <string name="notification_bookmark">Закладка в уведомлении</string>
-    <string name="notification_bookmark_desc">Кнопка закладки в уведомлении плеера вместо кнопки «Выход»</string>
     <string name="bookmarks_title">Закладки</string>
     <string name="bookmark_added">Закладка: %1$s · %2$s</string>
     <string name="bookmark_added_other">«%3$s»: закладка %1$s · %2$s</string>

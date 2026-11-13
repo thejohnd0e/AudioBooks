@@ -147,6 +147,8 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     private MaterialButton mBtnFavorite;
     @Nullable
     private MaterialButton mBtnDownload;
+    private MaterialButton mBtnBookmarks;
+    private MaterialButton mBtnAskAi;
     private final BroadcastReceiver mPlaybackReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -512,6 +514,27 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             mBtnFavorite.setOnClickListener(v -> toggleBook());
         }
 
+        mBtnAskAi = view.findViewById(R.id.btnAskAi);
+        if (mBtnAskAi != null) {
+            mBtnAskAi.setOnClickListener(v -> {
+                BookPOJO asked = book();
+                if (asked != null && getActivity() != null) {
+                    com.fanok.audiobooks.util.AskAi.ask(requireActivity(),
+                            androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext()),
+                            asked.getName(), asked.getAutor());
+                }
+            });
+        }
+
+        mBtnBookmarks = view.findViewById(R.id.btnBookmarksBook);
+        if (mBtnBookmarks != null) {
+            mBtnBookmarks.setOnClickListener(v -> {
+                if (getActivity() instanceof BookActivity) {
+                    ((BookActivity) getActivity()).showBookmarks();
+                }
+            });
+        }
+
         mBtnDownload = view.findViewById(R.id.btnDownloadBook);
         if (mBtnDownload != null) {
             BookPOJO book = book();
@@ -715,6 +738,8 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mBtnListen = null;
         mBtnFavorite = null;
         mBtnDownload = null;
+        mBtnBookmarks = null;
+        mBtnAskAi = null;
         mAdapterBooksRecomended = null;
         super.onDestroyView();
     }
@@ -737,7 +762,7 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             mArtistLabel.setBackgroundResource(R.drawable.focusable);
             mSeriesLabel.setBackgroundResource(R.drawable.focusable);
             mShowMore.setBackgroundResource(R.drawable.focusable);
-            for (MaterialButton button : new MaterialButton[] {mBtnListen, mBtnFavorite, mBtnDownload}) {
+            for (MaterialButton button : new MaterialButton[] {mBtnListen, mBtnFavorite, mBtnBookmarks, mBtnDownload, mBtnAskAi}) {
                 if (button != null) {
                     button.setOnFocusChangeListener((v, hasFocus) -> {
                         button.setScaleX(hasFocus ? 1.03f : 1f);

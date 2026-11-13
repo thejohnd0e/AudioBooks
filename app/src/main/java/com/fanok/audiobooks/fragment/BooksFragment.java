@@ -84,6 +84,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class BooksFragment extends MvpAppCompatFragment implements BooksView {
     private static final String TAG = "BooksFragment";
+    /** Set by the drawer's «Поиск»: the catalog opens its search screen at once, once. */
+    public static final String ARG_OPEN_SEARCH = "open_search";
     private static final String ARG_URL = "url";
     private static final String ARG_TITLE = "title";
     private static final String ARG_SUB_TITLE = "sub_title";
@@ -779,8 +781,10 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
         }
         if (mBar.isFiltering()) {
             filter.setIcon(R.drawable.ic_filter_active); // drawn in the menu color already: no tint over the dot
+            filter.setTitle(R.string.filter_on); // in the «⋮» menu the dot is not seen: the title says it
         } else {
             filter.setIcon(R.drawable.ic_filter);
+            filter.setTitle(R.string.filter);
             setColorPrimeriTextInIconItemMenu(filter, requireContext());
         }
         SubMenu sub = filter.getSubMenu();
@@ -1086,6 +1090,11 @@ public class BooksFragment extends MvpAppCompatFragment implements BooksView {
             // a selected source that is itself inactive would open this same screen again, over and over
             recreate();
             return;
+        }
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.getBoolean(ARG_OPEN_SEARCH, false)) {
+            arguments.remove(ARG_OPEN_SEARCH);
+            showSearchActivity(Consts.MODEL_BOOKS);
         }
         long parentalVersion = ParentalControl.version(requireContext());
         if (parentalVersion != mParentalVersion && mAddapterBooks != null) {

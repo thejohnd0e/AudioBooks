@@ -61,12 +61,6 @@ public final class SleepSoundPlayer {
             case SOFT:
                 tones(ToneGenerator.TONE_PROP_PROMPT, 70, count);
                 break;
-            case NOTIFICATION:
-                sound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), count);
-                break;
-            case ALARM:
-                sound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM), count);
-                break;
             case CUSTOM:
                 sound(custom, count);
                 break;

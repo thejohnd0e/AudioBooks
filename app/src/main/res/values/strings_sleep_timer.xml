@@ -18,8 +18,6 @@
     <string name="sleep_sound_title">Звук предупреждения</string>
     <string name="sleep_sound_beep">Сигнал (как раньше)</string>
     <string name="sleep_sound_soft">Мягкий сигнал</string>
-    <string name="sleep_sound_notification">Звук уведомления</string>
-    <string name="sleep_sound_alarm">Звук будильника</string>
     <string name="sleep_sound_custom">Своя мелодия…</string>
     <string name="sleep_sound_custom_named">Мелодия: %1$s</string>
     <string name="sleep_sound_picker_title">Звук предупреждения</string>
