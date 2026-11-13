@@ -1287,6 +1287,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     @Override
     protected void onStop() {
+        com.fanok.audiobooks.util.WatchNext.sync(this); // the TV home screen's «Продолжить»
         if (mAudioAdapter != null) mAudioAdapter.stopLive();
         unregisterReceiver(setImage);
         unregisterReceiver(setProgress);
