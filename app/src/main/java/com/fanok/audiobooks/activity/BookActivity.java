@@ -1977,6 +1977,31 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             }
             return true;
         }
+        if (currentFocus != null && tabs != null && !mTvPlayerShown) {
+            // the tabs sit between the toolbar's buttons and the page: «down» and «right» from «Back» come to them,
+            // «up» from a tab goes back to it (the beam of the focus search jumps over the tabs)
+            View toolbar = findViewById(R.id.toolbar);
+            View strip = tabs.getChildAt(0);
+            boolean inToolbar = toolbar != null && currentFocus != toolbar && isInside(currentFocus, toolbar);
+            java.util.ArrayList<View> toolbarStops = toolbar == null ? new java.util.ArrayList<>()
+                    : toolbar.getFocusables(View.FOCUS_DOWN);
+            if (inToolbar && !toolbarStops.isEmpty() && toolbarStops.get(0) == currentFocus
+                    && (keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+                    && strip instanceof ViewGroup && ((ViewGroup) strip).getChildCount() > 0) {
+                View tab = ((ViewGroup) strip).getChildAt(Math.max(0, tabs.getSelectedTabPosition()));
+                if (tab.requestFocus()) {
+                    return true;
+                }
+            }
+            if (isTabView(currentFocus) && keyCode == KeyEvent.KEYCODE_DPAD_UP && toolbar != null) {
+                java.util.ArrayList<View> stops = toolbar.getFocusables(View.FOCUS_DOWN);
+                for (View stop : stops) {
+                    if (stop.isShown() && stop.requestFocus()) {
+                        return true;
+                    }
+                }
+            }
+        }
         if (currentFocus!=null){
             if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                 // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
@@ -2017,10 +2042,21 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
                         currentFocus.getId()==R.id.authorLabel||currentFocus.getId()==R.id.artistLabel||
                         currentFocus.getId()==R.id.seriesLabel||currentFocus.getId()==R.id.btnListenBook||
                         currentFocus.getId()==R.id.btnDownloadBook||favoriteIsRightmost) {
-                    View playerView = findViewById(R.id.player);
-                    if (playerView != null) {
-                        playerView.requestFocus();
-                    }
+                    // the page has nothing to the right of these (the player is its own screen now): the focus stays
+                    return true;
+                }
+            }
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && !mTvPlayerShown && tabs != null && currentFocus != null
+                && !isTabView(currentFocus)) {
+            // «up» from the top of the page: to the tabs (the focus search ends there, or goes past them)
+            View up = currentFocus.focusSearch(View.FOCUS_UP);
+            View strip = tabs.getChildAt(0);
+            if ((up == null || up == currentFocus) && strip instanceof ViewGroup
+                    && ((ViewGroup) strip).getChildCount() > 0) {
+                View tab = ((ViewGroup) strip).getChildAt(Math.max(0, tabs.getSelectedTabPosition()));
+                if (tab.requestFocus()) {
+                    return true;
                 }
             }
         }
@@ -2237,6 +2273,15 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
                 mButton.announceForAccessibility(mTimeStart.getText());
             }
         }
+    }
+
+    private static boolean isInside(View view, View ancestor) {
+        for (ViewParent p = view.getParent(); p != null; p = p.getParent()) {
+            if (p == ancestor) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isTabView(View view) {

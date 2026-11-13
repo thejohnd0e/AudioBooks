@@ -51,6 +51,15 @@ public final class TvFocus {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
                 attach(activity.getWindow().getDecorView());
+                // the toolbar's buttons off the screen's edge: a TV overscans, and its overlays sit there
+                activity.getWindow().getDecorView().post(() -> {
+                    View toolbar = activity.findViewById(R.id.toolbar);
+                    if (toolbar != null) {
+                        int safe = Math.round(32 * activity.getResources().getDisplayMetrics().density);
+                        toolbar.setPaddingRelative(toolbar.getPaddingStart(), toolbar.getPaddingTop(),
+                                Math.max(toolbar.getPaddingEnd(), safe), toolbar.getPaddingBottom());
+                    }
+                });
                 if (activity instanceof FragmentActivity) {
                     // every dialog fragment (the settings' lists, the sheets): the ring and a first focus
                     ((FragmentActivity) activity).getSupportFragmentManager()
