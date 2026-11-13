@@ -244,6 +244,28 @@ public class MainActivity extends MvpAppCompatActivity
         if (intent.hasExtra(EXTRA_SOURCES)) {
             pendingSources = intent;
         }
+        openWatchNextBook(intent);
+    }
+
+    /** The «Продолжить» row of the TV's home screen: the book it names opens (on its player if it plays now). */
+    private void openWatchNextBook(@NonNull Intent intent) {
+        final String url = intent.getStringExtra(com.fanok.audiobooks.util.WatchNext.EXTRA_BOOK_URL);
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        intent.removeExtra(com.fanok.audiobooks.util.WatchNext.EXTRA_BOOK_URL); // once: a recreation must not repeat it
+        final android.content.Context app = getApplicationContext();
+        io.reactivex.Single.fromCallable(() -> {
+            for (com.fanok.audiobooks.room.HistoryEntity row
+                    : com.fanok.audiobooks.room.AppDatabase.getDatabase(app).historyDao().getAll()) {
+                if (url.equals(row.toPojo().getUrl())) {
+                    return row.toPojo();
+                }
+            }
+            throw new java.util.NoSuchElementException(url);
+        }).subscribeOn(io.reactivex.schedulers.Schedulers.io())
+                .observeOn(io.reactivex.android.schedulers.AndroidSchedulers.mainThread())
+                .subscribe(this::showBooksActivity, e -> Log.w(TAG, "the row's book is gone", e));
     }
 
     /** A request of the source screens, once: the extras leave the intent, so a recreation does not repeat it. */
@@ -367,6 +389,7 @@ public class MainActivity extends MvpAppCompatActivity
         }
 
         Intent intent = getIntent();
+        openWatchNextBook(intent);
         int fragment = intent.getIntExtra(EXSTRA_FRAGMENT, -1);
         String url = intent.getStringExtra(EXSTRA_URL);
         if (url != null && !url.isEmpty() && fragment != -1) {
@@ -437,6 +460,7 @@ public class MainActivity extends MvpAppCompatActivity
     @Override
     protected void onPause() {
         Updater.setListener(null);
+        com.fanok.audiobooks.util.WatchNext.sync(this);
         super.onPause();
     }
 
