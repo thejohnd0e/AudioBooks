@@ -83,6 +83,7 @@ public class SourcesDialogFragment extends DialogFragment {
     private static final int MENU_DOWN = 2;
     private static final int MENU_TOGGLE = 3;
     private static final int MENU_ABOUT = 4;
+    private static final int MENU_ROUTE = 5;
     /** Sites checked at once by the refresh button. */
     private static final int PARALLEL = 4;
     /** A rebind payload: the row changes in place, without the item animator's cross-fade. */
@@ -530,8 +531,18 @@ public class SourcesDialogFragment extends DialogFragment {
         }
         menu.getMenu().add(0, MENU_TOGGLE, 0,
                 position < divider ? R.string.sources_deactivate : R.string.sources_activate);
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // the route's button is not a stop for the remote: the row's menu has it
+            Provider provider = (Provider) rows.get(position);
+            menu.getMenu().add(0, MENU_ROUTE, 0, AppProxy.isDirect(provider)
+                    ? R.string.sources_route_proxy : R.string.sources_route_direct);
+        }
         menu.setOnMenuItemClickListener(item -> {
             int at = holder.getBindingAdapterPosition();
+            if (item.getItemId() == MENU_ROUTE) {
+                toggleRoute(holder);
+                return true;
+            }
             if (item.getItemId() == MENU_ABOUT) {
                 if (at != RecyclerView.NO_POSITION) {
                     SourceActivity.start(requireContext(), (Provider) rows.get(at));
@@ -541,6 +552,19 @@ public class SourcesDialogFragment extends DialogFragment {
             act(at, item.getItemId());
             return true;
         });
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // a remote sees its row in a dialog's list, not in a popup
+            android.view.Menu items = menu.getMenu();
+            CharSequence[] titles = new CharSequence[items.size()];
+            for (int i = 0; i < titles.length; i++) {
+                titles[i] = items.getItem(i).getTitle();
+            }
+            new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(requireContext())
+                    .setItems(titles, (d, which) -> menu.getMenu().performIdentifierAction(
+                            items.getItem(which).getItemId(), 0))
+                    .show();
+            return;
+        }
         menu.show();
     }
 
@@ -717,6 +741,9 @@ public class SourcesDialogFragment extends DialogFragment {
             holder.mode.setContentDescription(context.getString(
                     direct ? R.string.sources_mode_direct : R.string.sources_mode_proxy, provider.title));
             holder.mode.setOnClickListener(v -> toggleRoute(holder));
+            if (com.fanok.audiobooks.util.Tv.is(holder.itemView.getContext())) {
+                holder.mode.setFocusable(false); // the row is the one stop; its menu switches the route
+            }
             holder.itemView.setOnClickListener(v -> showMenu(holder));
             holder.handle.setOnTouchListener((v, event) -> {
                 if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {

@@ -36,6 +36,8 @@
         <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
         <item name="android:listSelector">@drawable/tv_list_selector</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
     </style>
 
     <style name="Widget.AudioBooks.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
@@ -81,6 +83,8 @@
         <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
         <item name="android:listSelector">@drawable/tv_list_selector</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
         <item name="elevationOverlayEnabled">false</item>
     </style>
 
@@ -94,6 +98,8 @@
         <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
         <item name="android:listSelector">@drawable/tv_list_selector</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
         <item name="elevationOverlayEnabled">false</item>
     </style>
 
@@ -177,6 +183,8 @@
         <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
         <item name="android:listSelector">@drawable/tv_list_selector</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
     </style>
 
     <style name="AppThemeBlack.NoActionBar">
@@ -259,6 +267,8 @@
         <item name="popupMenuStyle">@style/Widget.AudioBooks.PopupMenu</item>
         <item name="actionOverflowMenuStyle">@style/Widget.AudioBooks.PopupMenu.Overflow</item>
         <item name="android:listSelector">@drawable/tv_list_selector</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
+        <item name="android:listChoiceBackgroundIndicator">@drawable/tv_list_selector</item>
     </style>
 
     <style name="myCustomMenuTextAppearanceLight" parent="@android:style/TextAppearance.Widget.IconMenu.Item">
