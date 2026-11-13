@@ -493,6 +493,17 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         mRecommendedBooks = view.findViewById(R.id.recommendedBooks);
         mRecommendedBooksTitle = view.findViewById(R.id.recommendedBooksTitle);
         mScrollView = view.findViewById(R.id.scrollView);
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // a TV: a safe margin at the screen's edge (some sets cut it off); no «Спросить AI» here
+            float density = getResources().getDisplayMetrics().density;
+            mScrollView.setClipToPadding(false);
+            mScrollView.setPadding(mScrollView.getPaddingLeft(), mScrollView.getPaddingTop(),
+                    Math.round(48 * density), mScrollView.getPaddingBottom());
+            View ask = view.findViewById(R.id.btnAskAi);
+            if (ask != null) {
+                ask.setVisibility(View.GONE);
+            }
+        }
         mProgressBar = view.findViewById(R.id.progressBar);
         mFavorite = view.findViewById(R.id.favorite);
         mLike = view.findViewById(R.id.like);
@@ -1022,6 +1033,14 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         } else {
             mProgressBar.setVisibility(View.GONE);
             mScrollView.setVisibility(View.VISIBLE);
+            if (com.fanok.audiobooks.util.Tv.is(requireContext()) && mBtnListen != null) {
+                // the book's page on a TV opens with the remote on «Слушать», not on the cover or a link
+                mBtnListen.post(() -> {
+                    if (mBtnListen != null) {
+                        mBtnListen.requestFocus();
+                    }
+                });
+            }
         }
     }
 

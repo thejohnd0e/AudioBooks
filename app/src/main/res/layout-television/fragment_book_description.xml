@@ -19,20 +19,22 @@
             android:id="@+id/imageView"
             android:layout_width="@dimen/book_cover_weight"
             android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginEnd="40dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginEnd="32dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/book_cover"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
+            android:focusable="false"
             android:scaleType="fitCenter"
             tools:srcCompat="@tools:sample/avatars[2]" />
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:clipToPadding="false"
             android:focusable="false"
+            android:paddingEnd="48dp"
             android:visibility="invisible"
             tools:background="?attr/backgraundColor">
 
@@ -422,23 +424,6 @@
                     android:textAlignment="center"
                     android:textColor="?attr/hrefColor"
                     android:textSize="@dimen/textSizeBookDescription" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAskAi"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="12dp"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/ask_ai"
-                    android:textColor="?attr/colorPrimaryText"
-                    android:textSize="13sp"
-                    app:cornerRadius="22dp"
-                    app:icon="@drawable/ic_ask_ai"
-                    app:iconGravity="textStart"
-                    app:iconTint="?attr/colorAccentPrimary"
-                    app:strokeColor="?attr/colorTextMuted" />
 
                 <View
                     android:id="@+id/otherBookLine"

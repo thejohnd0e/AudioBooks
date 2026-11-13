@@ -10,6 +10,7 @@
     tools:viewBindingIgnore="true">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -48,9 +49,11 @@
             android:nextFocusUp="@id/tabs"
             android:layout_weight="1" />
 
+        <!-- hidden until «Слушать»: the book's page and the player are two screens (BookActivity.showTvPlayer) -->
         <include
             android:id="@+id/player"
-            layout="@layout/player" />
+            layout="@layout/player"
+            android:visibility="gone" />
     </LinearLayout>
 
 

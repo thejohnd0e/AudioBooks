@@ -37,8 +37,14 @@ public final class BookDownloader {
     private BookDownloader() {
     }
 
-    /** A site's book the list may download: not imported, not a site's collection, allowed by parental control. */
+    /**
+     * A site's book the list may download: not imported, not a site's collection, allowed by parental control. A TV
+     * downloads only with a removable drive in it (its own memory is small); a phone or a tablet always can.
+     */
     public static boolean canDownload(@NonNull Context context, @NonNull BookPOJO book) {
+        if (com.fanok.audiobooks.util.Tv.is(context) && !StoreLocation.hasRemovable(context)) {
+            return false;
+        }
         String url = book.getUrl();
         return url != null && !url.isEmpty() && !url.contains("/imported/") && Provider.parserOf(url) != null
                 && !LoadBook.opensAsListing(url) && ParentalControl.isAllowed(context, book);

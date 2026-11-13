@@ -89,6 +89,7 @@ import com.fanok.audiobooks.interface_pacatge.book_content.Activity;
 import com.fanok.audiobooks.fragment.BookmarksSheet;
 import com.fanok.audiobooks.model.Bookmarks;
 import com.fanok.audiobooks.util.ChapterFilter;
+import com.fanok.audiobooks.util.Tv;
 import com.fanok.audiobooks.room.BookmarkEntity;
 import com.fanok.audiobooks.model.FavoritePeople;
 import com.fanok.audiobooks.net.Covers;
@@ -142,6 +143,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     public static final String Broadcast_UPDATE_ADAPTER = "UpdateAdapter";
     /** A mark was stored: extras id, url, bookName, name (the chapter) and time (as text). */
     public static final String Broadcast_BOOKMARK_ADDED = "BookmarkAdded";
+    /** On a TV: open on the player, not on the book's page. */
+    private static final String EXTRA_TV_PLAYER = "tvPlayer";
 
     public static final String Broadcast_SHOW_EQUALIZER = "ShowEqualizer";
 
@@ -155,6 +158,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     private ImageButton mButtonCollapse;
     private LinearLayout mTopButtonsControls;
     private LinearLayout mPlayer;
+    /** On a TV: the player is a screen of its own, shown over the book's page (see {@link #showTvPlayer}). */
+    private boolean mTvPlayerShown;
     private ImageView mPlayerCover;
     private TextView mRadioAll;
     private ImageButton mSelectionClose;
@@ -364,8 +369,15 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     public static void startNewActivity(@NonNull Context context, @NonNull BookPOJO bookPOJO,
             boolean notificationClick) {
+        startNewActivity(context, bookPOJO, notificationClick, false);
+    }
+
+    /** {@code tvPlayer}: on a TV the book opens on its player, not on its page (the book playing now, «Продолжить»). */
+    public static void startNewActivity(@NonNull Context context, @NonNull BookPOJO bookPOJO,
+            boolean notificationClick, boolean tvPlayer) {
         Intent intent = new Intent(context, BookActivity.class);
         intent.putExtra("notificationClick", notificationClick);
+        intent.putExtra(EXTRA_TV_PLAYER, tvPlayer);
         String json = new GsonBuilder().serializeNulls().create().toJson(bookPOJO);
         intent.putExtra(ARG_BOOK, json);
         //one policy for every way in; a "notificationClick" extra is never a reason to skip it
@@ -500,6 +512,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         mButtonCollapse = findViewById(R.id.buttonCollapse);
         mTopButtonsControls = findViewById(R.id.topButtonsControls);
         mPlayer = findViewById(R.id.player);
+        mTvPlayerShown = false;
         mPlayerCover = findViewById(R.id.playerCover);
         bindPlayerCover();
         TextView playerTitle = findViewById(R.id.playerBookTitle);
@@ -801,6 +814,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             return true;
         });
         setUpChapterSearch();
+        if (Tv.is(this) && getIntent().getBooleanExtra(EXTRA_TV_PLAYER, false)) {
+            showTvPlayer(true); // the book playing now: its player, not its page
+        }
         getSystemService(AUDIO_SERVICE);
 
 
@@ -811,6 +827,10 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             public void handleOnBackPressed() {
                 if (mAudioAdapter.isSelecting()) {
                     mAudioAdapter.endSelection();
+                    return;
+                }
+                if (mTvPlayerShown) {
+                    showTvPlayer(false);
                     return;
                 }
                 if (bottomSheetBehavior != null
@@ -1109,6 +1129,30 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     /** The description's listen button acts on this book, even while the bottom player holds another. */
     public void playThisBook() {
         mPresenter.playThisBook();
+        if (Tv.is(this)) {
+            showTvPlayer(true);
+        }
+    }
+
+    /**
+     * On a TV the book's page and the player are two screens: the page chooses (listen, favourites, bookmarks,
+     * download), the player listens (the whole screen, the focus on Play). Back from the player returns to the page.
+     */
+    public void showTvPlayer(boolean shown) {
+        View appBar = findViewById(R.id.appBar);
+        View pager = findViewById(R.id.view_pager);
+        if (mPlayer == null || appBar == null || pager == null) {
+            return;
+        }
+        mTvPlayerShown = shown;
+        mPlayer.setVisibility(shown ? View.VISIBLE : View.GONE);
+        appBar.setVisibility(shown ? View.GONE : View.VISIBLE);
+        pager.setVisibility(shown ? View.GONE : View.VISIBLE);
+        View listen = findViewById(R.id.btnListenBook);
+        View target = shown ? findViewById(R.id.playBottom) : listen != null ? listen : pager;
+        if (target != null) {
+            target.post(target::requestFocus);
+        }
     }
 
     private void performPlayerAction(int id) {
