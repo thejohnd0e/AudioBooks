@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="screen_off">Погасить экран</string>
+    <string name="screen_off_setting">Гасить экран при прослушивании</string>
+    <string name="screen_off_never">Не гасить</string>
+    <string name="screen_off_hint_title">Экран телевизора</string>
+    <string name="screen_off_hint">Приложение закрывает экран чёрным, звук продолжает играть. Подсветку панели оно выключить не может: чтобы телевизор гас совсем, включите в его настройках HDMI-CEC и экономию питания.</string>
+
+    <string-array name="screen_off_titles">
+        <item>@string/screen_off_never</item>
+        <item>Через 5 мин без нажатий</item>
+        <item>Через 15 мин без нажатий</item>
+        <item>Через 30 мин без нажатий</item>
+        <item>Через 60 мин без нажатий</item>
+    </string-array>
+    <string-array name="screen_off_values" translatable="false">
+        <item>0</item>
+        <item>5</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+</resources>

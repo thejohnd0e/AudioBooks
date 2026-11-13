@@ -466,6 +466,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             }
         }
 
+        Preference screenOff = findPreference(com.fanok.audiobooks.util.ScreenOff.PREF_MINUTES);
+        if (screenOff != null && !com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            screenOff.setVisible(false);
+        }
+
         Preference customEditPref = findPreference("pref_custom_palette_edit");
         if (customEditPref != null) {
             String current = AppThemes.currentPalette(requireContext());

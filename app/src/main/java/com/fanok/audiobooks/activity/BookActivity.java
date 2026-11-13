@@ -160,6 +160,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     private LinearLayout mPlayer;
     /** On a TV: the player is a screen of its own, shown over the book's page (see {@link #showTvPlayer}). */
     private boolean mTvPlayerShown;
+    /** A TV only: the black cover of «Погасить экран». */
+    private com.fanok.audiobooks.util.ScreenOff mScreenOff;
     private ImageView mPlayerCover;
     private TextView mRadioAll;
     private ImageButton mSelectionClose;
@@ -809,7 +811,12 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
         findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
         if (com.fanok.audiobooks.util.Tv.is(this)) {
-            findViewById(R.id.player_action_car).setVisibility(View.GONE); // a car mode on a living-room TV is nonsense
+            // a car mode on a living-room TV is nonsense: its place is the button that blacks the screen out
+            mScreenOff = new com.fanok.audiobooks.util.ScreenOff(this);
+            com.google.android.material.button.MaterialButton screenOff = findViewById(R.id.player_action_car);
+            screenOff.setIconResource(R.drawable.ic_screen_off);
+            screenOff.setContentDescription(getString(R.string.screen_off));
+            screenOff.setOnClickListener(v -> mScreenOff.show());
         }
         findViewById(R.id.player_action_bookmark).setOnClickListener(v -> addBookmarkHere());
         findViewById(R.id.player_action_bookmark).setOnLongClickListener(v -> {
@@ -1306,6 +1313,15 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     private void registerInternalReceiver(BroadcastReceiver receiver, String action) {
         ContextCompat.registerReceiver(this, receiver, new IntentFilter(action),
                 ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    @Override
+    protected void onPause() {
+        if (mScreenOff != null) {
+            mScreenOff.hide();
+            mScreenOff.disarm();
+        }
+        super.onPause();
     }
 
     @Override
@@ -2324,6 +2340,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     @Override
     protected void onResume() {
         super.onResume();
+        if (mScreenOff != null) {
+            mScreenOff.arm();
+        }
         if (pendingEqualizerSession > 0) {
             int sessionId = pendingEqualizerSession;
             pendingEqualizerSession = 0;
@@ -2350,6 +2369,10 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        // on a TV the screen covered black (the player's button, or by itself) comes back with any key
+        if (mScreenOff != null && mScreenOff.consume(event)) {
+            return true;
+        }
         // on a TV the «Меню» key undoes a jump while its bar is shown (the system would open the book's menu instead)
         if (event.getKeyCode() == KeyEvent.KEYCODE_MENU && Tv.is(this)) {
             boolean offered = android.os.SystemClock.elapsedRealtime() < mTvUndoUntil;
