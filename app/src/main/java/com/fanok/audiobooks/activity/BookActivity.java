@@ -808,6 +808,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         findViewById(R.id.player_action_timer).setOnClickListener(v -> performPlayerAction(R.id.sleep_timer));
         findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
         findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
+        if (com.fanok.audiobooks.util.Tv.is(this)) {
+            findViewById(R.id.player_action_car).setVisibility(View.GONE); // a car mode on a living-room TV is nonsense
+        }
         findViewById(R.id.player_action_bookmark).setOnClickListener(v -> addBookmarkHere());
         findViewById(R.id.player_action_bookmark).setOnLongClickListener(v -> {
             showBookmarks();

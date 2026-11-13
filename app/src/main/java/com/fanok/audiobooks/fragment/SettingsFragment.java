@@ -1228,7 +1228,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                         }
                     });
                 })
-                .setNegativeButton(android.R.string.cancel, null);
+                .setNegativeButton(R.string.cancel, null);
 
         androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.show();
