@@ -191,6 +191,33 @@ public class DialogEqualizerFragment extends DialogFragment {
         if (getDialog() != null) {
             com.fanok.audiobooks.PaletteBinder.applyPaletteToDialog(getDialog());
         }
+        if (getDialog() != null && com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // the bands trap Up and Down (they change the level): past the last band Right goes on to the knobs,
+            // before the first one Left goes back to the balance
+            getDialog().setOnKeyListener((d, keyCode, event) -> {
+                View focused = getDialog().getCurrentFocus();
+                ViewGroup bands = getView() == null ? null : getView().findViewById(R.id.equalizerContainer);
+                if (event.getAction() != android.view.KeyEvent.ACTION_DOWN || focused == null || bands == null) {
+                    return false;
+                }
+                View column = focused;
+                while (column != null && column.getParent() != bands) {
+                    column = column.getParent() instanceof View ? (View) column.getParent() : null;
+                }
+                if (column == null) {
+                    return false;
+                }
+                int index = bands.indexOfChild(column);
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT && index == bands.getChildCount() - 1) {
+                    return bassController != null && bassController.requestFocus();
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT && index == 0) {
+                    View balance = getView().findViewById(R.id.equalizer_balance);
+                    return balance != null && balance.requestFocus();
+                }
+                return false;
+            });
+        }
         // a dialog keeps its portrait width on its side: in landscape its two columns take most of the screen
         Window window = getDialog() == null ? null : getDialog().getWindow();
         if (window != null && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -252,6 +279,21 @@ public class DialogEqualizerFragment extends DialogFragment {
         bindBoost(view, textColor);
         if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
             // the remote starts on the preset list's neighbour: the first thing it can change
+            View eqSwitch = view.findViewById(R.id.equalizer_switch);
+            View back = view.findViewById(R.id.equalizer_back_btn);
+            View balance = view.findViewById(R.id.equalizer_balance);
+            // the top row is out of the other controls' beam: a remote walks it by these links
+            if (back != null) {
+                back.setFocusable(true);
+                back.setNextFocusRightId(R.id.equalizer_switch);
+                back.setNextFocusDownId(R.id.equalizer_balance);
+            }
+            if (eqSwitch != null) {
+                eqSwitch.setNextFocusLeftId(R.id.equalizer_back_btn);
+            }
+            if (balance != null) {
+                balance.setNextFocusUpId(R.id.equalizer_back_btn);
+            }
             view.post(() -> {
                 View first = view.findViewById(R.id.equalizer_balance);
                 if (first != null) {
