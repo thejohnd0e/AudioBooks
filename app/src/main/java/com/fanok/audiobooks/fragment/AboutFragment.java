@@ -89,6 +89,21 @@ public class AboutFragment extends PreferenceFragmentCompat {
             return true;
         });
 
+        // switched on: a check at once (after the new value is saved), not at the next period
+        for (String key : new String[] {Updater.PREF, Updater.PREF_BETA}) {
+            Preference toggle = findPreference(key);
+            if (toggle != null) {
+                toggle.setOnPreferenceChangeListener((preference, value) -> {
+                    if (Boolean.TRUE.equals(value)) {
+                        Context app = requireContext().getApplicationContext();
+                        new android.os.Handler(android.os.Looper.getMainLooper())
+                                .post(() -> Updater.check(app, null));
+                    }
+                    return true;
+                });
+            }
+        }
+
         preferenceClickListner("privacy", preference -> {
             AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(
                     requireContext());
