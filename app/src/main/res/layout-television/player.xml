@@ -1,12 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The TV's player is a screen of its own (BookActivity shows it after «Слушать», the book's page is the other one):
+     the book on the left, the chapters, the progress and the controls on the right. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/player"
-    android:layout_width="320dp"
+    android:layout_width="0dp"
     android:layout_height="match_parent"
-    android:layout_gravity="end"
+    android:layout_weight="1"
     android:background="?attr/backgraundColor"
-    android:orientation="vertical">
+    android:orientation="horizontal"
+    android:paddingStart="48dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="48dp"
+    android:paddingBottom="24dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingEnd="24dp">
+
+        <ImageView
+            android:id="@+id/playerCover"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/playerBookTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textColor="?attr/colorPrimaryText"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/playerBookAuthor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="?attr/subTextColor"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="6"
+        android:orientation="vertical">
 
 
     <LinearLayout
@@ -240,4 +294,5 @@
 
 
     <include layout="@layout/player_actions" />
+    </LinearLayout>
 </LinearLayout>

@@ -84,6 +84,16 @@ public final class StoreLocation {
         return volumes;
     }
 
+    /** A removable volume (a USB drive, an SD card) is mounted: what a TV needs to keep books, its own memory is small. */
+    public static boolean hasRemovable(@NonNull Context context) {
+        for (Volume volume : volumes(context)) {
+            if (volume.removable) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Bytes of the files below {@code dir}; call off the main thread. */
     public static long size(@NonNull File dir) {
         File[] files = dir.listFiles();

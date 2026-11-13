@@ -949,6 +949,9 @@ public class MainActivity extends MvpAppCompatActivity
                     Consts.MODEL_BOOKS), "collectionBooks");
             return;
         }
-        BookActivity.startNewActivity(this, bookPOJO);
+        // on a TV the book playing now (the menu's «Сейчас играет», «Продолжить») opens on its player
+        boolean player = com.fanok.audiobooks.util.Tv.is(this)
+                && bookPOJO.getUrl() != null && bookPOJO.getUrl().equals(MediaPlayerService.currentBookUrl());
+        BookActivity.startNewActivity(this, bookPOJO, false, player);
     }
 }

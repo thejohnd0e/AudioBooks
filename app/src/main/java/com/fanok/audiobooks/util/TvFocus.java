@@ -88,9 +88,15 @@ public final class TvFocus {
 
     /** Containers and text fields show their own cursor: the ring is for the things OK presses. */
     private static boolean wantsRing(@NonNull View view) {
-        return !(view instanceof EditText || view instanceof RecyclerView || view instanceof AbsListView
-                || view instanceof ScrollView || view instanceof NestedScrollView)
-                && view.getWidth() > 0 && view.getHeight() > 0;
+        if (view instanceof EditText || view instanceof RecyclerView || view instanceof AbsListView
+                || view instanceof ScrollView || view instanceof NestedScrollView
+                || view instanceof androidx.viewpager2.widget.ViewPager2 || view.getWidth() <= 0
+                || view.getHeight() <= 0) {
+            return false;
+        }
+        // a view that fills most of the window is a screen, not a button: no ring around it
+        View root = view.getRootView();
+        return root == null || (long) view.getWidth() * view.getHeight() < 0.5 * root.getWidth() * root.getHeight();
     }
 
     private static void add(@Nullable View view) {
@@ -102,8 +108,18 @@ public final class TvFocus {
         GradientDrawable ring = new GradientDrawable();
         ring.setShape(GradientDrawable.RECTANGLE);
         ring.setCornerRadius(RADIUS_DP * density);
-        ring.setStroke(Math.round(RING_DP * density), PaletteBinder.accent(view.getContext()));
-        ring.setBounds(0, 0, view.getWidth(), view.getHeight());
+        // white on a dark theme, black on a light one: seen on the screen and on a button filled with the accent
+        boolean darkTheme = androidx.core.graphics.ColorUtils.calculateLuminance(
+                PaletteBinder.background(view.getContext())) < 0.5;
+        ring.setStroke(Math.round(RING_DP * density), darkTheme ? 0xFFFFFFFF : 0xFF000000);
+        int top = 0;
+        int bottom = view.getHeight();
+        if (view instanceof com.google.android.material.button.MaterialButton) {
+            // a Material button is drawn inside its own insets: the ring follows what is seen
+            top = ((com.google.android.material.button.MaterialButton) view).getInsetTop();
+            bottom -= ((com.google.android.material.button.MaterialButton) view).getInsetBottom();
+        }
+        ring.setBounds(0, top, view.getWidth(), bottom);
         view.getOverlay().add(ring);
         view.setTag(R.id.tv_focus_ring, ring);
     }
