@@ -62,7 +62,28 @@ public class AnalogController extends View {
         mListener = listener;
     }
 
+    /** A remote turns the knob: Left/Right (and the keys' own repeat) step it, Up/Down leave to the neighbours. */
+    @Override
+    public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
+        if (isEnabled()) {
+            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT && value < max) {
+                change(value + 1);
+                return true;
+            }
+            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT && value > 0) {
+                change(value - 1);
+                return true;
+            }
+            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER || keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                change(value < max ? value + 1 : 0); // OK steps round, as a tap does
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     void init() {
+        setFocusable(true);
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Color.WHITE);
         textPaint.setStyle(Paint.Style.FILL);
