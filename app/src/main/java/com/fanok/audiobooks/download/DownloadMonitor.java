@@ -67,10 +67,10 @@ public final class DownloadMonitor implements DownloadManager.Listener {
     /** Finished transfers kept until the screens re-read the index (a few seconds); bounded, requests are large. */
     private static final int ENDED_MAX = 64;
     /** What the resting notification shows, carried in it so that a later process can take it over. */
-    private static final String EXTRA_RESTING_KEY = "com.fanok.audiobooks.resting.key";
-    private static final String EXTRA_RESTING_STATE = "com.fanok.audiobooks.resting.state";
-    private static final String EXTRA_RESTING_SHOWN = "com.fanok.audiobooks.resting.shown";
-    private static final String EXTRA_RESTING_OTHERS = "com.fanok.audiobooks.resting.others";
+    private static final String EXTRA_RESTING_KEY = "link.intertop.audiobooks.resting.key";
+    private static final String EXTRA_RESTING_STATE = "link.intertop.audiobooks.resting.state";
+    private static final String EXTRA_RESTING_SHOWN = "link.intertop.audiobooks.resting.shown";
+    private static final String EXTRA_RESTING_OTHERS = "link.intertop.audiobooks.resting.others";
     /** Index scans: off the main thread, and off the download worker that screens and actions queue on. */
     private static final ExecutorService SCANS = Executors.newSingleThreadExecutor();
 
