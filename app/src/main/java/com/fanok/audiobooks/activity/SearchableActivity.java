@@ -288,6 +288,20 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
         }
 
         binding.action.setOnClickListener(v -> onAction());
+        if (com.fanok.audiobooks.util.Tv.is(this)) {
+            binding.action.setOnKeyListener((v, keyCode, event) -> {
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_UP && event.getAction() == android.view.KeyEvent.ACTION_DOWN) {
+                    for (int i = 0; i < binding.sources.getChildCount(); i++) {
+                        View chip = binding.sources.getChildAt(i);
+                        if (chip.isSelected() && chip.requestFocus()) {
+                            return true;
+                        }
+                    }
+                    return binding.sources.getChildCount() > 0 && binding.sources.getChildAt(0).requestFocus();
+                }
+                return false;
+            });
+        }
 
         binding.list.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -899,7 +913,11 @@ public class SearchableActivity extends MvpAppCompatActivity implements Searchab
     }
 
     private TextView newChip() {
-        return (TextView) getLayoutInflater().inflate(R.layout.search_source_chip, binding.sources, false);
+        TextView chip = (TextView) getLayoutInflater().inflate(R.layout.search_source_chip, binding.sources, false);
+        if (com.fanok.audiobooks.util.Tv.is(this)) {
+            chip.setNextFocusDownId(R.id.action); // the action button sits at the far right: out of the beam
+        }
+        return chip;
     }
 
     private void bindChip(TextView chip, SearchUi.Chip c) {
