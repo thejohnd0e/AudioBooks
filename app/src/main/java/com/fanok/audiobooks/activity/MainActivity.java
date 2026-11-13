@@ -325,6 +325,7 @@ public class MainActivity extends MvpAppCompatActivity
 
     /** Marks the permanent drawer's entry {@code layoutId} (a tablet in landscape) as the section on screen. */
     public void highlightNav(int layoutId) {
+        mSelectedNavId = layoutId;
         if (mTextViewArrayList == null) {
             return;
         }
@@ -409,6 +410,18 @@ public class MainActivity extends MvpAppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        if (com.fanok.audiobooks.util.Tv.is(this)) {
+            // a TV starts with nothing in focus, and the first key would only wake it: the section's menu item has it
+            getWindow().getDecorView().post(() -> {
+                View focused = getCurrentFocus(); // the menu's own scroll area holds it at the start: not a place to press
+                if (!isFinishing() && (focused == null || focused instanceof android.widget.ScrollView)) {
+                    View start = findViewById(mSelectedNavId != 0 ? mSelectedNavId : R.id.layout_nav_home);
+                    if (start != null) {
+                        start.requestFocus();
+                    }
+                }
+            });
+        }
         updateNowPlayingEntry();
         updateSourcesEntry();
         if (pendingSources != null) {
@@ -676,11 +689,87 @@ public class MainActivity extends MvpAppCompatActivity
         if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && currentFocus != null && currentFocus.getParent() != null
                 && ((View) currentFocus.getParent()).getId() == R.id.liner_nav_view) {
             View content = findViewById(R.id.content);
-            if (content != null && content.requestFocus(View.FOCUS_RIGHT)) {
+            if (content != null && content.requestFocus(View.FOCUS_FORWARD)) {
                 return true;
             }
         }
+        // «left» out of the content or the toolbar returns to the menu's item of the section shown, not to the one
+        // nearest by height
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && currentFocus != null && mSelectedNavId != 0
+                && !isInNavMenu(currentFocus)) {
+            View left = currentFocus.focusSearch(View.FOCUS_LEFT);
+            View selected = findViewById(mSelectedNavId);
+            if ((left == null || isInNavMenu(left) || !isToTheLeft(left, currentFocus)) && selected != null
+                    && selected.isShown()
+                    && selected.requestFocus()) {
+                return true;
+            }
+        }
+        // the top row of a list: «up» goes to the toolbar's first icon, whichever column the row is in (the beam of
+        // the focus search misses icons that sit at the other side)
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && currentFocus != null && isInContent(currentFocus)) {
+            View above = currentFocus.focusSearch(View.FOCUS_UP);
+            if (above == null || above == currentFocus || isInNavMenu(above)) {
+                View action = firstToolbarAction();
+                if (action != null && action.requestFocus()) {
+                    return true;
+                }
+            }
+        }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /** The TV menu's item of the section shown now: where «left» from the content comes back to. */
+    private int mSelectedNavId;
+
+    /** {@code target} lies to the left of {@code from}: the search may answer with a view in the same column. */
+    private static boolean isToTheLeft(@NonNull View target, @NonNull View from) {
+        int[] a = new int[2];
+        int[] b = new int[2];
+        target.getLocationOnScreen(a);
+        from.getLocationOnScreen(b);
+        return a[0] < b[0];
+    }
+
+    private boolean isInContent(@NonNull View view) {
+        View content = findViewById(R.id.content);
+        return content != null && isDescendant(view, content);
+    }
+
+    private boolean isInNavMenu(@NonNull View view) {
+        View menu = findViewById(R.id.liner_nav_view);
+        return menu != null && isDescendant(view, menu);
+    }
+
+    private static boolean isDescendant(@NonNull View view, @NonNull View ancestor) {
+        for (android.view.ViewParent p = view.getParent(); p != null; p = p.getParent()) {
+            if (p == ancestor) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The first visible, focusable icon of the toolbar's action menu; null when the screen has none. */
+    @Nullable
+    private View firstToolbarAction() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            return null;
+        }
+        for (int i = 0; i < toolbar.getChildCount(); i++) {
+            View child = toolbar.getChildAt(i);
+            if (child instanceof androidx.appcompat.widget.ActionMenuView) {
+                androidx.appcompat.widget.ActionMenuView menu = (androidx.appcompat.widget.ActionMenuView) child;
+                for (int j = 0; j < menu.getChildCount(); j++) {
+                    View item = menu.getChildAt(j);
+                    if (item.getVisibility() == View.VISIBLE && item.isFocusable()) {
+                        return item;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -750,6 +839,7 @@ public class MainActivity extends MvpAppCompatActivity
                                 textView.setBackgroundResource(outValue.resourceId);
                             }
                             view1.setBackgroundResource(SelectedValue.resourceId);
+                            mSelectedNavId = view1.getId(); // «left» from the content comes back here
                             mSectionFrom = view1; // showFragment ties it to the screen opened
                             mSectionFor = null;
                             mPresenter.onItemSelected(view1.getId());

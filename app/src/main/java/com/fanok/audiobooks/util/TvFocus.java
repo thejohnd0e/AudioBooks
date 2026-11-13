@@ -2,15 +2,23 @@ package com.fanok.audiobooks.util;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.fanok.audiobooks.PaletteBinder;
@@ -43,6 +51,11 @@ public final class TvFocus {
             @Override
             public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
                 attach(activity.getWindow().getDecorView());
+                if (activity instanceof FragmentActivity) {
+                    // every dialog fragment (the settings' lists, the sheets): the ring and a first focus
+                    ((FragmentActivity) activity).getSupportFragmentManager()
+                            .registerFragmentLifecycleCallbacks(DIALOGS, true);
+                }
             }
 
             @Override
@@ -69,6 +82,63 @@ public final class TvFocus {
             public void onActivityDestroyed(@NonNull Activity activity) {
             }
         });
+    }
+
+    private static final FragmentManager.FragmentLifecycleCallbacks DIALOGS =
+            new FragmentManager.FragmentLifecycleCallbacks() {
+                @Override
+                public void onFragmentStarted(@NonNull FragmentManager fm, @NonNull Fragment fragment) {
+                    if (fragment instanceof DialogFragment && ((DialogFragment) fragment).getDialog() != null) {
+                        prepareDialog(((DialogFragment) fragment).getDialog());
+                    }
+                }
+            };
+
+    /** A dialog on a TV: the ring in its window and the remote on its list (the chosen row) or a button. */
+    private static void prepareDialog(@NonNull Dialog dialog) {
+        if (dialog.getWindow() == null) {
+            return;
+        }
+        View decor = dialog.getWindow().getDecorView();
+        attach(decor);
+        decor.post(() -> {
+            if (dialog.getCurrentFocus() instanceof Button) {
+                return;
+            }
+            if (dialog instanceof AlertDialog) {
+                AlertDialog alert = (AlertDialog) dialog;
+                ListView list = alert.getListView();
+                if (list != null && list.getCount() > 0) {
+                    int checked = list.getCheckedItemPosition();
+                    list.setSelector(rowHighlight(list));
+                    list.setDrawSelectorOnTop(true); // the rows have a background of their own: over it
+                    list.requestFocus();
+                    list.setSelection(checked >= 0 ? checked : 0);
+                    return;
+                }
+                for (int which : new int[] {AlertDialog.BUTTON_POSITIVE, AlertDialog.BUTTON_NEGATIVE,
+                        AlertDialog.BUTTON_NEUTRAL}) {
+                    Button button = alert.getButton(which);
+                    if (button != null && button.getVisibility() == View.VISIBLE) {
+                        button.requestFocus();
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
+    /** The row a remote stands on in a dialog's list: a ring and a light fill, in the list's own selector. */
+    private static GradientDrawable rowHighlight(@NonNull View list) {
+        float density = list.getResources().getDisplayMetrics().density;
+        boolean darkTheme = androidx.core.graphics.ColorUtils.calculateLuminance(
+                PaletteBinder.background(list.getContext())) < 0.5;
+        GradientDrawable row = new GradientDrawable();
+        row.setShape(GradientDrawable.RECTANGLE);
+        row.setCornerRadius(RADIUS_DP * density);
+        row.setColor(darkTheme ? 0x22FFFFFF : 0x22000000);
+        row.setStroke(Math.round(RING_DP * density), darkTheme ? 0xFFFFFFFF : 0xFF000000);
+        return row;
     }
 
     /**
