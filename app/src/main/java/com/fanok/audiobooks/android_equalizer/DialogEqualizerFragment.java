@@ -250,6 +250,15 @@ public class DialogEqualizerFragment extends DialogFragment {
         presetSpinner.getBackground().setColorFilter(textColor, PorterDuff.Mode.SRC_ATOP);
         bindBalance(view);
         bindBoost(view, textColor);
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // the remote starts on the preset list's neighbour: the first thing it can change
+            view.post(() -> {
+                View first = view.findViewById(R.id.equalizer_balance);
+                if (first != null) {
+                    first.requestFocus();
+                }
+            });
+        }
         // night sound, like the balance, is the sink's: heard at once, with the equalizer switch off too
         SwitchCompat nightSwitch = view.findViewById(R.id.equalizer_night);
         nightSwitch.setTextColor(textColor);
