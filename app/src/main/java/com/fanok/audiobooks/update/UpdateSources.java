@@ -23,7 +23,9 @@ public final class UpdateSources {
 
     /** Redirects to {@code …/releases/tag/<tag>} of the newest release (drafts and pre-releases excluded). */
     static final String GITHUB_LATEST = "https://github.com/thejohnd0e/AudioBooks/releases/latest";
-    static final String GITHUB_DOWNLOAD = "https://github.com/thejohnd0e/AudioBooks/releases/download/";
+    /** Every release, pre-releases included, newest first: the feed the «beta channel» reads. */
+    static final String GITHUB_FEED = "https://github.com/thejohnd0e/AudioBooks/releases.atom";
+    static final String GITHUB_DOWNLOAD ="https://github.com/thejohnd0e/AudioBooks/releases/download/";
     static final String MIRROR = "https://www.abc-guitars.com/data/audiobook/";
     static final String MIRROR_INFO = MIRROR + "update.txt";
     /**
@@ -37,7 +39,10 @@ public final class UpdateSources {
     public static final String FORUM_TOPIC = "https://4pda.to/forum/lofiversion/index.php?t1128418.html";
 
     private static final Pattern TAG = Pattern.compile("/releases/tag/([^/?#]+)$");
-    private static final Pattern VERSION = Pattern.compile("\\d+(?:\\.\\d+)*");
+    /** A version, with an optional pre-release suffix: 8.6.0, 8.6.0-beta1. */
+    private static final Pattern VERSION = Pattern.compile("\\d+(?:\\.\\d+)*(?:-[A-Za-z0-9.]+)?");
+    /** A release tag inside the releases feed: its entries link to {@code …/releases/tag/<tag>}. */
+    private static final Pattern FEED_TAG = Pattern.compile("/releases/tag/([^\"'<>/?#\\s]+)");
     /** A file name of the mirror: no path, nothing but an APK. */
     private static final Pattern FILE = Pattern.compile("[A-Za-z0-9._-]+\\.apk");
     private static final Pattern SUM = Pattern.compile("(?m)^([0-9a-fA-F]{64})\\s+\\*?(\\S+\\.apk)\\s*$");
@@ -134,6 +139,25 @@ public final class UpdateSources {
     static String githubTag(@Nullable String location) {
         Matcher m = location == null ? null : TAG.matcher(location);
         return m != null && m.find() ? m.group(1) : null;
+    }
+
+    /** The tag of the highest version among the releases {@code feed} lists (pre-releases too); null when none. */
+    @Nullable
+    static String newestTag(@Nullable String feed) {
+        if (feed == null) {
+            return null;
+        }
+        String best = null;
+        String bestVersion = null;
+        Matcher m = FEED_TAG.matcher(feed);
+        while (m.find()) {
+            String version = versionOf(m.group(1));
+            if (version != null && (bestVersion == null || compare(version, bestVersion) > 0)) {
+                best = m.group(1);
+                bestVersion = version;
+            }
+        }
+        return best;
     }
 
     /** The version a tag names ("v7.9.1" → "7.9.1"), or null when it names none. */

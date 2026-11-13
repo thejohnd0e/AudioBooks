@@ -58,6 +58,19 @@ public class UpdateSourcesTest {
     }
 
     @Test
+    public void theBetaChannelTakesTheHighestVersionOfTheFeed() {
+        String feed = "<entry><link rel=\"alternate\" href=\"https://github.com/o/r/releases/tag/v8.6.0-beta1\"/></entry>"
+                + "<entry><link rel=\"alternate\" href=\"https://github.com/o/r/releases/tag/v8.5.3\"/></entry>";
+        assertEquals("v8.6.0-beta1", UpdateSources.newestTag(feed));
+        assertEquals("8.6.0-beta1", UpdateSources.versionOf("v8.6.0-beta1"));
+        // the release of the same number wins over its beta, whatever the order of the feed
+        assertEquals("v8.6.0", UpdateSources.newestTag(feed
+                + "<link href=\"https://github.com/o/r/releases/tag/v8.6.0\"/>"));
+        assertNull(UpdateSources.newestTag("<feed>nothing here</feed>"));
+        assertNull(UpdateSources.newestTag(null));
+    }
+
+    @Test
     public void aPreReleaseIsOlderThanItsRelease() {
         assertTrue(UpdateSources.compare("8.6.0", "8.6.0-beta1") > 0); // the beta is offered the release
         assertTrue(UpdateSources.compare("8.6.0-beta1", "8.6.0") < 0);

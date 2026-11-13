@@ -73,6 +73,8 @@ import okhttp3.ResponseBody;
 public final class Updater {
 
     public static final String PREF = "auto_update";
+    /** «Получать пре-релизы»: the newest version of all, betas too, instead of the newest release. Off by default. */
+    public static final String PREF_BETA = "pref_beta_updates";
     /** The WebView's user agent, stored by the forum screen: 4pda's cookies are sent only with it. */
     private static final String PREF_FORUM_AGENT = "update_forum_agent";
     private static final String PREF_SNOOZE_VERSION = "update_snooze_version";
@@ -246,6 +248,7 @@ public final class Updater {
                 clients.add(route);
             }
 
+            boolean beta = prefs(app).getBoolean(PREF_BETA, false);
             boolean newer = false;
             Release github = null; // its hash also checks the same version from another place
             Release login = null;
@@ -254,7 +257,7 @@ public final class Updater {
                 Site site = sites.get(i);
                 Release release;
                 try {
-                    release = latest(site, clients.get(i));
+                    release = latest(site, clients.get(i), beta);
                 } catch (IOException | RuntimeException e) {
                     Log.i(TAG, site + " #" + i + " does not answer: " + e);
                     continue;
@@ -307,13 +310,19 @@ public final class Updater {
 
     /** The newest version {@code site} publishes. */
     @NonNull
-    private static Release latest(@NonNull Site site, @NonNull OkHttpClient client) throws IOException {
+    private static Release latest(@NonNull Site site, @NonNull OkHttpClient client, boolean beta)
+            throws IOException {
         switch (site) {
             case GITHUB: {
                 String tag;
-                try (Response response = execute(client.newBuilder().followRedirects(false).build(),
-                        UpdateSources.GITHUB_LATEST, site)) {
-                    tag = UpdateSources.githubTag(response.header("Location"));
+                if (beta) {
+                    // pre-releases are not "latest" for GitHub: its feed lists them all
+                    tag = UpdateSources.newestTag(text(client, UpdateSources.GITHUB_FEED, site));
+                } else {
+                    try (Response response = execute(client.newBuilder().followRedirects(false).build(),
+                            UpdateSources.GITHUB_LATEST, site)) {
+                        tag = UpdateSources.githubTag(response.header("Location"));
+                    }
                 }
                 String version = tag == null ? null : UpdateSources.versionOf(tag);
                 if (version == null) {
