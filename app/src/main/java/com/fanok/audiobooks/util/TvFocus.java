@@ -177,7 +177,7 @@ public final class TvFocus {
         float density = view.getResources().getDisplayMetrics().density;
         GradientDrawable ring = new GradientDrawable();
         ring.setShape(GradientDrawable.RECTANGLE);
-        ring.setCornerRadius(RADIUS_DP * density);
+        ring.setCornerRadius(radius(view, density));
         // white on a dark theme, black on a light one: seen on the screen and on a button filled with the accent
         boolean darkTheme = androidx.core.graphics.ColorUtils.calculateLuminance(
                 PaletteBinder.background(view.getContext())) < 0.5;
@@ -192,6 +192,21 @@ public final class TvFocus {
         ring.setBounds(0, top, view.getWidth(), bottom);
         view.getOverlay().add(ring);
         view.setTag(R.id.tv_focus_ring, ring);
+    }
+
+    /** The ring follows the shape it surrounds: a pill stays a pill, a round button stays round. */
+    private static float radius(@NonNull View view, float density) {
+        float half = Math.min(view.getWidth(), view.getHeight()) / 2f;
+        if (view instanceof com.google.android.material.button.MaterialButton) {
+            float own = ((com.google.android.material.button.MaterialButton) view).getCornerRadius();
+            return Math.min(own > 0 ? own : RADIUS_DP * density, half);
+        }
+        boolean icon = view instanceof android.widget.ImageView && !(view instanceof android.widget.ImageView
+                && view.getWidth() > 96 * density);
+        if (icon && Math.abs(view.getWidth() - view.getHeight()) < 4 * density) {
+            return half; // a round icon button
+        }
+        return RADIUS_DP * density;
     }
 
     private static void remove(@Nullable View view) {
