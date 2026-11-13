@@ -141,6 +141,15 @@
         android:summary="@string/battary_optimize_desc"
         android:title="@string/battary_optimize" />
 
+    <!-- a TV only (AboutFragment hides it elsewhere) -->
+    <Preference
+        android:icon="@drawable/ic_screen_off"
+        android:key="tv_screen_hint"
+        android:persistent="false"
+        android:selectable="false"
+        android:summary="@string/screen_off_hint"
+        android:title="@string/screen_off_hint_title" />
+
     <!-- hidden for now (temporary): the item and its link stay as they are -->
     <Preference
         android:icon="@drawable/ic_rustore"

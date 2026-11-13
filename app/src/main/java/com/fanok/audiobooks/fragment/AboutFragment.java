@@ -108,6 +108,10 @@ public class AboutFragment extends PreferenceFragmentCompat {
         if (battery != null && com.fanok.audiobooks.util.Tv.is(requireContext())) {
             battery.setVisible(false); // a TV has no battery
         }
+        Preference screenHint = findPreference("tv_screen_hint");
+        if (screenHint != null && !com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            screenHint.setVisible(false);
+        }
 
         preferenceClickListner("privacy", preference -> {
             AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(
