@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- the row a remote stands on in a list or a menu: a ring and a light fill (nothing on a touch screen) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/mySelectableItemBackground" />
+            <stroke android:width="2dp" android:color="?attr/colorAccentPrimary" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/mySelectableItemBackground" />
+            <stroke android:width="2dp" android:color="?attr/colorAccentPrimary" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+</selector>
