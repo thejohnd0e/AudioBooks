@@ -1145,6 +1145,14 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             return;
         }
         mTvPlayerShown = shown;
+        // the side buttons are for the touch: the remote winds with «left»/«right» on Play and changes the chapter by
+        // the list or the media keys, so the focus never lands on a button it cannot leave
+        for (int id : new int[] {R.id.rewind, R.id.forward, R.id.previousBottom, R.id.nextBottom}) {
+            View side = findViewById(id);
+            if (side != null) {
+                side.setFocusable(!shown);
+            }
+        }
         mPlayer.setVisibility(shown ? View.VISIBLE : View.GONE);
         appBar.setVisibility(shown ? View.GONE : View.VISIBLE);
         pager.setVisibility(shown ? View.GONE : View.VISIBLE);
@@ -1925,6 +1933,17 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         View currentFocus = getCurrentFocus();
+        // the TV's player works as a video player does: on Play, «left» and «right» wind the book by the step (held
+        // down, they go on), OK pauses, «up» and «down» move through the chapters, the progress and the buttons
+        if (mTvPlayerShown && currentFocus != null && currentFocus.getId() == R.id.playBottom
+                && (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)) {
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                mPresenter.buttomRewindClick(currentFocus);
+            } else {
+                mPresenter.buttomForwardClick(currentFocus);
+            }
+            return true;
+        }
         if (currentFocus!=null){
             if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
                 // --- НАЧАЛО ИСПРАВЛЕНИЯ ---
