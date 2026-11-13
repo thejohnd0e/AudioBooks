@@ -2008,8 +2008,9 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
                 }
             }else if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
                 View downloadBtn = findViewById(R.id.btnDownloadBook);
-                boolean favoriteIsRightmost = currentFocus.getId() == R.id.btnFavoriteBook
-                        && (downloadBtn == null || downloadBtn.getVisibility() != View.VISIBLE);
+                // the last button of the row (Favorite, Bookmarks, Download: whichever is the rightmost shown)
+                boolean noDownload = downloadBtn == null || downloadBtn.getVisibility() != View.VISIBLE;
+                boolean favoriteIsRightmost = currentFocus.getId() == R.id.btnBookmarksBook && noDownload;
                 if (currentFocus.getId()==R.id.genre||currentFocus.getId()==R.id.autorConteiner||currentFocus.getId()==R.id.author||
                         currentFocus.getId()==R.id.artistConteiner||currentFocus.getId()==R.id.artist||currentFocus.getId()==R.id.seriesConteiner||
                         currentFocus.getId()==R.id.series||currentFocus.getId()==R.id.showMore||

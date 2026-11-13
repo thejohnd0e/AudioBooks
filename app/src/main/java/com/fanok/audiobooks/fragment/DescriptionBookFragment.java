@@ -764,7 +764,6 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         if (mTv) {
             // Устанавливаем наш селектор в качестве фона для всех интерактивных элементов
             // Система сама будет показывать/скрывать рамку при смене фокуса.
-            mImageView.setBackgroundResource(R.drawable.focusable);
             mGenre.setBackgroundResource(R.drawable.focusable);
             mAuthor.setBackgroundResource(R.drawable.focusable);
             mArtist.setBackgroundResource(R.drawable.focusable);
@@ -775,10 +774,6 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
             mShowMore.setBackgroundResource(R.drawable.focusable);
             for (MaterialButton button : new MaterialButton[] {mBtnListen, mBtnFavorite, mBtnBookmarks, mBtnDownload, mBtnAskAi}) {
                 if (button != null) {
-                    button.setOnFocusChangeListener((v, hasFocus) -> {
-                        button.setScaleX(hasFocus ? 1.03f : 1f);
-                        button.setScaleY(hasFocus ? 1.03f : 1f);
-                    });
                 }
             }
         }
@@ -833,6 +828,9 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
                         ImageFullScreenActivity.start(activity,
                                 remotePoster, description.getTitle(),
                                 mImageView, coverKey(remotePoster)));
+            }
+            if (mTv) {
+                mImageView.setFocusable(false); // the cover is not a stop for the remote
             }
 
             if (description.getGenre() != null && !description.getGenre().isEmpty()) {

@@ -197,20 +197,21 @@ public final class TvFocus {
             top = ((com.google.android.material.button.MaterialButton) view).getInsetTop();
             bottom -= ((com.google.android.material.button.MaterialButton) view).getInsetBottom();
         }
-        ring.setBounds(0, top, view.getWidth(), bottom);
+        // the stroke sits inside the view: a ring on the edge is cut by a parent that clips its children
+        int inset = Math.round(RING_DP * density / 2f);
+        ring.setBounds(inset, top + inset, view.getWidth() - inset, bottom - inset);
         view.getOverlay().add(ring);
         view.setTag(R.id.tv_focus_ring, ring);
     }
 
     /** The ring follows the shape it surrounds: a pill stays a pill, a round button stays round. */
     private static float radius(@NonNull View view, float density) {
-        float half = Math.min(view.getWidth(), view.getHeight()) / 2f;
+        float half = Math.min(view.getWidth(), view.getHeight()) / 2f - RING_DP * density / 2f;
         if (view instanceof com.google.android.material.button.MaterialButton) {
             float own = ((com.google.android.material.button.MaterialButton) view).getCornerRadius();
             return Math.min(own > 0 ? own : RADIUS_DP * density, half);
         }
-        boolean icon = view instanceof android.widget.ImageView && !(view instanceof android.widget.ImageView
-                && view.getWidth() > 96 * density);
+        boolean icon = view instanceof android.widget.ImageView && view.getWidth() <= 64 * density;
         if (icon && Math.abs(view.getWidth() - view.getHeight()) < 4 * density) {
             return half; // a round icon button
         }
