@@ -104,6 +104,11 @@ public class AboutFragment extends PreferenceFragmentCompat {
             }
         }
 
+        Preference battery = findPreference("disable_battary_optimize");
+        if (battery != null && com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            battery.setVisible(false); // a TV has no battery
+        }
+
         preferenceClickListner("privacy", preference -> {
             AlertDialog.Builder builder = new com.fanok.audiobooks.dialogs.PaletteDialogBuilder(
                     requireContext());

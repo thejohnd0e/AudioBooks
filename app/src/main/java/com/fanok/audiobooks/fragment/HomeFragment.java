@@ -245,6 +245,16 @@ public class HomeFragment extends Fragment {
                 play.setVisibility(item.canResume() ? View.VISIBLE : View.GONE);
                 play.setContentDescription(getString(R.string.home_play_book, book.getName()));
                 play.setOnClickListener(v -> resume(book));
+                if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+                    // the whole plate is one stop for the remote, with one ring; OK opens the book
+                    play.setFocusable(false);
+                    View card = itemView.findViewById(R.id.continueCard);
+                    card.setFocusable(false);
+                    card.setClickable(false);
+                    itemView.setFocusable(true);
+                    itemView.setClickable(true);
+                    itemView.setOnClickListener(v -> open(book));
+                }
             }
         }
     }
