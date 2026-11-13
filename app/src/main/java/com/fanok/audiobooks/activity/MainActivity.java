@@ -693,6 +693,14 @@ public class MainActivity extends MvpAppCompatActivity
                 return true;
             }
         }
+        // the favourites' switcher sits left of the toolbar's icons, out of their beam: «left» from the first icon
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && currentFocus == firstToolbarAction()) {
+            Toolbar bar = findViewById(R.id.toolbar);
+            View switcher = bar == null ? null : (View) bar.getTag(R.id.favoritesSwitcher);
+            if (switcher != null && switcher.isShown() && switcher.requestFocus()) {
+                return true;
+            }
+        }
         // «left» out of the content or the toolbar returns to the menu's item of the section shown, not to the one
         // nearest by height
         if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && currentFocus != null && mSelectedNavId != 0
