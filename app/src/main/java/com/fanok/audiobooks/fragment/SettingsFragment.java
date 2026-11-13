@@ -440,10 +440,37 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             });
         }
 
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // a remote cannot pick colours: a TV has the ready palettes only, and no downloads without a drive
+            androidx.preference.ListPreference palettes = findPreference("pref_palette");
+            if (palettes != null) {
+                java.util.List<CharSequence> titles = new java.util.ArrayList<>();
+                java.util.List<CharSequence> values = new java.util.ArrayList<>();
+                CharSequence[] t = palettes.getEntries();
+                CharSequence[] v = palettes.getEntryValues();
+                for (int i = 0; i < v.length; i++) {
+                    if (!AppThemes.PALETTE_CUSTOM.contentEquals(v[i])) {
+                        titles.add(t[i]);
+                        values.add(v[i]);
+                    }
+                }
+                palettes.setEntries(titles.toArray(new CharSequence[0]));
+                palettes.setEntryValues(values.toArray(new CharSequence[0]));
+                if (AppThemes.PALETTE_CUSTOM.equals(palettes.getValue())) {
+                    palettes.setValue(requireContext().getString(R.string.palette_steel_value));
+                }
+            }
+            Preference downloads = findPreference("group_downloads");
+            if (downloads != null && !com.fanok.audiobooks.download.BookDownloader.available(requireContext())) {
+                downloads.setVisible(false);
+            }
+        }
+
         Preference customEditPref = findPreference("pref_custom_palette_edit");
         if (customEditPref != null) {
             String current = AppThemes.currentPalette(requireContext());
-            customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(current));
+            customEditPref.setVisible(AppThemes.PALETTE_CUSTOM.equals(current)
+                    && !com.fanok.audiobooks.util.Tv.is(requireContext()));
             customEditPref.setOnPreferenceClickListener(p -> {
                 showCustomPaletteMenu();
                 return true;

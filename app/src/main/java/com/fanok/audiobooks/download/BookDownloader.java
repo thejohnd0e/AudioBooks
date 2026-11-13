@@ -37,12 +37,17 @@ public final class BookDownloader {
     private BookDownloader() {
     }
 
+    /** Downloads exist on this device at all: a TV needs a removable drive (its own memory is small). */
+    public static boolean available(@NonNull Context context) {
+        return !com.fanok.audiobooks.util.Tv.is(context) || StoreLocation.hasRemovable(context);
+    }
+
     /**
      * A site's book the list may download: not imported, not a site's collection, allowed by parental control. A TV
      * downloads only with a removable drive in it (its own memory is small); a phone or a tablet always can.
      */
     public static boolean canDownload(@NonNull Context context, @NonNull BookPOJO book) {
-        if (com.fanok.audiobooks.util.Tv.is(context) && !StoreLocation.hasRemovable(context)) {
+        if (!available(context)) {
             return false;
         }
         String url = book.getUrl();

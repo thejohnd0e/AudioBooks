@@ -790,6 +790,10 @@ public class MainActivity extends MvpAppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         PaletteBinder.bind(this);
+        View savedItem = findViewById(R.id.layout_nav_saved);
+        if (savedItem != null && !com.fanok.audiobooks.download.BookDownloader.available(this)) {
+            savedItem.setVisibility(View.GONE); // a TV without a drive has no downloads
+        }
 
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
