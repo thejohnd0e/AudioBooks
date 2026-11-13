@@ -62,24 +62,45 @@ public class AnalogController extends View {
         mListener = listener;
     }
 
-    /** A remote turns the knob: Left/Right (and the keys' own repeat) step it, Up/Down leave to the neighbours. */
+    private boolean turning; // a remote: OK takes the knob in hand, the arrows turn it, OK or Back lets it go
+
+    /** A remote: OK takes the knob (a ring in the accent shows it), the arrows turn it, OK or Back lets it go. */
     @Override
     public boolean onKeyDown(int keyCode, android.view.KeyEvent event) {
         if (isEnabled()) {
-            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT && value < max) {
-                change(value + 1);
-                return true;
-            }
-            if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT && value > 0) {
-                change(value - 1);
-                return true;
-            }
             if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER || keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                change(value < max ? value + 1 : 0); // OK steps round, as a tap does
+                if (event.getRepeatCount() == 0) {
+                    turning = !turning;
+                    invalidate();
+                }
                 return true;
+            }
+            if (turning) {
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == android.view.KeyEvent.KEYCODE_DPAD_UP) {
+                    change(Math.min(max, value + 1));
+                    return true;
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_DPAD_LEFT || keyCode == android.view.KeyEvent.KEYCODE_DPAD_DOWN) {
+                    change(Math.max(0, value - 1));
+                    return true;
+                }
+                if (keyCode == android.view.KeyEvent.KEYCODE_BACK) {
+                    turning = false; // the dialog stays
+                    invalidate();
+                    return true;
+                }
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onFocusChanged(boolean gainFocus, int direction, android.graphics.Rect previouslyFocusedRect) {
+        super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        if (!gainFocus && turning) {
+            turning = false;
+            invalidate();
+        }
     }
 
     void init() {
@@ -128,6 +149,13 @@ public class AnalogController extends View {
         midx = (float) getWidth() / 2;
         midy = (float) getHeight() / 2;
         float radius = radius();
+        if (turning) {
+            Paint hand = new Paint(Paint.ANTI_ALIAS_FLAG);
+            hand.setStyle(Paint.Style.STROKE);
+            hand.setStrokeWidth(radius * 0.08f);
+            hand.setColor(linePaint.getColor());
+            canvas.drawCircle(midx, midy, radius * 1.1f, hand);
+        }
         boolean off = value == 0 || !isEnabled();
 
         int faceColor = com.fanok.audiobooks.PaletteBinder.background(getContext());
