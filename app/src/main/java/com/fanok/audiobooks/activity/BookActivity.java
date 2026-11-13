@@ -996,7 +996,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         }
         String name = people.get(0);
         boolean on = mFavorites.toggle(kind, name);
-        Snackbar bar = Snackbar.make(findViewById(R.id.view_pager),
+        Snackbar bar = Snackbar.make(snackbarHost(),
                 getString(on ? R.string.book_fav_added : R.string.book_fav_removed, name), Snackbar.LENGTH_LONG)
                 .setAction(R.string.undo, v -> mFavorites.undo(kind, name));
         //above the collapsed player, which is drawn over the screen's bottom
@@ -1138,7 +1138,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             String text = other
                     ? getString(R.string.bookmark_added_other, chapter, time, bookName == null ? "" : bookName)
                     : getString(R.string.bookmark_added, chapter, time);
-            Snackbar bar = Snackbar.make(findViewById(R.id.view_pager), text, Snackbar.LENGTH_LONG)
+            Snackbar bar = Snackbar.make(snackbarHost(), text, Snackbar.LENGTH_LONG)
                     .setDuration(6000);
             if (id >= 0) {
                 bar.setAction(R.string.bookmark_note, v -> BookmarksSheet.editNote(BookActivity.this, id, null));
@@ -1156,7 +1156,7 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         String name = chapterName == null ? "" : chapterName;
         String chapterText = !name.isEmpty() && android.text.TextUtils.isDigitsOnly(name)
                 ? getString(R.string.player_chapter_number, name) : name;
-        Snackbar bar = Snackbar.make(findViewById(R.id.view_pager),
+        Snackbar bar = Snackbar.make(snackbarHost(),
                 getString(R.string.seek_undo, Bookmarks.time(positionMs), chapterText), 8000)
                 .setAction(R.string.seek_undo_action, v -> mPresenter.undoSeek(chapter, positionMs));
         //above the collapsed player, which is drawn over the screen's bottom
@@ -1164,6 +1164,14 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             bar.setAnchorView(mPlayer);
         }
         bar.show();
+    }
+
+    /** The player's own layer is drawn over the screen: a bar made on the screen would be hidden behind the open player. */
+    private View snackbarHost() {
+        boolean open = bottomSheetBehavior != null && mPlayer != null
+                && bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED
+                && bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN;
+        return open ? mPlayer : findViewById(R.id.view_pager);
     }
 
     /** Marks the place the player is at; with nothing loaded there is no place to mark. */
