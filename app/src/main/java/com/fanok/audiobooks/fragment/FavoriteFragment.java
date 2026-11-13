@@ -722,6 +722,7 @@ public class FavoriteFragment extends MvpAppCompatFragment implements FavoriteVi
         BookSheetPeople.bind(layout, book); // the stars of the author and reader rows, once their visibility is set
         BookSheetDownload.bind(layout, book, dialog);
         dialog.show();
+        com.fanok.audiobooks.PaletteBinder.forRemote(dialog, layout);
     }
 
     protected FavoritePresenter getPresenter() {

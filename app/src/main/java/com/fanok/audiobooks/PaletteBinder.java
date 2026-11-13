@@ -535,6 +535,41 @@ public final class PaletteBinder {
                 sheet.setBackgroundColor(surface);
             }
             paint(content, background(context), surface(context), accent(context));
+            if (sheet != null) {
+                forRemote(sheet, content);
+            }
         });
+    }
+
+    /**
+     * On a TV a bottom sheet opens whole (a remote cannot drag it up) and its first control has the focus; nothing off
+     * a TV. For a {@link com.google.android.material.bottomsheet.BottomSheetDialog} built without bindBottomSheet.
+     */
+    public static void forRemote(@NonNull com.google.android.material.bottomsheet.BottomSheetDialog dialog,
+            @NonNull View content) {
+        View sheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+        if (sheet != null) {
+            forRemote(sheet, content);
+        }
+    }
+
+    private static void forRemote(@NonNull View sheet, @NonNull View content) {
+        if (!com.fanok.audiobooks.util.Tv.is(content.getContext())) {
+            return;
+        }
+        com.google.android.material.bottomsheet.BottomSheetBehavior<View> behavior =
+                com.google.android.material.bottomsheet.BottomSheetBehavior.from(sheet);
+        behavior.setSkipCollapsed(true);
+        behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
+        content.postDelayed(() -> {
+            if (content.findFocus() == null) {
+                java.util.ArrayList<View> focusables = content.getFocusables(View.FOCUS_DOWN);
+                for (View candidate : focusables) {
+                    if (candidate.isShown() && candidate.requestFocus()) {
+                        break;
+                    }
+                }
+            }
+        }, 150);
     }
 }

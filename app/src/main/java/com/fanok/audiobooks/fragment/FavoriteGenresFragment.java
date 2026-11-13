@@ -362,6 +362,7 @@ public class FavoriteGenresFragment extends Fragment {
         addAction(dialog, actions, R.drawable.ic_minus_circle, getString(R.string.favorite_people_remove),
                 () -> remove(genre));
         dialog.show();
+        com.fanok.audiobooks.PaletteBinder.forRemote(dialog, layout);
     }
 
     private void addAction(@NonNull BottomSheetDialog dialog, @NonNull ViewGroup parent, int icon,
