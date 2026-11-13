@@ -830,7 +830,11 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
                                 mImageView, coverKey(remotePoster)));
             }
             if (mTv) {
-                mImageView.setFocusable(false); // the cover is not a stop for the remote
+                // the cover and the words «Автор», «Чтец», «Серия» are not stops for the remote: the names are
+                mImageView.setFocusable(false);
+                for (TextView label : new TextView[] {mAuthorLabel, mArtistLabel, mSeriesLabel}) {
+                    label.setFocusable(false);
+                }
             }
 
             if (description.getGenre() != null && !description.getGenre().isEmpty()) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- a TV is read from afar: taller source tiles and rows in the search (two lines of the text with room) -->
+<resources>
+    <dimen name="search_tile_height">56dp</dimen>
+    <dimen name="search_row_height">44dp</dimen>
+</resources>

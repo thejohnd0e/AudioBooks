@@ -563,12 +563,12 @@ public final class PaletteBinder {
         behavior.setState(com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED);
         content.postDelayed(() -> {
             if (content.findFocus() == null) {
-                java.util.ArrayList<View> focusables = content.getFocusables(View.FOCUS_DOWN);
-                for (View candidate : focusables) {
-                    if (candidate.isShown() && candidate.requestFocus()) {
-                        break;
-                    }
-                }
+                // a request for the focus does not take in a window that has just come: the remote's own key does
+                View root = content.getRootView();
+                root.dispatchKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN,
+                        android.view.KeyEvent.KEYCODE_DPAD_DOWN));
+                root.dispatchKeyEvent(new android.view.KeyEvent(android.view.KeyEvent.ACTION_UP,
+                        android.view.KeyEvent.KEYCODE_DPAD_DOWN));
             }
         }, 150);
     }
