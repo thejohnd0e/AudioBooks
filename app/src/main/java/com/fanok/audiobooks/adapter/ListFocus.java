@@ -1,8 +1,6 @@
 package com.fanok.audiobooks.adapter;
 
-import android.app.UiModeManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewParent;
@@ -52,8 +50,7 @@ public final class ListFocus {
     private View.OnLayoutChangeListener mRestore;
 
     public static boolean isTv(@NonNull Context context) {
-        UiModeManager modes = (UiModeManager) context.getApplicationContext().getSystemService(Context.UI_MODE_SERVICE);
-        return modes != null && modes.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        return com.fanok.audiobooks.util.Tv.is(context);
     }
 
     /** The app runs on a TV: list adapters keep their rows across updates there (touch devices are left as they were). */

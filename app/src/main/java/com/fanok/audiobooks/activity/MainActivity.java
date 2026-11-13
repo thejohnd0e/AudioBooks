@@ -671,29 +671,13 @@ public class MainActivity extends MvpAppCompatActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         View currentFocus = getCurrentFocus();
-        if (currentFocus!=null){
-            if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                if (currentFocus.getId()==R.id.layout_nav_home||currentFocus.getId()==R.id.toolbar) {
-                    View menuItem = findViewById(R.id.app_bar_search);
-                    if (menuItem != null && menuItem.requestFocus()) {
-                        return true; // handled: unhandled, the key would move the focus on past the search
-                    }
-                }
-            }
-            if(keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                // handled as on the right: unhandled, the key would move the focus on, one step past the target
-                if (currentFocus.getId()==R.id.app_bar_search){
-                    Toolbar toolbar = findViewById(R.id.toolbar);
-                    if (toolbar != null && toolbar.requestFocus()) {
-                        return true;
-                    }
-                }
-                if (currentFocus.getId()==R.id.toolbar){
-                    View view = findViewById(R.id.layout_nav_home);
-                    if (view != null && view.requestFocus()) {
-                        return true;
-                    }
-                }
+        // the side menu's «right» goes to the screen's content, whichever menu item it is on; the toolbar's icons are
+        // reached by «up» from the first row, as on every Android TV screen
+        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && currentFocus != null && currentFocus.getParent() != null
+                && ((View) currentFocus.getParent()).getId() == R.id.liner_nav_view) {
+            View content = findViewById(R.id.content);
+            if (content != null && content.requestFocus(View.FOCUS_RIGHT)) {
+                return true;
             }
         }
         return super.onKeyDown(keyCode, event);

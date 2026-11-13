@@ -82,7 +82,7 @@ public class MainPresenter extends MvpPresenter<MainView> implements
         if (source == null) {
             return;
         }
-        if (id == R.id.nav_search) {
+        if (id == R.id.nav_search || id == R.id.layout_nav_search) {
             // the catalog with its search screen on top: the found books come back to the catalog
             BooksFragment catalog = BooksFragment.newInstance(source.index, R.string.menu_audiobooks,
                     Consts.MODEL_BOOKS);

@@ -268,6 +268,7 @@ public class App extends Application {
         com.fanok.audiobooks.search.SourceHealth.checkIfDue(this); // at most daily, delayed, unmetered only
         com.fanok.audiobooks.search.ReleaseCheck.checkIfDue(this); // new books of favourite people: same terms
         com.fanok.audiobooks.util.AppShortcuts.install(this); // the icon's long-press shortcuts, once
+        com.fanok.audiobooks.util.TvFocus.install(this); // a TV remote's cursor on every screen
         com.fanok.audiobooks.sync.CloudSync.install(this); // the cloud sync module: its one entry point
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {

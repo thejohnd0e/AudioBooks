@@ -490,10 +490,30 @@ public final class PaletteBinder {
                     btn.setTextColor(accent);
                 }
             }
+            com.fanok.audiobooks.util.TvFocus.attach(alert.getWindow() == null ? null : alert.getWindow().getDecorView());
+            focusFirstButtonOnTv(alert);
         }
         View icon = dialog.findViewById(android.R.id.icon);
         if (icon instanceof ImageView) {
             ((ImageView) icon).setImageTintList(ColorStateList.valueOf(accent));
+        }
+    }
+
+    /** On a TV a dialog opens with the focus on a button, so OK answers it at once; nothing off a TV. */
+    private static void focusFirstButtonOnTv(@NonNull androidx.appcompat.app.AlertDialog alert) {
+        if (!com.fanok.audiobooks.util.Tv.is(alert.getContext())
+                || alert.getCurrentFocus() instanceof android.widget.Button) { // the message's scroll area has it by default
+            return;
+        }
+        for (int which : new int[] {
+                androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
+                androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
+                androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL}) {
+            android.widget.Button btn = alert.getButton(which);
+            if (btn != null && btn.getVisibility() == View.VISIBLE) {
+                btn.requestFocus();
+                return;
+            }
         }
     }
 
