@@ -22,8 +22,13 @@ public final class Tv {
         if (sTv == null) {
             UiModeManager modes = (UiModeManager) context.getApplicationContext()
                     .getSystemService(Context.UI_MODE_SERVICE);
-            sTv = modes != null && modes.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+            sTv = modes != null && isTelevisionMode(modes.getCurrentModeType());
         }
         return sTv;
+    }
+
+    /** The UI mode type that is a TV (a box on a TV reports it too); every other mode is a phone, a tablet, a car... */
+    static boolean isTelevisionMode(int modeType) {
+        return modeType == Configuration.UI_MODE_TYPE_TELEVISION;
     }
 }

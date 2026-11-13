@@ -148,13 +148,12 @@ public final class TvFocus {
     /** The row a remote stands on in a dialog's list: a ring and a light fill, in the list's own selector. */
     private static GradientDrawable rowHighlight(@NonNull View list) {
         float density = list.getResources().getDisplayMetrics().density;
-        boolean darkTheme = androidx.core.graphics.ColorUtils.calculateLuminance(
-                PaletteBinder.background(list.getContext())) < 0.5;
+        boolean darkTheme = isDark(PaletteBinder.background(list.getContext()));
         GradientDrawable row = new GradientDrawable();
         row.setShape(GradientDrawable.RECTANGLE);
         row.setCornerRadius(RADIUS_DP * density);
-        row.setColor(darkTheme ? 0x22FFFFFF : 0x22000000);
-        row.setStroke(Math.round(RING_DP * density), darkTheme ? 0xFFFFFFFF : 0xFF000000);
+        row.setColor(fillColor(darkTheme));
+        row.setStroke(Math.round(RING_DP * density), ringColor(darkTheme));
         return row;
     }
 
@@ -196,9 +195,8 @@ public final class TvFocus {
         ring.setShape(GradientDrawable.RECTANGLE);
         ring.setCornerRadius(radius(view, density));
         // white on a dark theme, black on a light one: seen on the screen and on a button filled with the accent
-        boolean darkTheme = androidx.core.graphics.ColorUtils.calculateLuminance(
-                PaletteBinder.background(view.getContext())) < 0.5;
-        ring.setStroke(Math.round(RING_DP * density), darkTheme ? 0xFFFFFFFF : 0xFF000000);
+        boolean darkTheme = isDark(PaletteBinder.background(view.getContext()));
+        ring.setStroke(Math.round(RING_DP * density), ringColor(darkTheme));
         int top = 0;
         int bottom = view.getHeight();
         if (view instanceof com.google.android.material.button.MaterialButton) {
@@ -207,7 +205,7 @@ public final class TvFocus {
             bottom -= ((com.google.android.material.button.MaterialButton) view).getInsetBottom();
         }
         // the stroke sits inside the view: a ring on the edge is cut by a parent that clips its children
-        int inset = Math.round(RING_DP * density / 2f);
+        int inset = ringInset(density);
         ring.setBounds(inset, top + inset, view.getWidth() - inset, bottom - inset);
         view.getOverlay().add(ring);
         view.setTag(R.id.tv_focus_ring, ring);
@@ -215,13 +213,52 @@ public final class TvFocus {
 
     /** The ring follows the shape it surrounds: a pill stays a pill, a round button stays round. */
     private static float radius(@NonNull View view, float density) {
-        float half = Math.min(view.getWidth(), view.getHeight()) / 2f - RING_DP * density / 2f;
-        if (view instanceof com.google.android.material.button.MaterialButton) {
-            float own = ((com.google.android.material.button.MaterialButton) view).getCornerRadius();
-            return Math.min(own > 0 ? own : RADIUS_DP * density, half);
+        boolean button = view instanceof com.google.android.material.button.MaterialButton;
+        float own = button ? ((com.google.android.material.button.MaterialButton) view).getCornerRadius() : 0;
+        return ringRadius(button, own, view instanceof android.widget.ImageView, view.getWidth(), view.getHeight(),
+                density);
+    }
+
+    /** True when the window's background is dark: the ring is then white, on a light one it is black. */
+    static boolean isDark(int background) {
+        // the relative luminance of ColorUtils.calculateLuminance (sRGB), by hand: it runs without Android as well
+        double luminance = 0.2126 * linear((background >> 16) & 0xFF) + 0.7152 * linear((background >> 8) & 0xFF)
+                + 0.0722 * linear(background & 0xFF);
+        return luminance < 0.5;
+    }
+
+    private static double linear(int channel) {
+        double c = channel / 255.0;
+        return c < 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+
+    /** White on a dark theme, black on a light one: seen on the screen and on a button filled with the accent. */
+    static int ringColor(boolean darkTheme) {
+        return darkTheme ? 0xFFFFFFFF : 0xFF000000;
+    }
+
+    /** The light fill of a list's row under the remote: a veil of the ring's colour. */
+    static int fillColor(boolean darkTheme) {
+        return darkTheme ? 0x22FFFFFF : 0x22000000;
+    }
+
+    /** The stroke sits inside the view, by half its width: a ring on the edge is cut by a parent that clips. */
+    static int ringInset(float density) {
+        return Math.round(RING_DP * density / 2f);
+    }
+
+    /**
+     * The corner radius of the ring: a Material button's own (a pill stays a pill), a round icon button is a circle,
+     * anything else the common radius. A button's never exceeds half of the shorter side, or the ring would not close.
+     */
+    static float ringRadius(boolean materialButton, float ownRadius, boolean imageView, int width, int height,
+            float density) {
+        float half = Math.min(width, height) / 2f - RING_DP * density / 2f;
+        if (materialButton) {
+            return Math.min(ownRadius > 0 ? ownRadius : RADIUS_DP * density, half);
         }
-        boolean icon = view instanceof android.widget.ImageView && view.getWidth() <= 64 * density;
-        if (icon && Math.abs(view.getWidth() - view.getHeight()) < 4 * density) {
+        boolean icon = imageView && width <= 64 * density;
+        if (icon && Math.abs(width - height) < 4 * density) {
             return half; // a round icon button
         }
         return RADIUS_DP * density;
