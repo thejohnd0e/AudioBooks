@@ -513,6 +513,7 @@ public class FavoritePeopleFragment extends Fragment implements FavoritePeople.L
         addAction(dialog, actions, R.drawable.ic_minus_circle, getString(R.string.favorite_people_remove),
                 () -> remove(row));
         dialog.show();
+        com.fanok.audiobooks.PaletteBinder.forRemote(dialog, layout);
     }
 
     private void addAction(@NonNull BottomSheetDialog dialog, @NonNull ViewGroup parent, int icon,
