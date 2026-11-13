@@ -629,7 +629,7 @@ public class FavoriteFragment extends MvpAppCompatFragment implements FavoriteVi
             mPresenter.onFilterSelected(filterId, index == 0 ? null : values.get(index - 1));
             return true;
         });
-        popupMenu.show();
+        com.fanok.audiobooks.util.TvMenu.show(requireContext(), popupMenu);
     }
 
     @SuppressLint("InflateParams")

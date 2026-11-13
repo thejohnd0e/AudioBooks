@@ -118,6 +118,7 @@ public final class FavoritesSwitcher {
         arrow.setRotation(0);
         final View anchor = view;
         view.setOnClickListener(v -> opener.open(activity, anchor, arrow));
+        view.setFocusable(true); // a remote must reach it (the ring is drawn by util.TvFocus on a TV)
     }
 
     /** Takes the switcher down if {@code owner} has it; the toolbar shows the title again. */
@@ -234,6 +235,6 @@ public final class FavoritesSwitcher {
         });
         arrow.setRotation(180);
         popup.setOnDismissListener(p -> arrow.setRotation(0));
-        popup.show();
+        com.fanok.audiobooks.util.TvMenu.show(activity, popup, () -> arrow.setRotation(0));
     }
 }

@@ -452,7 +452,7 @@ public class FavoritePeopleFragment extends Fragment implements FavoritePeople.L
             setFilter(index == 0 ? FILTER_NONE : filter, index == 0 ? null : values.get(index - 1));
             return true;
         });
-        popup.show();
+        com.fanok.audiobooks.util.TvMenu.show(requireContext(), popup);
     }
 
     /** The person's books on every site, newest first; a listing chosen there comes back here to open. */
