@@ -6,6 +6,22 @@
         android:icon="@drawable/ic_version"
         android:key="version" />
 
+    <!-- update.Updater: a check at the start and every 1.5 h; the line above checks by hand either way -->
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:icon="@drawable/ic_update"
+        android:key="auto_update"
+        android:summary="@string/auto_update_desc"
+        android:title="@string/auto_update" />
+
+    <!-- update.Updater.PREF_BETA: the checks also offer the pre-releases (8.6.0-beta1) -->
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_update"
+        android:key="pref_beta_updates"
+        android:summary="@string/beta_updates_desc"
+        android:title="@string/beta_updates" />
+
     <!--<Preference
         android:icon="@drawable/ic_plus_version"
         android:key="version_plus"

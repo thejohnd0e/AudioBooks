@@ -72,7 +72,6 @@ import com.fanok.audiobooks.presenter.FavoritePresenter;
 import com.fanok.audiobooks.search.Provider;
 import com.fanok.audiobooks.search.ReleaseCheck;
 import com.fanok.audiobooks.search.Sources;
-import com.fanok.audiobooks.update.Updater;
 import com.fanok.audiobooks.util.DownloadStorageHelper;
 
 import com.google.android.material.navigation.NavigationView;
@@ -880,9 +879,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
         if (AppThemes.PREF_PALETTE.equals(key) && getActivity() != null) {
             requireActivity().getWindow().getDecorView().post(App::recreateActivities);
-        }
-        if (Updater.PREF.equals(key) && sharedPreferences.getBoolean(key, true) && getContext() != null) {
-            Updater.check(getContext(), null); // switched on: the first check now, not at the next period
         }
         if (Sources.PREF.equals(key) && getView() != null) {
             // posted: the save that wrote the list moves the catalog source right after it (an undo too)
