@@ -147,4 +147,16 @@
         <item>flat</item>
     </string-array>
 
+    <string-array name="ai_app_titles">
+        <item>ChatGPT</item>
+        <item>Claude</item>
+        <item>Grok</item>
+        <item>Perplexity</item>
+    </string-array>
+    <string-array name="ai_app_values">
+        <item>chatgpt</item>
+        <item>claude</item>
+        <item>grok</item>
+        <item>perplexity</item>
+    </string-array>
 </resources>

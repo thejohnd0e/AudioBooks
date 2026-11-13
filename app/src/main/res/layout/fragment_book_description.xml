@@ -372,10 +372,34 @@
                     android:maxLines="1"
                     android:text="@string/action_to_favorites"
                     android:textColor="?attr/colorPrimaryText"
-                    android:textSize="13sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="12sp"
                     app:cornerRadius="22dp"
                     app:icon="@drawable/ic_favorite_add"
                     app:iconGravity="textStart"
+                    app:iconPadding="4dp"
+                    app:iconTint="?attr/colorAccentPrimary"
+                    app:strokeColor="?attr/colorTextMuted" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBookmarksBook"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/bookmarks_title"
+                    android:textColor="?attr/colorPrimaryText"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="12sp"
+                    app:cornerRadius="22dp"
+                    app:icon="@drawable/ic_bookmark_outline"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp"
                     app:iconTint="?attr/colorAccentPrimary"
                     app:strokeColor="?attr/colorTextMuted" />
 
@@ -390,10 +414,13 @@
                     android:maxLines="1"
                     android:text="@string/action_download"
                     android:textColor="?attr/colorPrimaryText"
-                    android:textSize="13sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:textSize="12sp"
                     app:cornerRadius="22dp"
                     app:icon="@drawable/ic_download"
                     app:iconGravity="textStart"
+                    app:iconPadding="4dp"
                     app:iconTint="?attr/colorAccentPrimary"
                     app:strokeColor="?attr/colorTextMuted" />
             </LinearLayout>
@@ -463,6 +490,23 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAskAi"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="12dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/ask_ai"
+                android:textColor="?attr/colorPrimaryText"
+                android:textSize="13sp"
+                app:cornerRadius="22dp"
+                app:icon="@drawable/ic_ask_ai"
+                app:iconGravity="textStart"
+                app:iconTint="?attr/colorAccentPrimary"
+                app:strokeColor="?attr/colorTextMuted" />
 
             <!-- Recommendations / Other Books Card -->
             <com.google.android.material.card.MaterialCardView

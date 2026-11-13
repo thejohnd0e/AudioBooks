@@ -125,13 +125,6 @@
         <!-- SkipSilenceProcessor.PREF / PREF_LEVEL: applied by the player at once -->
         <CheckBoxPreference
             android:defaultValue="false"
-            android:icon="@drawable/ic_bookmark_outline"
-            android:key="notification_bookmark"
-            android:summary="@string/notification_bookmark_desc"
-            android:title="@string/notification_bookmark" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
             android:icon="@drawable/ic_skip_silence"
             android:key="skip_silence"
             android:summary="@string/skip_silence_desc"
@@ -272,6 +265,12 @@
             android:summary="@string/check_releases_desc"
             android:title="@string/check_releases" />
 
+        <Preference
+            android:icon="@drawable/ic_refresh"
+            android:key="pref_check_releases_now"
+            android:summary="@string/check_releases_now_desc"
+            android:title="@string/check_releases_now" />
+
         <CheckBoxPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_magnify"
@@ -365,6 +364,17 @@
             android:icon="@drawable/ic_application"
             android:key="pref_start_screen"
             android:title="@string/setting_start_menu" />
+
+        <ListPreference
+            android:defaultValue="chatgpt"
+            android:dialogTitle="@string/setting_ai_app"
+            android:entries="@array/ai_app_titles"
+            android:entryValues="@array/ai_app_values"
+            android:icon="@drawable/ic_ask_ai"
+            android:key="pref_ai_app"
+            android:summary="@string/setting_ai_app_desc"
+            android:title="@string/setting_ai_app"
+            app:useSimpleSummaryProvider="false" />
 
         <CheckBoxPreference
             android:defaultValue="false"

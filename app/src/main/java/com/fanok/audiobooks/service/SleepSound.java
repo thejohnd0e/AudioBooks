@@ -8,8 +8,7 @@ import androidx.annotation.StringRes;
 import com.fanok.audiobooks.R;
 
 /**
- * The sound of the sleep timer's warning, chosen on the timer screen: the old beep, a softer tone, the phone's
- * notification or alarm sound, or any sound the user picks. Kept in the preferences by id; an unknown or missing id is
+ * The sound of the sleep timer's warning, chosen on the timer screen: the old beep, a softer tone, or any sound the user picks. Kept in the preferences by id; an unknown or missing id is
  * the old beep, and a picked sound that is gone (no address kept) falls back to it too. Pure: the sounds are played by
  * {@link SleepSoundPlayer}.
  */
@@ -23,8 +22,6 @@ public final class SleepSound {
     public enum Kind {
         BEEP("beep", R.string.sleep_sound_beep),
         SOFT("soft", R.string.sleep_sound_soft),
-        NOTIFICATION("notification", R.string.sleep_sound_notification),
-        ALARM("alarm", R.string.sleep_sound_alarm),
         CUSTOM("custom", R.string.sleep_sound_custom);
 
         public final String id;

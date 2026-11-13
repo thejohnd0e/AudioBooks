@@ -182,10 +182,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
 
     /** The notification's close button: stop, as {@link #ACTION_STOP}, and close every screen of the app. */
     public static final String ACTION_EXIT = "audioBook.ACTION_EXIT";
-    /** The notification's bookmark button: marks the place now. */
-    public static final String ACTION_BOOKMARK = "audioBook.ACTION_BOOKMARK";
-    /** The setting that puts the bookmark button in the notification, in the place of Exit. */
-    public static final String PREF_NOTIFICATION_BOOKMARK = "notification_bookmark";
 
     /**
      * The service is exported (media browser), so a start command may come from another app: Exit, which closes the
@@ -595,8 +591,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
     private final SharedPreferences.OnSharedPreferenceChangeListener prefListener = (prefs, key) -> {
         if (SeekStep.PREF.equals(key)) {
             publishState();
-        } else if (PREF_NOTIFICATION_BOOKMARK.equals(key)) {
-            postNotification();
         } else if (PREF_FLIP_PAUSE.equals(key)) {
             updateFlip();
         } else if (SkipSilenceProcessor.PREF.equals(key) || SkipSilenceProcessor.PREF_LEVEL.equals(key)) {
@@ -2338,13 +2332,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                         showPause ? playbackAction(ACTION_PAUSE, 1) : playbackAction(ACTION_PLAY, 0))
                 .addAction(SeekStep.notificationForwardIcon(this), SeekStep.forwardLabel(this),
                         playbackAction(ACTION_FORWARD, 5));
-        //a card holds five buttons: with the setting on the bookmark takes Exit's place (Exit stays in the session)
-        if (mPreferences.getBoolean(PREF_NOTIFICATION_BOOKMARK, false)) {
-            builder.addAction(R.drawable.ic_notification_bookmark, getString(R.string.bookmark_add),
-                    playbackAction(ACTION_BOOKMARK, 8));
-        } else {
-            builder.addAction(R.drawable.ic_notification_close, getString(R.string.exit), exitAction());
-        }
+        builder.addAction(R.drawable.ic_notification_close, getString(R.string.exit), exitAction());
         if (book != null && book.getAutor() != null) {
             builder.setSubText(book.getAutor());
         }
@@ -2637,9 +2625,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 break;
             case ACTION_FORWARD:
                 seekBy(SeekStep.millis(MediaPlayerService.this));
-                break;
-            case ACTION_BOOKMARK:
-                addBookmark();
                 break;
             default:
         }

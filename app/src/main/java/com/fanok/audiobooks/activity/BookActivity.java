@@ -796,6 +796,10 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         findViewById(R.id.player_action_equalizer).setOnClickListener(v -> performPlayerAction(R.id.equalizer));
         findViewById(R.id.player_action_car).setOnClickListener(v -> performPlayerAction(R.id.car_mode));
         findViewById(R.id.player_action_bookmark).setOnClickListener(v -> addBookmarkHere());
+        findViewById(R.id.player_action_bookmark).setOnLongClickListener(v -> {
+            showBookmarks();
+            return true;
+        });
         setUpChapterSearch();
         getSystemService(AUDIO_SERVICE);
 
@@ -1184,7 +1188,8 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
         broadcastSend(new Intent(BookPresenter.Broadcast_ADD_BOOKMARK));
     }
 
-    private void showBookmarks() {
+    /** The book's bookmarks: from the menu, the book page's button and a long press on the player's. */
+    public void showBookmarks() {
         if (mBookPOJO == null || mBookPOJO.getUrl() == null || isFinishing()
                 || getSupportFragmentManager().findFragmentByTag(BookmarksSheet.TAG) != null) {
             return;

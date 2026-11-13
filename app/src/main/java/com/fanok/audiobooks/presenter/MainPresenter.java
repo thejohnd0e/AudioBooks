@@ -82,7 +82,13 @@ public class MainPresenter extends MvpPresenter<MainView> implements
         if (source == null) {
             return;
         }
-        if (id == R.id.nav_audiobooks || id == R.id.layout_nav_audiobooks) {
+        if (id == R.id.nav_search) {
+            // the catalog with its search screen on top: the found books come back to the catalog
+            BooksFragment catalog = BooksFragment.newInstance(source.index, R.string.menu_audiobooks,
+                    Consts.MODEL_BOOKS);
+            catalog.getArguments().putBoolean(BooksFragment.ARG_OPEN_SEARCH, true);
+            getViewState().showFragment(catalog, "audioBook");
+        } else if (id == R.id.nav_audiobooks || id == R.id.layout_nav_audiobooks) {
             openAudiobooks(source);
         } else if (id == R.id.nav_genre || id == R.id.layout_nav_genre) {
             openSection(source.sections, R.string.menu_genre, Consts.MODEL_GENRE, "genre");
