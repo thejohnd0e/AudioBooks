@@ -501,8 +501,13 @@ public final class PaletteBinder {
 
     /** On a TV a dialog opens with the focus on a button, so OK answers it at once; nothing off a TV. */
     private static void focusFirstButtonOnTv(@NonNull androidx.appcompat.app.AlertDialog alert) {
-        if (!com.fanok.audiobooks.util.Tv.is(alert.getContext())
-                || alert.getCurrentFocus() instanceof android.widget.Button) { // the message's scroll area has it by default
+        if (!com.fanok.audiobooks.util.Tv.is(alert.getContext())) {
+            return;
+        }
+        if (com.fanok.audiobooks.util.TvFocus.focusList(alert)) {
+            return; // a list of choices: the remote starts on it
+        }
+        if (alert.getCurrentFocus() instanceof android.widget.Button) { // the message's scroll area has it by default
             return;
         }
         for (int which : new int[] {

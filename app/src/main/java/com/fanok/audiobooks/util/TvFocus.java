@@ -102,20 +102,14 @@ public final class TvFocus {
         View decor = dialog.getWindow().getDecorView();
         attach(decor);
         decor.post(() -> {
+            if (dialog instanceof AlertDialog && focusList((AlertDialog) dialog)) {
+                return;
+            }
             if (dialog.getCurrentFocus() instanceof Button) {
                 return;
             }
             if (dialog instanceof AlertDialog) {
                 AlertDialog alert = (AlertDialog) dialog;
-                ListView list = alert.getListView();
-                if (list != null && list.getCount() > 0) {
-                    int checked = list.getCheckedItemPosition();
-                    list.setSelector(rowHighlight(list));
-                    list.setDrawSelectorOnTop(true); // the rows have a background of their own: over it
-                    list.requestFocus();
-                    list.setSelection(checked >= 0 ? checked : 0);
-                    return;
-                }
                 for (int which : new int[] {AlertDialog.BUTTON_POSITIVE, AlertDialog.BUTTON_NEGATIVE,
                         AlertDialog.BUTTON_NEUTRAL}) {
                     Button button = alert.getButton(which);
@@ -126,6 +120,20 @@ public final class TvFocus {
                 }
             }
         });
+    }
+
+    /** A dialog with a list (choices, checkboxes): the remote on the chosen row, drawn. False when it has none. */
+    public static boolean focusList(@NonNull AlertDialog alert) {
+        ListView list = alert.getListView();
+        if (list == null || list.getCount() <= 0) {
+            return false;
+        }
+        int checked = list.getCheckedItemPosition();
+        list.setSelector(rowHighlight(list));
+        list.setDrawSelectorOnTop(true); // the rows have a background of their own: over it
+        list.requestFocus();
+        list.setSelection(checked >= 0 ? checked : 0);
+        return true;
     }
 
     /** The row a remote stands on in a dialog's list: a ring and a light fill, in the list's own selector. */
