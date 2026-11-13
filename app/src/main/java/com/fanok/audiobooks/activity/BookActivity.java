@@ -1984,10 +1984,23 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
             View toolbar = findViewById(R.id.toolbar);
             View strip = tabs.getChildAt(0);
             boolean inToolbar = toolbar != null && currentFocus != toolbar && isInside(currentFocus, toolbar);
-            java.util.ArrayList<View> toolbarStops = toolbar == null ? new java.util.ArrayList<>()
-                    : toolbar.getFocusables(View.FOCUS_DOWN);
-            if (inToolbar && !toolbarStops.isEmpty() && toolbarStops.get(0) == currentFocus
-                    && (keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+            // «down» from any button of the toolbar («Back», the three dots) comes to the tabs; «right» and «left»
+            // between the toolbar's buttons stay the ordinary focus search, so the three dots can be reached
+            if (inToolbar && (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_DPAD_LEFT)) {
+                // the focus search would jump from the toolbar's buttons to the tabs: go along the toolbar instead
+                java.util.ArrayList<View> stops = new java.util.ArrayList<>();
+                for (View stop : toolbar.getFocusables(View.FOCUS_DOWN)) {
+                    if (stop.isShown()) {
+                        stops.add(stop);
+                    }
+                }
+                int at = stops.indexOf(currentFocus);
+                int to = at + (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT ? 1 : -1);
+                if (at >= 0 && to >= 0 && to < stops.size() && stops.get(to).requestFocus()) {
+                    return true;
+                }
+            }
+            if (inToolbar && keyCode == KeyEvent.KEYCODE_DPAD_DOWN
                     && strip instanceof ViewGroup && ((ViewGroup) strip).getChildCount() > 0) {
                 View tab = ((ViewGroup) strip).getChildAt(Math.max(0, tabs.getSelectedTabPosition()));
                 if (tab.requestFocus()) {
