@@ -112,7 +112,7 @@ tasks.matching { it.name == 'assembleRelease' }.configureEach { task ->
     task.doLast {
         def source = file("${buildDir}/outputs/apk/release/app-release.apk")
         if (source.exists()) {
-            def target = file("${rootDir}/dist/AudioBooks-${android.defaultConfig.versionName}-release.apk")
+            def target = file("${rootDir}/dist/ABooks++-${android.defaultConfig.versionName}-release.apk")
             target.parentFile.mkdirs()
             target.bytes = source.bytes
             println "release APK: ${target}"
