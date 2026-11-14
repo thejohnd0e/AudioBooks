@@ -127,10 +127,18 @@ public class DownloadUtil {
         return parser == null ? Collections.<String, String>emptyMap() : parser.mediaCookies(book);
     }
 
-    /** Network source for every request of one playback of {@code bookUrl}. */
+    /**
+     * Network source for every request of one playback of {@code bookUrl}: over HTTP/1.1, as downloads
+     * ({@link App#getDownloadHttpClient}). Playback reads its stream at the speed it plays, and stops reading for
+     * minutes while its buffer is full; a server then drops the stalled stream (akniga.me: about a minute). Over HTTP/2
+     * the dropped stream kept the shared connection's flow-control window: every request after it on that connection
+     * got 23 KB and stalled till the read timeout, the buffer ran dry and the chapter paused, every few minutes. Over
+     * HTTP/1.1 each request has its connection, and a dropped one fails at once: Media3 asks again on a new one.
+     */
     @NonNull
     public static DataSource.Factory upstreamFor(@NonNull Context context, @Nullable String bookUrl) {
-        return upstreamFor(context, bookUrl, App.getOkHttpClient());
+        okhttp3.OkHttpClient client = App.getDownloadHttpClient();
+        return upstreamFor(context, bookUrl, client != null ? client : App.getOkHttpClient());
     }
 
     /** Network source for every request of one download or playback of {@code bookUrl} through {@code client}. */
