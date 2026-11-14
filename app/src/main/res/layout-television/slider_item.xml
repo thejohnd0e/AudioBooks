@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="@dimen/books_other_width"
     android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
     android:orientation="vertical"
     tools:ignore="UseCompoundDrawables"
     tools:viewBindingIgnore="true">
@@ -20,9 +22,7 @@
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/focusable"
         android:ellipsize="end"
-        android:focusable="true"
         android:gravity="center"
         android:maxLines="3"
         tools:text="Ntcn" />

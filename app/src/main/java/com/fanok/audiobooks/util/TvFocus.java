@@ -31,7 +31,7 @@ import com.fanok.audiobooks.R;
  */
 public final class TvFocus {
 
-    private static final int RING_DP = 2;
+    private static final float RING_DP = 1f;
     private static final int RADIUS_DP = 12;
 
     private static final ViewTreeObserver.OnGlobalFocusChangeListener LISTENER = (old, now) -> {

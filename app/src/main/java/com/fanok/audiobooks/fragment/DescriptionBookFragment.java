@@ -755,6 +755,58 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         super.onDestroyView();
     }
 
+    /**
+     * On a TV the text links (genre, author, reader, series) get room around the text, equal above and below, so the
+     * focus ring neither touches the letters nor sits above them (the phone layout pads only the top); the labels
+     * before them get the same, so a row stays on one line. The recommended books get room below for their ring.
+     */
+    private void shapeTextLinks() {
+        float density = getResources().getDisplayMetrics().density;
+        int side = Math.round(6 * density);
+        int bar = Math.round(4 * density);
+        for (View label : new View[] {mAuthorLabel, mArtistLabel, mSeriesLabel}) {
+            if (label != null) {
+                label.setPadding(label.getPaddingLeft(), bar, label.getPaddingRight(), bar);
+            }
+        }
+        for (View name : new View[] {mAuthor, mArtist, mSeries}) {
+            if (name == null) {
+                continue;
+            }
+            name.setPadding(side, bar, side, bar);
+            if (name.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) name.getLayoutParams();
+                params.setMarginStart(0); // the padding is the gap now
+                name.setLayoutParams(params);
+            }
+        }
+        if (mGenre != null) {
+            mGenre.setPadding(side, Math.round(3 * density), side, Math.round(3 * density));
+            if (mGenre.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mGenre.getLayoutParams();
+                params.setMarginStart(-side); // the text stays in line with the title
+                mGenre.setLayoutParams(params);
+            }
+            if (mGenre.getParent() instanceof ViewGroup) {
+                ((ViewGroup) mGenre.getParent()).setClipChildren(false); // the ring is a little outside the text
+            }
+        }
+        if (mRecommendedBooks != null) {
+            mRecommendedBooks.setPadding(mRecommendedBooks.getPaddingLeft(), mRecommendedBooks.getPaddingTop(),
+                    mRecommendedBooks.getPaddingRight(), Math.round(24 * density));
+        }
+    }
+
+    /** The soft fill of a focused text; a background resets the padding of its view, which the layout set: kept. */
+    private static void focusFill(@NonNull View view) {
+        int left = view.getPaddingLeft();
+        int top = view.getPaddingTop();
+        int right = view.getPaddingRight();
+        int bottom = view.getPaddingBottom();
+        view.setBackgroundResource(R.drawable.focusable);
+        view.setPadding(left, top, right, bottom);
+    }
+
     @Override
     public void showDescription(@NonNull DescriptionPOJO description) {
         if (mTitle == null) {
@@ -764,14 +816,15 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         if (mTv) {
             // Устанавливаем наш селектор в качестве фона для всех интерактивных элементов
             // Система сама будет показывать/скрывать рамку при смене фокуса.
-            mGenre.setBackgroundResource(R.drawable.focusable);
-            mAuthor.setBackgroundResource(R.drawable.focusable);
-            mArtist.setBackgroundResource(R.drawable.focusable);
-            mSeries.setBackgroundResource(R.drawable.focusable);
-            mAuthorLabel.setBackgroundResource(R.drawable.focusable);
-            mArtistLabel.setBackgroundResource(R.drawable.focusable);
-            mSeriesLabel.setBackgroundResource(R.drawable.focusable);
-            mShowMore.setBackgroundResource(R.drawable.focusable);
+            focusFill(mGenre);
+            focusFill(mAuthor);
+            focusFill(mArtist);
+            focusFill(mSeries);
+            focusFill(mAuthorLabel);
+            focusFill(mArtistLabel);
+            focusFill(mSeriesLabel);
+            focusFill(mShowMore);
+            shapeTextLinks();
             for (MaterialButton button : new MaterialButton[] {mBtnListen, mBtnFavorite, mBtnBookmarks, mBtnDownload, mBtnAskAi}) {
                 if (button != null) {
                 }

@@ -29,13 +29,13 @@ public class TvFocusTest {
     }
 
     @Test public void strokeSitsInsideTheView() {
-        assertEquals(2, TvFocus.ringInset(2f));
+        assertEquals(1, TvFocus.ringInset(2f));
         assertEquals(1, TvFocus.ringInset(1f));
-        assertEquals(3, TvFocus.ringInset(3f));
+        assertEquals(2, TvFocus.ringInset(3f));
     }
 
     @Test public void pillButtonKeepsItsOwnRadiusUpToHalfItsHeight() {
-        float half = 50 / 2f - 2 * DENSITY / 2f;
+        float half = 50 / 2f - 1f * DENSITY / 2f;
         assertEquals(half, TvFocus.ringRadius(true, 100f, false, 900, 50, DENSITY), 0.001f);
         assertEquals(10f, TvFocus.ringRadius(true, 10f, false, 900, 50, DENSITY), 0.001f);
     }
@@ -45,7 +45,7 @@ public class TvFocusTest {
     }
 
     @Test public void roundIconButtonIsACircle() {
-        float half = 44 / 2f - 2 * DENSITY / 2f;
+        float half = 44 / 2f - 1f * DENSITY / 2f;
         assertEquals(half, TvFocus.ringRadius(false, 0f, true, 44, 44, DENSITY), 0.001f);
         // not quite square: still a circle
         assertEquals(half, TvFocus.ringRadius(false, 0f, true, 44, 46, DENSITY), 0.001f);
@@ -58,7 +58,7 @@ public class TvFocusTest {
     }
 
     @Test public void buttonRadiusNeverExceedsHalfOfATinyView() {
-        float half = 10 / 2f - 2 * DENSITY / 2f;
+        float half = 10 / 2f - 1f * DENSITY / 2f;
         assertEquals(half, TvFocus.ringRadius(true, 0f, false, 10, 10, DENSITY), 0.001f);
     }
 }

@@ -110,6 +110,11 @@ public class BooksOtherAdapter extends RecyclerView.Adapter<BooksOtherAdapter.Vi
             mTitle.setOnClickListener(click);
             mImageView.setOnKeyListener(key);
             mTitle.setOnKeyListener(key);
+            if (com.fanok.audiobooks.util.Tv.is(itemView.getContext())) {
+                // on a TV the whole card is one stop of the remote (its layout makes it so): the ring is around the card
+                itemView.setOnClickListener(click);
+                itemView.setOnKeyListener(key);
+            }
         }
     }
 }
