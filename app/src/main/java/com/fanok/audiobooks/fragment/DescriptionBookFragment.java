@@ -164,6 +164,9 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
     @Nullable
     private String descText;
     private boolean mTv;
+    /** Keeps the page at its top while the remote is on «Слушать» (keepPageTop). */
+    private android.view.ViewTreeObserver.OnGlobalLayoutListener mTopGuard;
+    private android.view.ViewTreeObserver.OnScrollChangedListener mTopGuardScroll;
     @Nullable
     private String mBookUrl;
     /** The header's parts: the author field (may be empty) and the title without it. */
@@ -703,6 +706,7 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
 
     @Override
     public void onDestroyView() {
+        removeTopGuard();
         // the presenter outlives this view: drop every reference to the destroyed tree (UI-12)
         BookFavorites favorites = favorites();
         if (favorites != null) {
@@ -1077,6 +1081,43 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         }
     }
 
+    /**
+     * The page of a book opens at its title. The ScrollView scrolls to the focused «Слушать» in its first layout, when its
+     * height is not final yet, and the page stayed scrolled down (the title and the author out of sight): while the
+     * remote is still on «Слушать», every layout that scrolled the page puts it back at the top.
+     */
+    private void keepPageTop() {
+        if (mScrollView == null || mBtnListen == null) {
+            return;
+        }
+        removeTopGuard();
+        mTopGuard = () -> {
+            if (mScrollView == null || mBtnListen == null || !mBtnListen.hasFocus()) {
+                removeTopGuard();
+            } else if (mScrollView.getScrollY() != 0) {
+                mScrollView.scrollTo(0, 0);
+            }
+        };
+        mTopGuardScroll = mTopGuard::onGlobalLayout;
+        android.view.ViewTreeObserver observer = mScrollView.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(mTopGuard);
+        observer.addOnScrollChangedListener(mTopGuardScroll); // also a scroll animation that ends after the layouts
+        mScrollView.postDelayed(this::removeTopGuard, 4000);
+    }
+
+    private void removeTopGuard() {
+        if (mScrollView != null && mScrollView.getViewTreeObserver().isAlive()) {
+            if (mTopGuard != null) {
+                mScrollView.getViewTreeObserver().removeOnGlobalLayoutListener(mTopGuard);
+            }
+            if (mTopGuardScroll != null) {
+                mScrollView.getViewTreeObserver().removeOnScrollChangedListener(mTopGuardScroll);
+            }
+        }
+        mTopGuard = null;
+        mTopGuardScroll = null;
+    }
+
     @Override
     public void showProgress(boolean b) {
         if (mProgressBar == null) {
@@ -1093,6 +1134,7 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
                 mBtnListen.post(() -> {
                     if (mBtnListen != null) {
                         mBtnListen.requestFocus();
+                        keepPageTop();
                     }
                 });
             }
