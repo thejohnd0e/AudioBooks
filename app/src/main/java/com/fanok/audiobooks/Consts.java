@@ -261,6 +261,10 @@ public class Consts {
         return (SSLSocketFactory) SSLSocketFactory.getDefault();
     }
 
+    /** A word edge before and after, for any script: no letter or digit next to it. */
+    private static final String NOT_AFTER_WORD = "(?<![\\p{L}\\p{N}])";
+    private static final String NOT_BEFORE_WORD = "(?![\\p{L}\\p{N}])";
+
     public static String formatTimeDisplay(String timeStr) {
         if (timeStr == null || timeStr.trim().isEmpty()) return "";
         timeStr = timeStr.trim();
@@ -284,9 +288,13 @@ public class Consts {
         }
 
         String result = timeStr;
-        result = result.replaceAll("(?i)\\b(\\d+)\\s*(?:часов|часа|час|ч)\\b\\.?", "$1 ч.");
-        result = result.replaceAll("(?i)\\b(\\d+)\\s*(?:минуты|минут|минута|мин)\\b\\.?", "$1 мин.");
-        result = result.replaceAll("(?i)\\b(\\d+)\\s*(?:секунды|секунд|секунда|сек)\\b\\.?", "");
+        //word edges spelled out: \b is ASCII-only on Java 19+ (JVM tests), it would cut "минуты" after "мин"
+        result = result.replaceAll("(?i)" + NOT_AFTER_WORD + "(\\d+)\\s*(?:часов|часа|час|ч)" + NOT_BEFORE_WORD
+                + "\\.?", "$1 ч.");
+        result = result.replaceAll("(?i)" + NOT_AFTER_WORD + "(\\d+)\\s*(?:минуты|минут|минута|мин)"
+                + NOT_BEFORE_WORD + "\\.?", "$1 мин.");
+        result = result.replaceAll("(?i)" + NOT_AFTER_WORD + "(\\d+)\\s*(?:секунды|секунд|секунда|сек)"
+                + NOT_BEFORE_WORD + "\\.?", "");
 
         result = result.replace("часов", "ч.")
                        .replace("часа", "ч.")
