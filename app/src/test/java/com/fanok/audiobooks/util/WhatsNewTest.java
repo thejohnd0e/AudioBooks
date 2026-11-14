@@ -53,4 +53,19 @@ public class WhatsNewTest {
         assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE, Integer.MAX_VALUE).contains("Версия 8.6.10"));
         assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE + 1, Integer.MAX_VALUE).startsWith("Версия 8.6.11"));
     }
+
+    /** A release without its notes would show no window after the update: the build fails instead (docs/howto.md). */
+    @Test public void theCurrentBuildHasItsNotes() throws Exception {
+        String gradle = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("build.gradle")),
+                java.nio.charset.StandardCharsets.UTF_8);
+        java.util.regex.Matcher code = java.util.regex.Pattern.compile("versionCode\\s+(\\d+)").matcher(gradle);
+        java.util.regex.Matcher name = java.util.regex.Pattern.compile("versionName\\s+\"([^\"]+)\"").matcher(gradle);
+        assertTrue(code.find() && name.find());
+        String text = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("src/main/assets/whats_new.txt")),
+                java.nio.charset.StandardCharsets.UTF_8);
+        String notes = WhatsNew.notes(text, Integer.parseInt(code.group(1)) - 1, Integer.parseInt(code.group(1)));
+        assertTrue("whats_new.txt has no entry [" + code.group(1) + "] " + name.group(1), !notes.isEmpty());
+        assertTrue("the entry of build " + code.group(1) + " names another version than " + name.group(1),
+                notes.startsWith("Версия " + name.group(1) + "\n"));
+    }
 }
