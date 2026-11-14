@@ -980,12 +980,12 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
                 displayText = styled;
             }
             final CharSequence formattedText = displayText;
-            ExpandableText.bind(mDesc, mShowMore, mCopyDesc, formattedText, MAX_LINES, descExpanded);
+            ExpandableText.bind(mDesc, mShowMore, mCopyDesc, formattedText, MAX_LINES, descExpanded, !mTv);
             mDesc.setMovementMethod(description.getCollectionLinks().isEmpty() ? null : LinkMovementMethod.getInstance());
             mShowMore.setOnClickListener(view1 -> {
                 descExpanded = !descExpanded;
                 if (mDesc != null) {
-                    ExpandableText.bind(mDesc, mShowMore, mCopyDesc, formattedText, MAX_LINES, descExpanded);
+                    ExpandableText.bind(mDesc, mShowMore, mCopyDesc, formattedText, MAX_LINES, descExpanded, !mTv);
                 }
             });
             if (mCopyDesc != null) {
@@ -1077,7 +1077,7 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
         }
         descExpanded = true;
         if (mDesc != null && descText != null) {
-            ExpandableText.bind(mDesc, mShowMore, mCopyDesc, descText, MAX_LINES, true);
+            ExpandableText.bind(mDesc, mShowMore, mCopyDesc, descText, MAX_LINES, true, !mTv);
         }
     }
 

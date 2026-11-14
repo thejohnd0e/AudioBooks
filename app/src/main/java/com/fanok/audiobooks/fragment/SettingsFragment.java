@@ -471,6 +471,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             screenOff.setVisible(false);
         }
 
+        if (com.fanok.audiobooks.util.Tv.is(requireContext())) {
+            // no «Спросить AI» and no phone sensor on a TV
+            for (String key : new String[] {"pref_ai_app", "flip_pause"}) {
+                Preference unneeded = findPreference(key);
+                if (unneeded != null) {
+                    unneeded.setVisible(false);
+                }
+            }
+        }
+
         Preference customEditPref = findPreference("pref_custom_palette_edit");
         if (customEditPref != null) {
             String current = AppThemes.currentPalette(requireContext());

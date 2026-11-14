@@ -32,13 +32,19 @@ public final class ExpandableText {
      */
     public static void bind(@NonNull TextView text, @NonNull TextView toggle, @Nullable View companion,
                             @Nullable CharSequence content, int maxLines, boolean expanded) {
+        bind(text, toggle, companion, content, maxLines, expanded, true);
+    }
+
+    /** As above; with {@code canCollapse} false an unfolded text stays unfolded (a TV: no "show less"). */
+    public static void bind(@NonNull TextView text, @NonNull TextView toggle, @Nullable View companion,
+                            @Nullable CharSequence content, int maxLines, boolean expanded, boolean canCollapse) {
         text.setMaxLines(expanded ? Integer.MAX_VALUE : maxLines);
         text.setText(content == null ? "" : content);
         toggle.setText(expanded ? R.string.show_less : R.string.show_more);
         if (companion != null) {
             toggle.setTextAlignment(expanded ? View.TEXT_ALIGNMENT_VIEW_END : View.TEXT_ALIGNMENT_CENTER);
         }
-        showToggle(toggle, companion, expanded, expanded);
+        showToggle(toggle, companion, expanded, expanded && canCollapse);
         text.setOnClickListener(v -> tapToggle(toggle)); // a tap on the text toggles it too, as the toggle does
         int boundMaxLines = text.getMaxLines();
         text.post(() -> {
@@ -49,7 +55,7 @@ public final class ExpandableText {
             Layout layout = text.getLayout();
             boolean overflows = layout != null && (layout.getLineCount() > maxLines
                     || (layout.getLineCount() == maxLines && layout.getEllipsisCount(maxLines - 1) > 0));
-            showToggle(toggle, companion, expanded, overflows);
+            showToggle(toggle, companion, expanded, overflows && (canCollapse || !expanded));
         });
     }
 

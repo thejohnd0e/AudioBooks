@@ -174,7 +174,7 @@ public class AboutFragment extends PreferenceFragmentCompat {
             hint.setSpan(new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.sources_link)), 0,
                     hint.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             version.setSummary(TextUtils.concat(
-                    getString(R.string.version) + " " + BuildConfig.VERSION_NAME + " [by thejohnd0e]\n", hint));
+                    getString(R.string.version) + " " + BuildConfig.VERSION_NAME + "\n", hint));
             version.setTitle(getString(R.string.app_name));
         }
 
