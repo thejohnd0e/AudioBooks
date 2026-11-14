@@ -2,6 +2,7 @@ package com.fanok.audiobooks.android_equalizer;
 
 
 import static com.fanok.audiobooks.android_equalizer.EqualizerFragment.Broadcast_EqualizerEnabled;
+import static com.fanok.audiobooks.android_equalizer.EqualizerFragment.Broadcast_ReverbChanged;
 
 import android.content.Context;
 import android.content.Intent;
@@ -67,7 +68,6 @@ public class DialogEqualizerFragment extends DialogFragment {
     private Equalizer mEqualizer;
 
 
-    private PresetReverb presetReverb;
 
     private LineSet dataset;
 
@@ -127,6 +127,12 @@ public class DialogEqualizerFragment extends DialogFragment {
         ctx = context;
     }
 
+    /** The player plays the room of {@code Settings} now: the reverb is the player's, not the dialog's. */
+    private void sendReverbChanged() {
+        requireContext().sendBroadcast(new Intent(Broadcast_ReverbChanged)
+                .setPackage(requireContext().getPackageName()));
+    }
+
     private void sendEqualizerEnabled(boolean enabled) {
         Intent intent = new Intent(Broadcast_EqualizerEnabled);
         intent.putExtra("enabled", enabled);
@@ -159,15 +165,6 @@ public class DialogEqualizerFragment extends DialogFragment {
             Log.w(TAG, "No equalizer for session " + audioSesionId, e);
             return; // onViewCreated closes the dialog with a message
         }
-        try {
-            presetReverb = new PresetReverb(0, audioSesionId);
-            presetReverb.setPreset(Settings.equalizerModel.getReverbPreset());
-            presetReverb.setEnabled(Settings.isReverbOn(Settings.equalizerModel.getReverbPreset()));
-        } catch (RuntimeException e) {
-            Log.w(TAG, "No reverb", e);
-            presetReverb = null;
-        }
-
         mEqualizer.setEnabled(Settings.isEqualizerEnabled);
         short bands = mEqualizer.getNumberOfBands();
         levels = Settings.bandLevels(bands);
@@ -268,9 +265,7 @@ public class DialogEqualizerFragment extends DialogFragment {
             mEqualizer.setEnabled(isChecked);
             Settings.isEqualizerEnabled = isChecked;
             Settings.applyBass(Settings.equalizerModel.getBassStrength());
-            if (presetReverb != null) {
-                presetReverb.setEnabled(Settings.isReverbOn(Settings.equalizerModel.getReverbPreset()));
-            }
+            sendReverbChanged();
         });
 
         presetSpinner = view.findViewById(R.id.equalizer_preset_spinner);
@@ -319,7 +314,7 @@ public class DialogEqualizerFragment extends DialogFragment {
         reverbController.setMax(PresetReverb.PRESET_PLATE); // one step per room, 0 being none
         bassController.setLabel(getString(R.string.equalizer_bass));
         reverbController.setLabel(getString(R.string.equalizer_3d));
-        reverbController.setEnabled(presetReverb != null);
+        reverbController.setEnabled(true);
 
 
         bassController.circlePaint.setColor(com.fanok.audiobooks.PaletteBinder.background(requireContext()));
@@ -338,13 +333,7 @@ public class DialogEqualizerFragment extends DialogFragment {
         if (!Settings.isEqualizerReloaded) {
             x = Settings.bassStep(Settings.equalizerModel.getBassStrength());
 
-            if (presetReverb != null) {
-                try {
-                    y = presetReverb.getPreset();
-                } catch (Exception e) {
-                    Log.e(TAG, "onViewCreated: " + e.getLocalizedMessage());
-                }
-            }
+            y = Settings.equalizerModel.getReverbPreset();
         } else {
             x = Settings.bassStep(Settings.bassStrength);
             y = Settings.reverbPreset;
@@ -367,11 +356,8 @@ public class DialogEqualizerFragment extends DialogFragment {
                 progress -> {
                     Settings.reverbPreset = (short) progress;
                     try {
-                        if (presetReverb != null) {
-                            presetReverb.setPreset(Settings.reverbPreset);
-                            presetReverb.setEnabled(Settings.isReverbOn(Settings.reverbPreset));
-                        }
                         Settings.equalizerModel.setReverbPreset(Settings.reverbPreset);
+                        sendReverbChanged();
                     } catch (Exception e) {
                         Log.e(TAG, "onViewCreated: " + e.getLocalizedMessage());
                     }
@@ -646,10 +632,6 @@ public class DialogEqualizerFragment extends DialogFragment {
 
         if (mEqualizer != null) {
             mEqualizer.release();
-        }
-
-        if (presetReverb != null) {
-            presetReverb.release();
         }
 
         Settings.isEditing = false;

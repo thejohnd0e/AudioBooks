@@ -12,6 +12,7 @@ import static com.fanok.audiobooks.activity.SleepTimerActivity.Broadcast_UPDATE_
 import static com.fanok.audiobooks.activity.SleepTimerActivity.bradcast_FinishTimer;
 import static com.fanok.audiobooks.activity.SleepTimerActivity.bradcast_UpdateTimer;
 import static com.fanok.audiobooks.android_equalizer.EqualizerFragment.Broadcast_EqualizerEnabled;
+import static com.fanok.audiobooks.android_equalizer.EqualizerFragment.Broadcast_ReverbChanged;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_ADD_BOOKMARK;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_Equalizer;
 import static com.fanok.audiobooks.presenter.BookPresenter.Broadcast_PAUSE;
@@ -80,6 +81,7 @@ import androidx.core.content.IntentCompat;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media.session.MediaButtonReceiver;
 import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.AuxEffectInfo;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem.ClippingConfiguration;
 import androidx.media3.common.PlaybackException;
@@ -2637,7 +2639,7 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 Broadcast_PLAY_PREVIOUS,
                 Broadcast_SEEK_TO, Broadcast_SEEK_NEXT_30, Broadcast_SEEK_PREVIOUS_10, Broadcast_SET_SPEED,
                 Broadcast_SHOW_TITLE, Broadcast_SleepTimer, Broadcast_UPDATE_TIMER_START, Broadcast_Equalizer,
-                Broadcast_EqualizerEnabled, Broadcast_ADD_BOOKMARK}) {
+                Broadcast_EqualizerEnabled, Broadcast_ReverbChanged, Broadcast_ADD_BOOKMARK}) {
             filter.addAction(action);
         }
         ContextCompat.registerReceiver(this, commandReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
@@ -2704,6 +2706,9 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
                 break;
             case Broadcast_ADD_BOOKMARK:
                 addBookmark();
+                break;
+            case Broadcast_ReverbChanged:
+                applyReverb();
                 break;
             case Broadcast_EqualizerEnabled:
                 mEqualizerEnabled = intent.getBooleanExtra("enabled", false);
@@ -3449,10 +3454,6 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             try {
                 mEqualizer = new Equalizer(0, audioSesionId);
 
-                presetReverb = new PresetReverb(0, audioSesionId);
-                presetReverb.setPreset(Settings.equalizerModel.getReverbPreset());
-                presetReverb.setEnabled(Settings.isReverbOn(Settings.equalizerModel.getReverbPreset()));
-
                 mEqualizer.setEnabled(Settings.isEqualizerEnabled);
                 //the same mapping as the dialog: the sound heard while editing is the one kept after closing it
                 Settings.applyTo(mEqualizer);
@@ -3468,6 +3469,34 @@ public class MediaPlayerService extends MediaBrowserServiceCompat {
             mEqualizer = null;
         }
 
+        applyReverb(); //the room follows the equalizer's switch
+    }
+
+    /**
+     * The 3D room, played as an auxiliary send effect of the player: a PresetReverb on the session itself is an insert
+     * effect and passes only the reverb's own wet sound, which on some devices is silence. The send keeps the dry
+     * sound; no room chosen, or the equalizer off, takes the send away.
+     */
+    private void applyReverb() {
+        short preset = Settings.equalizerModel == null ? PresetReverb.PRESET_NONE
+                : Settings.equalizerModel.getReverbPreset();
+        boolean on = player != null && Settings.isReverbOn(preset);
+        try {
+            if (on) {
+                if (presetReverb == null) {
+                    presetReverb = new PresetReverb(0, 0);
+                }
+                presetReverb.setPreset(preset);
+                presetReverb.setEnabled(true);
+                player.setAuxEffectInfo(new AuxEffectInfo(presetReverb.getId(), 1f));
+                return;
+            }
+        } catch (RuntimeException e) {
+            Log.w(TAG, "No reverb", e);
+        }
+        if (player != null) {
+            player.clearAuxEffectInfo();
+        }
         if (presetReverb != null) {
             presetReverb.release();
             presetReverb = null;
