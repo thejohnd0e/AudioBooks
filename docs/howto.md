@@ -262,7 +262,7 @@ With the [GitHub CLI](https://cli.github.com/), `base64 -w 0 audiobooks-release.
 
 ### Publishing a release
 
-1. Increase `versionCode` and set the new `versionName` in [`app/build.gradle`](../app/build.gradle). Commit, push to `master`, and wait for the Build workflow to pass.
+1. Increase `versionCode` and set the new `versionName` in [`app/build.gradle`](../app/build.gradle), and **add the release's notes to the top of [`app/src/main/assets/whats_new.txt`](../app/src/main/assets/whats_new.txt)** (the «Что нового» window after an update, see below). Commit, push to `master`, and wait for the Build workflow to pass.
 2. Tag the commit with `v` plus the exact `versionName` and push the tag:
 
 ```bash
@@ -273,6 +273,15 @@ git push origin v7.4
 3. The Release workflow builds and publishes the release with notes generated from the merged pull requests and commits; edit them on GitHub afterwards if needed. A tag containing a hyphen, such as `v7.4-beta1` (with `versionName "7.4-beta1"`), is published as a pre-release.
 
 4. Installed apps find the release themselves ([`update/Updater`](../app/src/main/java/com/fanok/audiobooks/update/Updater.java), "Автообновление"): GitHub first (the tag the latest release redirects to, then its `SHA256SUMS.txt`, whose first `*.apk` line names the file to download), so step 3 is enough for them. Where GitHub is blocked they read the mirror: upload the APK to `www.abc-guitars.com/data/audiobook/` and update `update.txt` there (`version=<versionName>`, `file=AudioBooks-<versionName>.apk`, optionally `sha256=<hash from SHA256SUMS.txt>`), and put the same APK and `update.txt` into the public Yandex Disk folder `https://disk.yandex.ru/d/UsQE3CEkNPSOUw` (the app reads its listing through the public API, no login; file names must match `update.txt`; the API's `/download` is rate-limited, so the app never uses it). In Russia (the region check) Yandex Disk is asked before GitHub, elsewhere after the mirror. The last resort is the 4pda topic: the parser reads the header's list after "Скачать:" (`<strong>Версия: X</strong>` followed by the link to the post) and takes the attachment whose file name ends in `-X.apk`, so keep that form. Every downloaded APK must be signed with the release key and have a higher `versionCode`, or the app rejects it.
+
+### «Что нового» after an update
+
+After an update the app shows a short list of the changes in a dialog, once per build ([`util/WhatsNew`](../app/src/main/java/com/fanok/audiobooks/util/WhatsNew.java), called from `MainActivity`'s start-up dialogs). It reads [`app/src/main/assets/whats_new.txt`](../app/src/main/assets/whats_new.txt), which is bundled with the build, so **every release needs its entry there, or the window does not appear for that build** (nothing fails: it simply stays silent).
+
+- A heading is `[versionCode] versionName`, then one change per line, in Russian and short: what the user sees, not what the code did. The newest build goes at the top. Blank lines between builds are free.
+- The dialog shows what is newer than the build the user had seen, newest first, up to five builds (`WhatsNew.MAXIMUM_BUILDS`). A new install shows nothing. An update from a build older than the window itself shows what is newer than `WhatsNew.BASELINE`; leave `BASELINE` as it is.
+- Check it on a device without waiting for a real update: install the debug build, start it once, stop it, set `whats_new_seen_build` in `shared_prefs/<package>_preferences.xml` to the previous `versionCode` (`adb shell run-as <package> sed -i ...`), and start it again.
+- `WhatsNewTest` covers the selection rules and that the bundled file has the entries of the latest builds.
 
 If the workflow fails, for example because the tag does not match `versionName`, delete the tag, fix the cause, and tag again:
 
