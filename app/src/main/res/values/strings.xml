@@ -606,6 +606,7 @@
     <string name="export_nothing">Нечего экспортировать: у всех скачанных глав уже есть копии</string>
     <string name="auto_export_failed">Не удалось сохранить главы в папку загрузок: %1$s</string>
     <string name="ok">ОК</string>
+    <string name="whats_new">Что нового</string>
     <string name="continue_">Продолжить</string>
     <string name="undo">Отменить</string>
     <string name="menu_home">Продолжить</string>

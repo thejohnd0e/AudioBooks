@@ -412,6 +412,11 @@ public class MainActivity extends MvpAppCompatActivity
             pendingSources = intent; // above the start screen, so Back leads to it
         }
 
+        // what changed, once after an update; a new install has nothing to tell
+        final String whatsNew = com.fanok.audiobooks.util.WhatsNew.pending(this);
+        if (whatsNew != null) {
+            dialogs.add(done -> com.fanok.audiobooks.util.WhatsNew.show(this, whatsNew, done));
+        }
         // one decision at a time, each with its reason (UI-18); parental control is in the settings, not asked here
         if (!preferences.getBoolean("first", false)) {
             dialogs.add(this::showPrivacyDialog);
