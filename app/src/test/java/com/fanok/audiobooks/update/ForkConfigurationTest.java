@@ -44,8 +44,8 @@ public class ForkConfigurationTest {
         assertFalse(about.contains("android:key=\"write_autor\""));
         assertTrue(read("src/main/java/com/fanok/audiobooks/fragment/AboutFragment.java")
                 .contains("https://github.com/thejohnd0e/AudioBooks"));
-        assertTrue(read("src/main/java/com/fanok/audiobooks/fragment/AboutFragment.java")
-                .contains(" [by thejohnd0e]"));
+        assertFalse(read("src/main/java/com/fanok/audiobooks/fragment/AboutFragment.java")
+                .contains("[by thejohnd0e]"));
         assertTrue(read("src/main/res/values/strings.xml").contains("android-dev@intertop.link"));
     }
 }
