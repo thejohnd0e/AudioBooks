@@ -46,12 +46,13 @@ public class WhatsNewTest {
         assertEquals(148, WhatsNew.seenBuild(148, 150, false));
     }
 
-    @Test public void theBundledNotesStartWithTheCurrentVersion() throws Exception {
+    /** The shipped builds keep their notes; the current build's are checked by {@link #theCurrentBuildHasItsNotes}. */
+    @Test public void theBundledNotesKeepTheShippedVersions() throws Exception {
         java.nio.file.Path asset = java.nio.file.Paths.get("src/main/assets/whats_new.txt");
         String text = new String(java.nio.file.Files.readAllBytes(asset), java.nio.charset.StandardCharsets.UTF_8);
-        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE - 1, Integer.MAX_VALUE).contains("Версия 8.6.9"));
-        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE, Integer.MAX_VALUE).contains("Версия 8.6.10"));
-        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE + 1, Integer.MAX_VALUE).startsWith("Версия 8.6.11"));
+        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE - 1, WhatsNew.BASELINE).contains("Версия 8.6.9"));
+        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE, WhatsNew.BASELINE + 1).contains("Версия 8.6.10"));
+        assertTrue(WhatsNew.notes(text, WhatsNew.BASELINE + 1, WhatsNew.BASELINE + 2).contains("Версия 8.6.11"));
     }
 
     /** A release without its notes would show no window after the update: the build fails instead (docs/howto.md). */
