@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.jsoup.Connection;
 import org.jsoup.HttpStatusException;
 import org.jsoup.UnsupportedMimeTypeException;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 public class SiteHttpTest {
@@ -116,6 +117,16 @@ public class SiteHttpTest {
             assertEquals(SiteHttp.MAX_REDIRECTS + 1, site.log.size());
             assertThrows(HttpStatusException.class,
                     () -> SiteHttp.executePosted(SiteHttp.connect(site.base + "/nowhere/"), site.base));
+        }
+    }
+
+    @Test
+    public void aScriptGateIsPassedAndThePageFetchedAgain() throws IOException {
+        try (BgateSite site = new BgateSite()) {
+            Document page = SiteHttp.get(site.base + "/book");
+            assertEquals("Книга", page.title());
+            assertEquals(java.util.Arrays.asList("GET /book", "GET /__bgate?r=/book",
+                    "GET /__bgate.gif?k=0ff01f", "GET /book bgate=0ff01f.1.1.0.0.1.1"), site.log);
         }
     }
 
@@ -221,4 +232,110 @@ public class SiteHttpTest {
             socket.close();
         }
     }
+
+    /**
+     * A site like slushat-knigi.com on the loopback: a page without the {@code bgate} cookie is redirected to a
+     * script gate, whose {@code /__bgate.gif} sets the cookie; the page opens only with it.
+     */
+    private static final class BgateSite implements AutoCloseable {
+        private static final String CRLF = "\r\n";
+        static final String COOKIE = "0ff01f.1.1.0.0.1.1";
+        final List<String> log = new CopyOnWriteArrayList<>();
+        final ServerSocket socket = new ServerSocket(0, 8, InetAddress.getLoopbackAddress());
+        final String base = "http://127.0.0.1:" + socket.getLocalPort();
+
+        BgateSite() throws IOException {
+            new Thread(this::serve).start();
+        }
+
+        private void serve() {
+            while (!socket.isClosed()) {
+                try (Socket client = socket.accept()) {
+                    answer(client);
+                } catch (IOException e) {
+                    return;
+                }
+            }
+        }
+
+        private void answer(Socket client) throws IOException {
+            InputStream in = client.getInputStream();
+            String[] head = readHead(in).split(CRLF);
+            String[] requestLine = head[0].split(" ");
+            String method = requestLine[0];
+            String path = requestLine[1];
+            String cookie = null;
+            for (String header : head) {
+                if (header.toLowerCase(Locale.ROOT).startsWith("cookie:")) {
+                    cookie = header.substring("cookie:".length()).trim();
+                }
+            }
+            boolean passed = cookie != null && cookie.contains("bgate=" + COOKIE);
+            String status = "200 OK";
+            String location = null;
+            String setCookie = null;
+            String html;
+            String contentType = "text/html; charset=UTF-8";
+            if (path.startsWith("/__bgate.gif")) {
+                String k = path.substring(path.indexOf("k=") + 2);
+                int amp = k.indexOf('&');
+                log.add(method + " /__bgate.gif?k=" + (amp < 0 ? k : k.substring(0, amp)));
+                setCookie = "bgate=" + COOKIE + "; Path=/; Max-Age=3600";
+                html = "gif";
+                contentType = "image/gif";
+            } else if (path.startsWith("/__bgate")) {
+                log.add(method + " " + path);
+                html = "<html><head><title>Проверка</title></head><body><script>(function(){"
+                        + "var m=\"00ff10\",x=\"0f0f0f\",k=\"\";"
+                        + "for(var j=0;j<m.length;j++){k+=(parseInt(m.charAt(j),16)^parseInt(x.charAt(j),16)).toString(16);}"
+                        + "var g=new Image();g.src=\"/__bgate.gif?k=\"+k+\"&r=\"+Math.random();})();</script>"
+                        + "</body></html>";
+            } else if (path.equals("/book") && !passed) {
+                log.add(method + " " + path);
+                status = "302 Found";
+                location = "/__bgate?r=/book";
+                html = "";
+            } else if (path.equals("/book")) {
+                log.add(method + " " + path + " bgate=" + COOKIE);
+                html = "<html><head><title>Книга</title></head><body>text</body></html>";
+            } else {
+                log.add(method + " " + path);
+                status = "404 Not Found";
+                html = "";
+            }
+            byte[] out = html.getBytes(StandardCharsets.UTF_8);
+            StringBuilder response = new StringBuilder("HTTP/1.1 ").append(status).append(CRLF);
+            if (location != null) {
+                response.append("Location: ").append(location).append(CRLF);
+            }
+            if (setCookie != null) {
+                response.append("Set-Cookie: ").append(setCookie).append(CRLF);
+            }
+            response.append("Content-Type: ").append(contentType).append(CRLF)
+                    .append("Content-Length: ").append(out.length).append(CRLF)
+                    .append("Connection: close").append(CRLF).append(CRLF);
+            OutputStream os = client.getOutputStream();
+            os.write(response.toString().getBytes(StandardCharsets.ISO_8859_1));
+            os.write(out);
+            os.flush();
+        }
+
+        /** The request line and headers, up to the blank line. */
+        private static String readHead(InputStream in) throws IOException {
+            ByteArrayOutputStream head = new ByteArrayOutputStream();
+            String end = CRLF + CRLF;
+            int matched = 0;
+            for (int b; matched < end.length() && (b = in.read()) >= 0; ) {
+                head.write(b);
+                matched = b == end.charAt(matched) ? matched + 1 : (b == '\r' ? 1 : 0);
+            }
+            return new String(head.toByteArray(), StandardCharsets.ISO_8859_1);
+        }
+
+        @Override
+        public void close() throws IOException {
+            socket.close();
+        }
+    }
 }
+

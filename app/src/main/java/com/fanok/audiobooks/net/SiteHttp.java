@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The one way to fetch a provider page: shared defaults (user agent, referrer, timeout, bounded body),
@@ -183,7 +185,57 @@ public final class SiteHttp {
         if (provider != null && provider.parser.postsPages() && Url.isHost(url, provider.server)) {
             return executePosted(connection, provider.server);
         }
-        return executeOnce(connection);
+        Connection.Response response = executeOnce(connection);
+        if (isBgate(response)) {
+            String cookie = passBgate(response);
+            if (cookie == null || cookie.isEmpty()) {
+                throw new CookesExeption(response.url().toString());
+            }
+            connection.url(url); // the attempt may have left the redirect's address on the request
+            connection.cookie(BGATE_COOKIE, cookie); // the jar holds it, but this request was built before it
+            response = executeOnce(connection);
+            if (isBgate(response)) {
+                throw new CookesExeption(response.url().toString());
+            }
+        }
+        return response;
+    }
+
+    private static final String BGATE_COOKIE = "bgate";
+    private static final Pattern BGATE_KEY_M = Pattern.compile("m=\"([0-9a-fA-F]+)\"");
+    private static final Pattern BGATE_KEY_X = Pattern.compile("x=\"([0-9a-fA-F]+)\"");
+
+    /** The script gate of slushat-knigi.com: a page is redirected to {@code /__bgate}, which answers with a page. */
+    static boolean isBgate(Connection.Response response) {
+        return response.url().getPath().startsWith("/__bgate")
+                || response.body().contains("/__bgate.gif");
+    }
+
+    /**
+     * Passes the gate of {@code response}'s site: its script XORs two hex strings of the page and fetches
+     * {@code /__bgate.gif?k=<key>}, which sets the {@code bgate} cookie. Returns that cookie, null when unsolvable.
+     */
+    static String passBgate(Connection.Response gate) throws IOException {
+        URL url = gate.url();
+        String html = gate.body();
+        Matcher m = BGATE_KEY_M.matcher(html);
+        Matcher x = BGATE_KEY_X.matcher(html);
+        if (!m.find() || !x.find() || m.group(1).length() != x.group(1).length()) {
+            return null;
+        }
+        String first = m.group(1);
+        String second = x.group(1);
+        StringBuilder key = new StringBuilder(first.length());
+        for (int i = 0; i < first.length(); i++) {
+            key.append(Character.forDigit(Character.digit(first.charAt(i), 16)
+                    ^ Character.digit(second.charAt(i), 16), 16));
+        }
+        String origin = url.getProtocol() + "://" + url.getAuthority();
+        executeOnce(connect(origin + "/__bgate.gif?k=" + key + "&r=" + Math.random())
+                .referrer(url.toString())
+                .ignoreContentType(true));
+        Map<String, String> cookies = JAR.get(Url.hostOf(url.toString()));
+        return cookies == null ? null : cookies.get(BGATE_COOKIE);
     }
 
     /**

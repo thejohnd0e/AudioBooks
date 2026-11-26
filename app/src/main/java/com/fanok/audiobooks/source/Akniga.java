@@ -74,8 +74,12 @@ public final class Akniga implements SourceParser {
 
     private static final String TAG = "ComentsModel";
 
-    /** Passphrase reverse-engineered from akniga's obfuscated player script. */
-    private static final String PASSPHRASE = "EKxtcg46V";
+    /**
+     * The passphrases akniga's player {@code getHres} tries in turn (its {@code assets3}, {@code assets} and the legacy
+     * {@code assets2}), newest first; the site switched to the first one on 2026-11-26.
+     */
+    private static final String[] PASSPHRASES = {
+            "5Z7EGM9MaLvAlAWi69U4fzW4", "ymXEKzvUkuo5G03.1C159BD535E9793", "EKxtcg46V"};
     /** LiveStreet's answer to a key of another session (akniga's player token, golosknig's playlist). */
     static final String HACKING = "Hacking attemp";
     private static final Pattern SECURITY_KEY
@@ -1095,28 +1099,34 @@ public final class Akniga implements SourceParser {
     }
 
     /**
-     * Decrypts akniga's {@code hres} (the HLS playlist URL), a {@link CryptoJs} JSON. Returns "" when it cannot be
-     * decrypted.
+     * Decrypts akniga's {@code hres} (the HLS playlist URL), a {@link CryptoJs} JSON encrypted with one of
+     * {@link #PASSPHRASES}. Returns "" when it cannot be decrypted.
      */
     public static String decryptHres(String hresJson) {
-        try {
-            String result = CryptoJs.decrypt(hresJson, PASSPHRASE).trim();
-            // a JSON string like "https:\/\/r1.akniga.club\/b\/111286\/pl.m3u8?…", a list of them or {url}
+        for (String passphrase : PASSPHRASES) {
             try {
-                JsonElement value = JsonParser.parseString(result);
-                if (value.isJsonArray() && value.getAsJsonArray().size() > 0) {
-                    value = value.getAsJsonArray().get(0);
-                } else if (value.isJsonObject()) {
-                    value = value.getAsJsonObject().get("url");
+                String result = CryptoJs.decrypt(hresJson, passphrase).trim();
+                // a JSON string like "https:\/\/r1.akniga.club\/b\/111286\/pl.m3u8?…", a list of them or {url}
+                try {
+                    JsonElement value = JsonParser.parseString(result);
+                    if (value.isJsonArray() && value.getAsJsonArray().size() > 0) {
+                        value = value.getAsJsonArray().get(0);
+                    } else if (value.isJsonObject()) {
+                        value = value.getAsJsonObject().get("url");
+                    }
+                    result = string(value);
+                } catch (JsonParseException notJson) {
+                    result = result.replace("\\/", "/");
                 }
-                result = string(value);
-            } catch (JsonParseException notJson) {
-                result = result.replace("\\/", "/");
+                String hls = resolve(Url.SERVER_AKNIGA + "/", result);
+                if (hls.startsWith("http://") || hls.startsWith("https://")) {
+                    return hls;
+                }
+            } catch (Exception e) {
+                // the next passphrase
             }
-            return resolve(Url.SERVER_AKNIGA + "/", result);
-        } catch (Exception e) {
-            return "";
         }
+        return "";
     }
 
     // ---------------------------------------------------------------- series
