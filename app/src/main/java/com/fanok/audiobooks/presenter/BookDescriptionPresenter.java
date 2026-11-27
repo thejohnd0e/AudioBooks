@@ -134,6 +134,8 @@ public class BookDescriptionPresenter extends MvpPresenter<Description> implemen
         com.fanok.audiobooks.search.Provider site = com.fanok.audiobooks.search.Provider.ofUrl(mBookPOJO.getUrl());
         if (cause instanceof CookesExeption && com.fanok.audiobooks.activity.ActivityCookies.passes(site)) {
             getViewState().showSiteCheckOffer(site);
+        } else if (cause instanceof BookRemovedException) {
+            getViewState().showLongToast(errorMessage(e));
         } else {
             getViewState().showToast(errorMessage(e));
         }

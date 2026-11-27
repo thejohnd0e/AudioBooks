@@ -1627,6 +1627,10 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     @Override
     public void showToast(int id) {
+        if (id == R.string.book_taken_down || id == R.string.book_taken_down_partial) {
+            showLongToast(id);
+            return;
+        }
         Toast.makeText(this, id, Toast.LENGTH_SHORT).show();
     }
 
@@ -1683,7 +1687,42 @@ public class BookActivity extends MvpAppCompatActivity implements Activity, Book
 
     @Override
     public void showLongToast(int id) {
-        Toast.makeText(this, id, Toast.LENGTH_LONG).show();
+        // the takedown notice: make it unmistakable - large accent-coloured text in a big dialog
+        int accent = com.fanok.audiobooks.PaletteBinder.accent(this);
+        float density = getResources().getDisplayMetrics().density;
+
+        TextView text = new TextView(this);
+        text.setText(id);
+        text.setTextColor(accent);
+        text.setTextSize(22);
+        text.setGravity(android.view.Gravity.CENTER);
+        int pad = (int) (24 * density);
+        text.setPadding(pad, pad, pad, pad);
+
+        Button ok = new Button(this);
+        ok.setText(android.R.string.ok);
+        ok.setTextColor(android.graphics.Color.WHITE);
+        ok.setBackgroundColor(accent);
+        ok.setTextSize(18);
+        int btnPad = (int) (12 * density);
+        ok.setPadding(btnPad * 2, btnPad, btnPad * 2, btnPad);
+
+        LinearLayout body = new LinearLayout(this);
+        body.setOrientation(LinearLayout.VERTICAL);
+        body.setGravity(android.view.Gravity.CENTER);
+        body.addView(text);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.gravity = android.view.Gravity.CENTER;
+        lp.setMargins(0, 0, 0, (int) (8 * density));
+        body.addView(ok, lp);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(this).setView(body).create();
+        ok.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF1A1A1A));
+        }
     }
 
     @UnstableApi

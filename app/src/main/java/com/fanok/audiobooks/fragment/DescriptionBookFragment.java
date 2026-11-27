@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -1143,8 +1144,51 @@ public class DescriptionBookFragment extends MvpAppCompatFragment
 
     @Override
     public void showToast(final int id) {
+        if (id == R.string.book_taken_down || id == R.string.book_taken_down_partial) {
+            showLongToast(id);
+            return;
+        }
         Toast.makeText(getContext(), getResources().getText(id),
                 Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showLongToast(final int id) {
+        int accent = com.fanok.audiobooks.PaletteBinder.accent(requireContext());
+        float density = getResources().getDisplayMetrics().density;
+
+        TextView text = new TextView(requireContext());
+        text.setText(id);
+        text.setTextColor(accent);
+        text.setTextSize(22);
+        text.setGravity(android.view.Gravity.CENTER);
+        int pad = (int) (24 * density);
+        text.setPadding(pad, pad, pad, pad);
+
+        Button ok = new Button(requireContext());
+        ok.setText(android.R.string.ok);
+        ok.setTextColor(android.graphics.Color.WHITE);
+        ok.setBackgroundColor(accent);
+        ok.setTextSize(18);
+        int btnPad = (int) (12 * density);
+        ok.setPadding(btnPad * 2, btnPad, btnPad * 2, btnPad);
+
+        LinearLayout body = new LinearLayout(requireContext());
+        body.setOrientation(LinearLayout.VERTICAL);
+        body.setGravity(android.view.Gravity.CENTER);
+        body.addView(text);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.gravity = android.view.Gravity.CENTER;
+        lp.setMargins(0, 0, 0, (int) (8 * density));
+        body.addView(ok, lp);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext()).setView(body).create();
+        ok.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xFF1A1A1A));
+        }
     }
 
     @Override

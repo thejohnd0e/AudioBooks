@@ -26,6 +26,9 @@ public interface Description extends MvpView {
     @StateStrategyType(SkipStrategy.class)
     void showToast(int id);
 
+    @StateStrategyType(SkipStrategy.class)
+    void showLongToast(int id);
+
     /** Offers to pass the browser check of the book's site, which refused the app; the book loads again once passed. */
     @StateStrategyType(OneExecutionStateStrategy.class)
     void showSiteCheckOffer(com.fanok.audiobooks.search.Provider site);
